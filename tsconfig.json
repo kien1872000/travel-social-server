@@ -16,6 +16,25 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@util/*": ["src/util/*"],
+      "@helper/*": ["src/helper/*"],
+      "@entity/*":["src/entity/*"],
+      "@dto/*": ["src/dto/*"],
+      "@config/*": ["src/config/*"],
+      "@decorator/*":["src/decorator/*"],
+      "@user/*": ["src/module/users/*"],
+      "@post/*": ["src/module/posts/*"],
+      "@following/*": ["src/module/followings/*"],
+      "@mediaFile/*": ["src/module/mediaFiles/*"],
+      "@comment/*": ["src/module/comments/*"],
+      "@hashtag/*": ["src/module/hashtags/*"],
+      "@like/*": ["src/module/likes/*"],
+      "@mail/*": ["src/mail/*"],
+      "@auth/*": ["src/auth/*"],
+      "@upload/*": ["src/upload/*"]
+    },
+
   }
 }

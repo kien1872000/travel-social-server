@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { UsersService } from 'src/lib/users/providers/users.service';
+import { UsersService } from 'src/module/users/providers/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayLoad } from 'src/util/types';

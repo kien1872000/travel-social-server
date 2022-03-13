@@ -1,7 +1,7 @@
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import * as timezone from 'dayjs/plugin/timezone';
-import { Time, TimeCheck } from 'src/util/enums';
+import { TimeCheck } from '@util/enums';
 export class StringHandlersHelper {
   public generateString(length: number) {
     let result = '';

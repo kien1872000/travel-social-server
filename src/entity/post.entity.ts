@@ -24,27 +24,10 @@ export class Post {
   mediaFiles: FileType[];
   @Prop({ type: [String] })
   hashtags: string[];
-  @Prop({ type: Number })
+  @Prop({ type: Number, required: true })
   comments: number;
-  @Prop({
-    type: {
-      loves: { type: Number, required: true },
-      likes: { type: Number, required: true },
-      hahas: { type: Number, required: true },
-      wows: { type: Number, required: true },
-      sads: { type: Number, required: true },
-      angrys: { type: Number, required: true },
-    },
-    required: true,
-  })
-  reactions: {
-    loves: number;
-    likes: number;
-    hahas: number;
-    wows: number;
-    sads: number;
-    angrys: number;
-  };
+  @Prop({ type: Number, required: true })
+  likes: number;
 }
 export type PostDocument = Post & Document;
 export const PostSchema = SchemaFactory.createForClass(Post);

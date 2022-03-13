@@ -10,7 +10,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Express } from 'express';
-import { Type } from 'class-transformer';
 export class UserInfoInput {
   @ApiProperty({
     type: String,

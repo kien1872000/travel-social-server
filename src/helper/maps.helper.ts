@@ -4,15 +4,15 @@ import { UserDocument } from 'src/entity/user.entity';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import * as timezone from 'dayjs/plugin/timezone';
-import { VIET_NAM_TZ } from 'src/util/constants';
-import { LoginOutput } from 'src/dto/user/login.dto';
-// import { PostOutput, Reactions } from 'src/dtos/post/postNew.dto';
+import { VIET_NAM_TZ } from '@util/constants';
+import { LoginOutput } from '@dto/user/login.dto';
 import { StringHandlersHelper } from './stringHandler.helper';
-import { PostDocument } from 'src/entity/post.entity';
-import { MediaFileDocument } from 'src/entity/mediaFile.entity';
-import { MediaFileDto } from 'src/dto/mediaFile/mediaFile.dto';
-import { GroupDocument } from 'src/entity/group.entity';
-import { FollowingDocument } from 'src/entity/following.entity';
+import { PostDocument } from '@entity/post.entity';
+import { MediaFileDocument } from '@entity/mediaFile.entity';
+import { MediaFileDto } from '@dto/mediaFile/mediaFile.dto';
+import { GroupDocument } from '@entity/group.entity';
+import { FollowingDocument } from '@entity/following.entity';
+import { PostOutput } from '@dto/post/postNew.dto';
 export class MapsHelper {
   stringhandlersHelper: StringHandlersHelper;
   constructor() {
@@ -157,6 +157,36 @@ export class MapsHelper {
       groupBackgroundImage: (mediaFile.group as unknown as GroupDocument)
         ?.backgroundImage,
 
+      createdAt: createdAt,
+    };
+  }
+  public mapToPostOutPut(post: PostDocument, currentUser: string): PostOutput {
+    const postId = (post as any)._id;
+    const user = post.user as any;
+    
+
+    const createdAt = this.stringhandlersHelper.getDateWithTimezone(
+      String((post as any).createdAt),
+      VIET_NAM_TZ,
+    );
+
+    const groupId = (post.group as any)?._id;
+    const groupName = (post.group as unknown as GroupDocument)?.name;
+    const groupBackgroundImage = (post.group as unknown as GroupDocument)
+      ?.backgroundImage;
+    return {
+      postId: postId,
+      groupId: groupId?.toString(),
+      groupBackgroundImage: groupBackgroundImage,
+      groupName: groupName,
+      userId: user._id,
+      userDisplayName: user.displayName,
+      userAvatar: user.avatar,
+      description: post.description,
+      files: post.mediaFiles,
+      likes: post.likes,
+      comments: post.comments,
+      isCurrentUser: user._id.toString() === currentUser,
       createdAt: createdAt,
     };
   }

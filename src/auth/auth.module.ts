@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UsersModule } from '../lib/users/users.module';
+import { UsersModule } from '../module/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { ConfigModule } from 'src/config/config.module';

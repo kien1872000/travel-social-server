@@ -1,18 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsDateString,
-  IsEmail,
-  IsIn,
-  IsInt,
-  isNotEmpty,
-  IsNotEmpty,
-  IsString,
-  Matches,
-  Max,
-  Min,
-  MinLength,
-} from 'class-validator';
-import { EMAIL_REGEX, PASSWORD_REGEX } from 'src/util/constants';
+import { IsNotEmpty, Matches } from 'class-validator';
+import { EMAIL_REGEX, PASSWORD_REGEX } from '@util/constants';
 
 export class UserSignUp {
   @ApiProperty({ type: String, required: true, description: 'User email' })

@@ -1,6 +1,5 @@
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
 
 export const imageFileFilter = (
   req: any,

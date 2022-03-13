@@ -1,7 +1,7 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
-import { Mail } from 'src/util/enums';
+import { Mail } from '@util/enums';
 
 @Injectable()
 export class MailService {

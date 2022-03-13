@@ -8,8 +8,8 @@ import {
 } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { clientUrl } from 'src/util/constants';
-import { Mail } from 'src/util/enums';
+import { clientUrl } from '@util/constants';
+import { Mail } from '@util/enums';
 
 @Processor('mail')
 export class MailProcessor {
