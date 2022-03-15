@@ -10,7 +10,7 @@ import { Comment, CommentDocument } from '@entity/comment.entity';
 import { StringHandlersHelper } from '@helper/stringHandler.helper';
 import { PostsService } from '@post/providers/posts.service';
 import { Interaction } from '@util/enums';
-import { FOLLOWINGS_PER_PAGE, VIET_NAM_TZ } from 'src/util/constants';
+import { FOLLOWINGS_PER_PAGE } from '@util/constants';
 
 @Injectable()
 export class CommentsService {

@@ -15,7 +15,7 @@ export const imageFileFilter = (
 
 export const storage = diskStorage({
   destination: (req: any, file: any, cb: any) => {
-    const uploadPath = './src/uploads/filestorage/';
+    const uploadPath = './src/upload/filestorage/';
 
     if (!existsSync(uploadPath)) {
       mkdirSync(uploadPath);
@@ -34,7 +34,7 @@ export const imageOrVideoFileFilter = (
 ) => {
   if (
     !file.originalname.match(
-      /\.(jpg|jpeg|png|gif|PNG|AVI|avi|flv|wmv|mp4|mov|webm)$/
+      /\.(jpg|jpeg|png|gif|PNG|AVI|avi|flv|wmv|mp4|mov|webm)$/,
     )
   ) {
     req.fileValidationError = 'only image or video files allowed';

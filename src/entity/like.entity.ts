@@ -1,4 +1,4 @@
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
 @Schema({ timestamps: true })
@@ -8,3 +8,5 @@ export class Like {
   @Prop({ type: Types.ObjectId, required: true, ref: 'Post' })
   post: Types.ObjectId;
 }
+export type LikeDocument = Like & Document;
+export const LikeSchema = SchemaFactory.createForClass(Like);
