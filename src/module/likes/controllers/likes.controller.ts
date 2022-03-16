@@ -16,10 +16,8 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { time } from 'console';
-import { Types } from 'mongoose';
+
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ReactionType, ReactionTypeQuery, Time } from 'src/utils/enums';
 import { LikesService } from '../providers/likes.service';
 
 @Controller('like')

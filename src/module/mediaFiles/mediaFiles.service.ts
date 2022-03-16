@@ -12,6 +12,12 @@ import {
   VIET_NAM_TZ,
 } from 'src/util/constants';
 import { File, Privacy } from 'src/util/enums';
+import { PaginationRes } from '@util/types';
+import { MediaFileDto } from '@dto/mediaFile/mediaFile.dto';
+import { User } from '@entity/user.entity';
+import { paginate } from '@util/paginate';
+import { INSTANCE_METADATA_SYMBOL } from '@nestjs/core/injector/instance-wrapper';
+import { query } from 'express';
 
 @Injectable()
 export class MediaFilesService {
@@ -60,117 +66,123 @@ export class MediaFilesService {
   //     throw new InternalServerErrorException(error);
   //   }
   // }
-  // public async getFiles(
-  //   type: string,
-  //   userId: string,
-  //   pageNumber: number,
-  //   groupId?: string,
-  // ): Promise<MediaFileDto[]> {
-  //   const limit = MEDIA_FILES_PER_PAGE;
-  //   const skip =
-  //     !pageNumber || pageNumber <= 0
-  //       ? (pageNumber = 0)
-  //       : pageNumber * MEDIA_FILES_PER_PAGE;
-  //   const match = groupId
-  //     ? { group: Types.ObjectId(groupId) }
-  //     : { user: Types.ObjectId(userId), group: { $exists: false } };
-  //   switch (type) {
-  //   case File.Video:
-  //     (match as any).type = File.Video;
-  //     break;
-  //   case File.Image:
-  //     (match as any).type = File.Image;
-  //     break;
-  //   case File.All:
-  //   default:
-  //     break;
-  //   }
-  //   const files = await this.fileModel
-  //     .find(match)
-  //     .populate('user', ['displayName', 'avatar'], User.name)
-  //     .sort({ createdAt: -1 })
-  //     .skip(skip)
-  //     .limit(limit);
+  public async getFiles(
+    type: string,
+    userId: string,
+    page: number,
+    groupId?: string,
+  ): Promise<PaginationRes<MediaFileDto>> {
+    const match = groupId
+      ? { group: Types.ObjectId(groupId) }
+      : { user: Types.ObjectId(userId), group: { $exists: false } };
+    switch (type) {
+      case File.Video:
+        (match as any).type = File.Video;
+        break;
+      case File.Image:
+        (match as any).type = File.Image;
+        break;
+      case File.All:
+      default:
+        break;
+    }
+    const query = this.fileModel
+      .find(match)
+      .populate('user', ['displayName', 'avatar'], User.name)
+      .sort({ createdAt: -1 });
+    const files = await paginate(query, {
+      perPage: MEDIA_FILES_PER_PAGE,
+      page: page,
+    });
+    return {
+      items: files.items.map((i) => this.mapsHelper.mapToMediaFileDto(i)),
+      meta: files.meta,
+    };
 
-  //   return files.map((file) => this.mapsHelper.mapToMediaFileDto(file));
-  // }
-  // public async getVideosWatch(
-  //   pageNumber: number,
-  //   userId: string,
-  // ): Promise<MediaFileDto[]> {
-  //   try {
-  //     const limit = VIDEOS_PERPAGE;
-  //     const skip =
-  //       !pageNumber || pageNumber < 0 ? 0 : pageNumber * VIDEOS_PERPAGE;
-  //     const videos = await this.fileModel.aggregate([
-  //       {
-  //         $lookup: {
-  //           from: 'users',
-  //           let: { user: '$user' },
-  //           pipeline: [
-  //             { $match: { $expr: { $eq: ['$$user', '$_id'] } } },
-  //             { $project: { avatar: 1, displayName: 1 } },
-  //           ],
-  //           as: 'user',
-  //         },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: 'groups',
-  //           let: {
-  //             group: '$group',
-  //           },
-  //           pipeline: [
-  //             {
-  //               $match: {
-  //                 $expr: {
-  //                   $and: [
-  //                     { $eq: ['$_id', '$$group'] },
-  //                     {
-  //                       $or: [
-  //                         { $eq: ['$admin_id', Types.ObjectId(userId)] },
-  //                         { $in: [Types.ObjectId(userId), '$member'] },
-  //                         { $eq: ['$privacy', Privacy.Public] },
-  //                       ],
-  //                     },
-  //                   ],
-  //                 },
-  //               },
-  //             },
-  //             { $project: { name: 1, backgroundImage: 1 } },
-  //           ],
-  //           as: 'group',
-  //         },
-  //       },
-  //       {
-  //         $match: {
-  //           type: File.Video,
-  //         },
-  //       },
-  //       {
-  //         $project: {
-  //           user: { $arrayElemAt: ['$user', 0] },
-  //           group: { $arrayElemAt: ['$group', 0] },
-  //           type: 1,
-  //           des: 1,
-  //           url: 1,
-  //           createdAt: 1,
-  //         },
-  //       },
-  //       {
-  //         $sort: { createdAt: -1 },
-  //       },
-  //       {
-  //         $skip: skip,
-  //       },
-  //       {
-  //         $limit: limit,
-  //       },
-  //     ]);
+    //   return files.map((file) => this.mapsHelper.mapToMediaFileDto(file));
+  }
+  public async getVideosWatch(
+    page: number,
+    userId: string,
+  ): Promise<PaginationRes<MediaFileDto>> {
+    try {
+      page = !page || page < 0 ? 0 : page;
+      const query = this.fileModel.aggregate<MediaFileDocument>([
+        {
+          $lookup: {
+            from: 'users',
+            let: { user: '$user' },
+            pipeline: [
+              { $match: { $expr: { $eq: ['$$user', '$_id'] } } },
+              { $project: { avatar: 1, displayName: 1 } },
+            ],
+            as: 'user',
+          },
+        },
+        // {
+        //   $lookup: {
+        //     from: 'groups',
+        //     let: {
+        //       group: '$group',
+        //     },
+        //     pipeline: [
+        //       {
+        //         $match: {
+        //           $expr: {
+        //             $and: [
+        //               { $eq: ['$_id', '$$group'] },
+        //               {
+        //                 $or: [
+        //                   { $eq: ['$admin_id', Types.ObjectId(userId)] },
+        //                   { $in: [Types.ObjectId(userId), '$member'] },
+        //                   { $eq: ['$privacy', Privacy.Public] },
+        //                 ],
+        //               },
+        //             ],
+        //           },
+        //         },
+        //       },
+        //       { $project: { name: 1, backgroundImage: 1 } },
+        //     ],
+        //     as: 'group',
+        //   },
+        // },
+        {
+          $match: {
+            type: File.Image,
+          },
+        },
+        {
+          $sort: { createdAt: -1 },
+        },
+      ]);
+      const project = {
+        $project: {
+          user: { $arrayElemAt: ['$user', 0] },
+          // group: { $arrayElemAt: ['$group', 0] },
+          type: 1,
+          des: 1,
+          url: 1,
+          createdAt: 1,
+        },
+      };
+      const videos = await paginate(
+        query,
+        {
+          perPage: VIDEOS_PERPAGE,
+          page: page,
+        },
+        project,
+      );
 
-  //     return videos.map((video) => this.mapsHelper.mapToMediaFileDto(video));
-  //   } catch (error) {
-  //     throw new InternalServerErrorException();
-  //   }
-  // }
+      return {
+        items: videos.items.map((i) =>
+          this.mapsHelper.mapToMediaFileDto(i as unknown as MediaFileDocument),
+        ),
+        meta: videos.meta,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }

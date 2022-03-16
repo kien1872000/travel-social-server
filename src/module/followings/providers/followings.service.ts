@@ -12,6 +12,8 @@ import { Following, FollowingDocument } from '@entity/following.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import { UsersService } from '@user/providers/users.service';
 import { FOLLOWERS_PER_PAGE, FOLLOWINGS_PER_PAGE } from 'src/util/constants';
+import { PaginationRes } from '@util/types';
+import { paginate } from '@util/paginate';
 
 @Injectable()
 export class FollowingsService {
@@ -81,83 +83,57 @@ export class FollowingsService {
   }
   public async getFollowings(
     userId: string,
-    pageNumber: number,
-    currentUserId: string,
-  ): Promise<FollowingsOutput[]> {
-    userId = userId.trim();
-    let followings: FollowingDocument[];
-    let followingsIds: string[];
-    const perPage = FOLLOWINGS_PER_PAGE;
-    const skip = !pageNumber || pageNumber <= 0 ? 0 : pageNumber * perPage;
-    if (userId !== currentUserId) {
-      const promises = await Promise.all([
-        this.followingModel
-          .find({
-            user: new Types.ObjectId(userId),
-          })
-          .populate('following', ['displayName', 'avatar'])
-          .select(['-_id', '-__v'])
-          .skip(skip)
-          .limit(perPage),
-        this.getFollowingIds(currentUserId),
-      ]);
-      followings = promises[0];
-      followingsIds = promises[1];
-    } else {
-      followings = await this.followingModel
+    page: number,
+    currentUser: string,
+  ): Promise<PaginationRes<FollowingsOutput>> {
+    try {
+      const query = this.followingModel
         .find({
           user: new Types.ObjectId(userId),
         })
-        .populate('following', ['displayName', 'avatar'])
-        .select(['-_id', '-__v'])
-        .skip(skip)
-        .limit(perPage);
-    }
-    // console.log(followings);
-    return followings.map((i) => {
-      const user = i.following as unknown as any;
-      let followed = true;
-      if (userId !== currentUserId) {
-        followed = followingsIds.includes(user._id.toString());
-      }
+        .populate('user', ['displayName', 'avatar'])
+        .select(['-_id', '-__v']);
+      const [followings, followingIds] = await Promise.all([
+        paginate(query, { perPage: FOLLOWERS_PER_PAGE, page: page }),
+        this.getFollowingIds(currentUser),
+      ]);
       return {
-        userId: user._id.toString(),
-        displayName: user.displayName,
-        avatar: user.avatar,
-        followed: followed,
-        isCurrentUser: currentUserId === user._id.toString(),
+        items: this.mapsHelper.mapToFollowingsOuput(
+          followings.items,
+          followingIds,
+          currentUser,
+        ),
+        meta: followings.meta,
       };
-    });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
   public async getFollowers(
     userId: string,
-    pageNumber: number,
-    currentUserId: string,
-  ): Promise<FollowingsOutput[]> {
+    page: number,
+    currentUser: string,
+  ): Promise<PaginationRes<FollowingsOutput>> {
     try {
       userId = userId.trim();
-      const perPage = FOLLOWERS_PER_PAGE;
-      const skip = !pageNumber || pageNumber <= 0 ? 0 : pageNumber * perPage;
-      const promises = await Promise.all([
-        this.followingModel
-          .find({
-            following: new Types.ObjectId(userId),
-          })
-          .populate('user', ['displayName', 'avatar'])
-          .select(['-_id', '-__v'])
-          .skip(skip)
-          .limit(perPage),
-        this.getFollowingIds(currentUserId),
+      const query = this.followingModel
+        .find({
+          following: new Types.ObjectId(userId),
+        })
+        .populate('user', ['displayName', 'avatar'])
+        .select(['-_id', '-__v']);
+      const [followings, followingIds] = await Promise.all([
+        paginate(query, { perPage: FOLLOWERS_PER_PAGE, page: page }),
+        this.getFollowingIds(currentUser),
       ]);
-      const followings = promises[0];
-      // console.log(followings);
-      const followingIds = promises[1];
-      // console.log(followingIds);
-      return this.mapsHelper.mapToFollowingsOuput(
-        followings,
-        followingIds,
-        currentUserId,
-      );
+      return {
+        items: this.mapsHelper.mapToFollowingsOuput(
+          followings.items,
+          followingIds,
+          currentUser,
+        ),
+        meta: followings.meta,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

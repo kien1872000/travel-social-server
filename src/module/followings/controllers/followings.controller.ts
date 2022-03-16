@@ -20,6 +20,7 @@ import {
 import { JwtAuthGuard } from '@auth/jwt-auth.guard';
 import { FollowingsService } from '../providers/followings.service';
 import { FollowingInput } from '@dto/following/following.dto';
+import { User } from '@decorator/user.decorator';
 
 @Controller('following')
 @ApiTags('Following')
@@ -55,23 +56,19 @@ export class FollowingsController {
   })
   @ApiQuery({
     type: Number,
-    name: 'pageNumber',
+    name: 'page',
     required: false,
     description:
       'Số thứ tự của page là các số tự nhiên, không truyền thì lấy page đầu tiên',
   })
   @ApiOperation({ description: 'Lấy danh sách những người user đang theo dõi' })
   async getFollowings(
-    @Request() req,
+    @User() user,
     @Query('userId') userId: string,
-    @Query('pageNumber') pageNumber: number,
+    @Query('page') page: number,
   ) {
-    if (!userId) userId = req.user.userId.toString();
-    return this.followingsService.getFollowings(
-      userId,
-      pageNumber,
-      req.user.userId,
-    );
+    if (!userId) userId = user._id;
+    return this.followingsService.getFollowings(userId, page, user._id);
   }
   @Get('get/followers')
   @ApiQuery({
@@ -83,7 +80,7 @@ export class FollowingsController {
   })
   @ApiQuery({
     type: Number,
-    name: 'pageNumber',
+    name: 'page',
     required: false,
     description:
       'Số thứ tự của page là các số tự nhiên, không truyền thì lấy page đầu tiên',
@@ -92,15 +89,11 @@ export class FollowingsController {
     description: 'Lấy danh sách những người đang theo dõi user',
   })
   async getFollowers(
-    @Request() req,
+    @User() user,
     @Query('userId') userId: string,
-    @Query('pageNumber') pageNumber: number,
+    @Query('page') page: number,
   ) {
-    if (!userId) userId = req.user.userId;
-    return this.followingsService.getFollowers(
-      userId,
-      pageNumber,
-      req.user.userId,
-    );
+    if (!userId) userId = user._id;
+    return this.followingsService.getFollowers(userId, page, user._id);
   }
 }

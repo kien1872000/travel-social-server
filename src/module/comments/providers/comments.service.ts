@@ -10,7 +10,9 @@ import { Comment, CommentDocument } from '@entity/comment.entity';
 import { StringHandlersHelper } from '@helper/stringHandler.helper';
 import { PostsService } from '@post/providers/posts.service';
 import { Interaction } from '@util/enums';
-import { FOLLOWINGS_PER_PAGE } from '@util/constants';
+import { FOLLOWINGS_PER_PAGE, POSTS_PER_PAGE } from '@util/constants';
+import { PaginationRes } from '@util/types';
+import { paginate } from '@util/paginate';
 
 @Injectable()
 export class CommentsService {
@@ -56,8 +58,16 @@ export class CommentsService {
     try {
       const cmt = await this.commentModel.findById(commentId);
       if (!cmt) throw new BadRequestException('Comment không tồn tại');
-      await Promise.all([
-        this.commentModel.findByIdAndUpdate(commentId, {
+      const commentToUpdateReplys = cmt.parentId ? cmt.parentId : commentId;
+      const [result, _, __] = await Promise.all([
+        new this.commentModel({
+          postId: cmt.postId,
+          userId: Types.ObjectId(userId),
+          parentId: commentToUpdateReplys,
+          comment,
+          replys: 0,
+        }).save(),
+        this.commentModel.findByIdAndUpdate(commentToUpdateReplys, {
           $inc: {
             replys: 1,
           },
@@ -68,14 +78,7 @@ export class CommentsService {
           1,
         ),
       ]);
-      const addComment = new this.commentModel({
-        postId: Types.ObjectId(cmt.postId.toString()),
-        userId: Types.ObjectId(userId),
-        parentId: Types.ObjectId(commentId),
-        comment,
-        replys: 0,
-      });
-      return await addComment.save();
+      return result;
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
@@ -88,7 +91,6 @@ export class CommentsService {
       const checkIfMyComment = await this.commentModel.findOne({
         userId: Types.ObjectId(userId),
       });
-      console.log(checkIfMyComment);
       if (!checkIfMyComment)
         throw new BadRequestException(
           'bạn không có quyền xóa comment không phải của bạn',
@@ -105,52 +107,55 @@ export class CommentsService {
           },
         });
       }
-      await this.commentModel.findByIdAndDelete(commentId);
+      await Promise.all([
+        this.commentModel.findByIdAndDelete(commentId),
+        this.commentModel.deleteMany({ parentId: commentId }),
+      ]);
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
   }
 
-  public async getListCommentParent(userId, postId, pageNumber): Promise<any> {
+  public async getListCommentParent(
+    userId: string,
+    postId: string,
+    page: number,
+  ): Promise<PaginationRes<Partial<CommentDocument>>> {
     try {
-      const perPage = FOLLOWINGS_PER_PAGE;
-      const skip = !pageNumber || pageNumber <= 0 ? 0 : pageNumber * perPage;
       const post = await this.postService.getPost(postId);
       if (!post) throw new BadRequestException('Post không tồn tại');
-      const commentParent = await this.commentModel
+      const query = this.commentModel
         .find({
           postId: Types.ObjectId(postId),
           parentId: null,
         })
         .populate('userId', ['displayName', 'avatar'])
-        .select(['-__v'])
-        .skip(skip)
-        .limit(perPage);
-      return commentParent;
+        .select(['-__v', '-updatedAt']);
+
+      return await paginate(query, {
+        perPage: POSTS_PER_PAGE,
+        page: page,
+      });
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
   }
 
   public async getListCommentReply(
-    userId,
-    commentId,
-    pageNumber,
-  ): Promise<any> {
+    userId: string,
+    commentId: string,
+    page: number,
+  ): Promise<PaginationRes<Partial<CommentDocument>>> {
     try {
-      const perPage = FOLLOWINGS_PER_PAGE;
-      const skip = !pageNumber || pageNumber <= 0 ? 0 : pageNumber * perPage;
       const cmt = await this.commentModel.findById(commentId);
       if (!cmt) throw new BadRequestException('Comment không tồn tại');
-      const commentReply = await this.commentModel
+      const query = this.commentModel
         .find({
           parentId: Types.ObjectId(commentId),
         })
         .populate('userId', ['displayName', 'avatar'])
-        .select(['-__v'])
-        .skip(skip)
-        .limit(perPage);
-      return commentReply;
+        .select(['-__v', '-updatedAt']);
+      return await paginate(query, { perPage: POSTS_PER_PAGE, page: page });
     } catch (err) {
       throw new InternalServerErrorException(err);
     }

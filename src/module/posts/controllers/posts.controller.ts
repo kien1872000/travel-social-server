@@ -61,8 +61,8 @@ export class PostsController {
         'Invalid file provided, [image or video files allowed]',
       );
     }
-    if (!files || files.length <= 0)
-      throw new BadRequestException('Images or videos files required');
+    // if (!files || files.length <= 0)
+    //   throw new BadRequestException('Images or videos files required');
     return this.postsService.createNewPost(
       user._id,
       postPrivateInput.description,
@@ -86,10 +86,10 @@ export class PostsController {
   })
   async searchUsers(
     @Query('search') search: string,
-    @Query('page', ParseIntPipe) pageNumber,
+    @Query('page', ParseIntPipe) page,
     @Request() req,
   ) {
-    return this.postsService.searchPosts(req.user.userId, search, pageNumber);
+    return this.postsService.searchPosts(req.user.userId, search, page);
   }
   @Get('posts')
   @ApiQuery({
@@ -139,7 +139,7 @@ export class PostsController {
   @Get('posts/by-hashtag')
   @ApiQuery({
     type: Number,
-    name: 'pageNumber',
+    name: 'page',
   })
   @ApiQuery({
     type: String,
@@ -156,7 +156,7 @@ export class PostsController {
   async getPostsByHahstag(
     @Query('time') time: string,
     @Query('hashtag') hashtag: string,
-    @Query('pageNumber') pageNumber: number,
+    @Query('page') pageNumber: number,
     @User() user,
   ) {
     if (!time) time = Time.All;

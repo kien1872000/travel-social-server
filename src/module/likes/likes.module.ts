@@ -7,7 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PostsModule } from '../posts/posts.module';
 import { UsersModule } from '../users/users.module';
 import { LikesController } from './controllers/likes.controller';
-import { ReactionsService } from './providers/likes.service';
+import { LikesService } from './providers/likes.service';
 
 @Module({
   imports: [
@@ -22,8 +22,8 @@ import { ReactionsService } from './providers/likes.service';
     FollowingsModule,
    
   ],
-  providers: [ReactionsService, StringHandlersHelper],
+  providers: [LikesService, StringHandlersHelper],
   controllers: [LikesController],
-  exports: [ReactionsService],
+  exports: [LikesService],
 })
 export class ReactionsModule { }

@@ -21,6 +21,8 @@ import {
   VIET_NAM_TZ,
 } from 'src/util/constants';
 import { Interaction, PostLimit, Privacy, Time } from 'src/util/enums';
+import { PaginationRes } from '@util/types';
+import { paginate } from '@util/paginate';
 @Injectable()
 export class PostsService {
   // Chỉ dùng cho trending
@@ -28,12 +30,11 @@ export class PostsService {
     currentUser: string,
     time: string,
     hashtag: string,
-    pageNumber: number,
+    page: number,
   ): Promise<TrendingPostOutput> {
     try {
       const limit = POSTS_PER_PAGE;
-      const skip =
-        !pageNumber || pageNumber < 0 ? 0 : pageNumber * POSTS_PER_PAGE;
+      const skip = !page || page < 0 ? 0 : page * POSTS_PER_PAGE;
       let match;
       if (time === Time.All) {
         match = { hashtags: hashtag, isPublic: true };
@@ -71,7 +72,8 @@ export class PostsService {
     }
   }
   constructor(
-    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    @InjectModel(Post.name)
+    private postModel: Model<PostDocument>,
     private stringHandlersHelper: StringHandlersHelper,
     private mapsHelper: MapsHelper,
     @Inject(forwardRef(() => MediaFilesService))
@@ -152,7 +154,7 @@ export class PostsService {
     currentUser: string,
     limit: PostLimit,
     groupId: string,
-  ): Promise<PostOutput[]> {
+  ): Promise<PaginationRes<PostOutput>> {
     switch (limit) {
       case PostLimit.Group:
         break;
@@ -209,7 +211,7 @@ export class PostsService {
   private async getPostsProfile(
     pageNumber: number,
     currentUser: string,
-  ): Promise<PostOutput[]> {
+  ): Promise<PaginationRes<PostOutput>> {
     try {
       return await this.getPosts(pageNumber, currentUser, PostLimit.Profile);
     } catch (error) {
@@ -219,7 +221,7 @@ export class PostsService {
   private async getPostsNewFeed(
     pageNumber: number,
     currentUser: string,
-  ): Promise<PostOutput[]> {
+  ): Promise<PaginationRes<PostOutput>> {
     try {
       return await this.getPosts(pageNumber, currentUser);
     } catch (error) {
@@ -227,14 +229,11 @@ export class PostsService {
     }
   }
   private async getPosts(
-    pageNumber: number,
+    page: number,
     currentUser: string,
     option?: PostLimit,
     groupId?: string,
-  ): Promise<PostOutput[]> {
-    const limit = POSTS_PER_PAGE;
-    const skip =
-      !pageNumber || pageNumber < 0 ? 0 : pageNumber * POSTS_PER_PAGE;
+  ): Promise<PaginationRes<PostOutput>> {
     const followings = await this.followingsService.getFollowingIds(
       currentUser,
     );
@@ -265,18 +264,22 @@ export class PostsService {
           ],
         };
     }
-    const posts = await this.postModel
+    const query = this.postModel
       .find(match)
       .populate('user', ['_id', 'displayName', 'avatar'])
       .populate('group', ['_id', 'name', 'backgroundImage'])
       .select(['-mediaFiles._id'])
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-    const result = posts.map((post) =>
-      this.mapsHelper.mapToPostOutPut(post, currentUser),
-    );
-    return result;
+      .sort({ createdAt: -1 });
+    const postsResult = await paginate<PostDocument>(query, {
+      perPage: POSTS_PER_PAGE,
+      page: page,
+    });
+    return {
+      items: postsResult.items.map((i) =>
+        this.mapsHelper.mapToPostOutPut(i, currentUser),
+      ),
+      meta: postsResult.meta,
+    };
   }
 
   public async searchPosts(userId: string, search: string, pageNumber: number) {
@@ -285,7 +288,6 @@ export class PostsService {
       const limit = POSTS_PER_PAGE;
       const skip = !pageNumber || pageNumber <= 0 ? 0 : pageNumber * limit;
       search = search.trim();
-      // console.log(search)
       const hashtagsInsearch =
         this.stringHandlersHelper.getHashtagFromString(search);
       let rmwp = search.split(' ').join('');
