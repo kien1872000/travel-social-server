@@ -72,16 +72,16 @@ export class LikesController {
   })
   @ApiQuery({
     type: Number,
-    name: 'pageNumber',
+    name: 'page',
     required: false,
     description: 'page number',
   })
   async getLikesOfPost(
     @User() user,
     @Query('postId') postId: string,
-    @Query('pageNumber') pageNumber: number,
+    @Query('page') page: number,
   ) {
-    return this.likesSerivce.getLikesOfPost(user._id, postId, pageNumber);
+    return this.likesSerivce.getLikesOfPost(user._id, postId, page);
   }
   @Delete('/dislike')
   @ApiOperation({

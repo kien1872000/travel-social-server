@@ -121,9 +121,9 @@ export class UsersController {
   })
   async searchUsers(
     @Query('search') search: string,
-    @Query('page', ParseIntPipe) pageNumber,
+    @Query('page', ParseIntPipe) page,
     @User() user,
   ) {
-    return this.usersService.getUserSearchList(user._id, search, pageNumber);
+    return this.usersService.getUserSearchList(user._id, search, page);
   }
 }

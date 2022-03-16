@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/jwt-auth.guard';
 import { CommentsService } from '../providers/comments.service';
+import { User } from '@decorator/user.decorator';
 
 @Controller('comment')
 @ApiTags('Comment')
@@ -68,12 +69,11 @@ export class CommentsController {
     description: 'nội dung',
   })
   async addReply(
-    @Request() req,
+    @User() user,
     @Query('commentId') commentId: string,
     @Query('comment') comment: string,
   ) {
-    const userId = req.user.userId.toString();
-    return this.commentService.addReplyToComment(userId, commentId, comment);
+    return this.commentService.addReplyToComment(user._id, commentId, comment);
   }
 
   @Delete('/delete')
@@ -86,9 +86,8 @@ export class CommentsController {
     required: true,
     description: 'id của comment cần xoa',
   })
-  async deleteComment(@Request() req, @Query('commentId') commentId: string) {
-    const userId = req.user.userId.toString();
-    return this.commentService.deleteComment(userId, commentId);
+  async deleteComment(@User() user, @Query('commentId') commentId: string) {
+    return this.commentService.deleteComment(user._id, commentId);
   }
 
   @Get('/getCommentsOfPost/:postId')
@@ -103,17 +102,16 @@ export class CommentsController {
   })
   @ApiQuery({
     type: Number,
-    name: 'pageNumber',
+    name: 'page',
     required: false,
     description: 'page number',
   })
   async getListComments(
-    @Request() req,
+    @User() user,
     @Query('postId') postId: string,
-    @Query('pageNumber') pageNumber: number,
+    @Query('page') page: number,
   ) {
-    const userId = req.user.userId.toString();
-    return this.commentService.getListCommentParent(userId, postId, pageNumber);
+    return this.commentService.getListCommentParent(user._id, postId, page);
   }
 
   @Get('/getCommentsReply/:commentId')
@@ -128,21 +126,16 @@ export class CommentsController {
   })
   @ApiQuery({
     type: Number,
-    name: 'pageNumber',
+    name: 'page',
     required: false,
     description: 'page number',
   })
   async getListCommentReply(
-    @Request() req,
+    @User() user,
     @Query('commentId') commentId: string,
-    @Query('pageNumber') pageNumber: number,
+    @Query('page') page: number,
   ) {
-    const userId = req.user.userId.toString();
-    return this.commentService.getListCommentReply(
-      userId,
-      commentId,
-      pageNumber,
-    );
+    return this.commentService.getListCommentReply(user._id, commentId, page);
   }
   // @Get('/statistic')
   // @ApiOperation({

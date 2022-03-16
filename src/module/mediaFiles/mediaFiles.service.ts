@@ -149,7 +149,7 @@ export class MediaFilesService {
         // },
         {
           $match: {
-            type: File.Image,
+            type: File.Video,
           },
         },
         {

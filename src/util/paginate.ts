@@ -24,11 +24,11 @@ export async function paginate<T = any>(
         meta: [
           { $count: 'totalItems' },
           { $addFields: { currentPage: Number(page) } },
-          { $addFields: { perPage: 2 } },
+          { $addFields: { perPage: perPage } },
           {
             $addFields: {
               totalPages: {
-                $ceil: { $divide: ['$totalItems', 2] },
+                $ceil: { $divide: ['$totalItems', perPage] },
               },
             },
           },
