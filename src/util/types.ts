@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class JwtPayLoad {
@@ -16,6 +18,23 @@ export class PaginationRes<T> {
 }
 
 export class PaginateOptions {
+  @IsOptional()
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+    name: 'perPage',
+    description:
+      'Số item mỗi page muốn get, nếu không điền thì sẽ backend sẽ tự dùng constant',
+    required: false,
+  })
   perPage: number;
+  @IsOptional()
+  @IsNumber()
+  @ApiProperty({
+    type: Number,
+    name: 'page',
+    description: 'Số thứ tự của page, mặc định là 0',
+    required: false,
+  })
   page: number;
 }

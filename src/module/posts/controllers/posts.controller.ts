@@ -30,6 +30,9 @@ import { imageOrVideoFileFilter, storage } from '@helper/storage.helper';
 import { PostLimit, Time } from '@util/enums';
 import { PostsService } from '../providers/posts.service';
 import { HashtagsService } from '@hashtag/hashtags.service';
+import { PaginateQuery } from '@decorator/pagination.decorator';
+import { POSTS_PER_PAGE } from '@util/constants';
+import { PaginateOptions } from '@util/types';
 
 @ApiTags('Post')
 @ApiBearerAuth()
@@ -93,11 +96,6 @@ export class PostsController {
   }
   @Get('posts')
   @ApiQuery({
-    type: Number,
-    name: 'page',
-    required: false,
-  })
-  @ApiQuery({
     type: String,
     name: 'postLimit',
     enum: PostLimit,
@@ -118,9 +116,12 @@ export class PostsController {
     description:
       'id của user muốn lấy post, nếu trong trang cá nhân của mình thì không cần truyền cũng đc',
   })
-  @ApiOperation({ description: 'Lấy post trong trang cá nhân' })
+  @ApiQuery({ type: PaginateOptions })
+  @ApiOperation({
+    description: 'Lấy post trong trang cá nhân, newsfeed, group',
+  })
   async getPosts(
-    @Query('page') pageNumber: number,
+    @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
     @Query('postLimit') postLimit: PostLimit,
     @Query('groupId') groupId: string,
     @Query('userId') userId: string,
@@ -130,7 +131,8 @@ export class PostsController {
       if (postLimit !== PostLimit.Profile) return;
     } else userId = user._id;
     return this.postsService.getPostsWithLimit(
-      pageNumber,
+      paginateOptions.page,
+      paginateOptions.perPage,
       userId,
       postLimit,
       groupId,

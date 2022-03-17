@@ -150,7 +150,8 @@ export class PostsService {
     }
   }
   public getPostsWithLimit(
-    pageNumber: number,
+    page: number,
+    perPage: number,
     currentUser: string,
     limit: PostLimit,
     groupId: string,
@@ -160,10 +161,10 @@ export class PostsService {
         break;
       //return this.getPostsGroup(pageNumber, currentUser, groupId);
       case PostLimit.Profile:
-        return this.getPostsProfile(pageNumber, currentUser);
+        return this.getPostsProfile(page, perPage, currentUser);
       case PostLimit.NewsFeed:
       default:
-        return this.getPostsNewFeed(pageNumber, currentUser);
+        return this.getPostsNewFeed(page, perPage, currentUser);
     }
   }
 
@@ -209,27 +210,35 @@ export class PostsService {
   //   }
   // }
   private async getPostsProfile(
-    pageNumber: number,
+    page: number,
+    perPage: number,
     currentUser: string,
   ): Promise<PaginationRes<PostOutput>> {
     try {
-      return await this.getPosts(pageNumber, currentUser, PostLimit.Profile);
+      return await this.getPosts(
+        page,
+        perPage,
+        currentUser,
+        PostLimit.Profile,
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
   private async getPostsNewFeed(
-    pageNumber: number,
+    page: number,
+    perPage: number,
     currentUser: string,
   ): Promise<PaginationRes<PostOutput>> {
     try {
-      return await this.getPosts(pageNumber, currentUser);
+      return await this.getPosts(page, perPage, currentUser);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
   private async getPosts(
     page: number,
+    perPage: number,
     currentUser: string,
     option?: PostLimit,
     groupId?: string,
@@ -271,7 +280,7 @@ export class PostsService {
       .select(['-mediaFiles._id'])
       .sort({ createdAt: -1 });
     const postsResult = await paginate<PostDocument>(query, {
-      perPage: POSTS_PER_PAGE,
+      perPage: perPage,
       page: page,
     });
     return {
