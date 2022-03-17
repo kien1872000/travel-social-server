@@ -14,7 +14,7 @@ import { UserSignUp } from '@dto/user/userSignup.dto';
 import { User, UserDocument } from '@entity/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordInput } from '@dto/user/changePassword.dto';
-import { SEARCH_USER_PER_PAGE } from '@util/constants';
+import { RENAMABLE_TIME, SEARCH_USER_PER_PAGE } from '@util/constants';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/stringHandler.helper';
 import { MediaFilesService } from '@mediaFile/mediaFiles.service';
@@ -63,6 +63,7 @@ export class UsersService {
         password: user.password,
         displayName: user.displayName,
         displayNameNoAccent: this.stringHandlers.removeAccent(user.displayName),
+        renamableTime: new Date(),
         isActive: false,
         avatar: '',
         coverPhoto: '',
@@ -149,19 +150,38 @@ export class UsersService {
   ): Promise<UserProfile> {
     if (!userInfoInput) return;
     try {
-      const sex = userInfoInput.sex;
-      const birthday = userInfoInput.birthday;
-      const user = await this.userModel.findByIdAndUpdate(
-        userId,
-        {
-          birthday: new Date(birthday),
-          sex: sex,
-        },
-        { new: true },
-      );
-      return this.mapsHelper.mapToUserProfile(user, true);
+      const user = await this.userModel.findById(userId);
+      if (!user) return;
+      let update = {
+        bio: userInfoInput.bio,
+        birthday: new Date(userInfoInput.birthday),
+        sex: userInfoInput.sex,
+      };
+      if (
+        userInfoInput.displayName &&
+        userInfoInput.displayName.trim().length > 0
+      ) {
+        if (new Date() <= user.renamableTime) {
+          throw new BadRequestException(
+            'display name can only be changed after 30 days',
+          );
+        }
+        const temp = {
+          displayName: userInfoInput.displayName.trim(),
+          displayNameNoAccent: this.stringHandlers.removeAccent(
+            userInfoInput.displayName.trim(),
+          ),
+          renamableTime: new Date().setDate(
+            new Date().getDate() + RENAMABLE_TIME,
+          ),
+        };
+        update = { ...update, ...temp };
+      }
+      const result = await this.userModel.findByIdAndUpdate(userId, update, {
+        new: true,
+      });
+      return this.mapsHelper.mapToUserProfile(result, true);
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }

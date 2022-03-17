@@ -14,6 +14,10 @@ export class User {
   displayNameNoAccent: string;
   @Prop({ type: Date })
   birthday?: Date;
+  @Prop({ type: Date, required: true })
+  renamableTime: Date;
+  @Prop({ type: String })
+  bio?: string;
   @Prop({ type: String })
   avatar: string;
   @Prop({ type: String })
@@ -22,7 +26,7 @@ export class User {
   refreshToken: string;
   @Prop({ type: Date })
   refreshTokenExpires: Date;
-  @Prop({ type: Number})
+  @Prop({ type: Number })
   sex?: number;
   @Prop({ type: Number, required: true })
   followings: number;

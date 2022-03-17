@@ -14,6 +14,18 @@ export class UserInfoInput {
   @ApiProperty({
     type: String,
     required: false,
+    description: 'Tên hiển thị, chỉ được đổi sau 30 ngày',
+  })
+  displayName: string;
+  @ApiProperty({
+    type: String,
+    required: false,
+    description: 'bio',
+  })
+  bio: string;
+  @ApiProperty({
+    type: String,
+    required: false,
     description: 'Ngày tháng năm sinh theo dạng DateString, bắt buộc',
   })
   @IsDateString()
@@ -35,6 +47,7 @@ export class UserProfile {
   avatar: string;
   coverPhoto: string;
   sex: string;
+  bio: string;
   sexNumber: number;
   followers: number;
   followings: number;

@@ -1,3 +1,5 @@
+import { CommentsModule } from '@comment/comments.module';
+import { LikesModule } from '@like/likes.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
@@ -18,6 +20,8 @@ import { UsersModule } from './module/users/users.module';
     }),
     UsersModule,
     PostsModule,
+    LikesModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -22,7 +22,11 @@ import { Activation, ActivationDocument } from 'src/entity/activation.entity';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import * as timezone from 'dayjs/plugin/timezone';
-import { PASSWORD_LINK_EXPIRE_MINUTES, VIET_NAM_TZ } from 'src/util/constants';
+import {
+  ACTIVATION_CODE_EXPIRE,
+  RESET_PASSWORD_TOKEN_EXPIRE,
+  VIET_NAM_TZ,
+} from 'src/util/constants';
 import { PasswordResetInput } from 'src/dto/user/passwordReset.dto';
 import { MailService } from 'src/mail/mail.service';
 import { StringHandlersHelper } from 'src/helper/stringHandler.helper';
@@ -79,7 +83,10 @@ export class UsersAuthService {
       dayjs.extend(timezone);
       dayjs.extend(utc);
       const activationCode = this.stringHandlersHelper.generateString(10);
-      const expireIn = dayjs().tz(VIET_NAM_TZ).add(10, 'day').format();
+      const expireIn = dayjs()
+        .tz(VIET_NAM_TZ)
+        .add(ACTIVATION_CODE_EXPIRE, 'day')
+        .format();
       await this.activationModel.findOneAndUpdate(
         { email: email },
         { activationCode: activationCode, expireIn: new Date(expireIn) },
@@ -136,7 +143,7 @@ export class UsersAuthService {
       const token = this.stringHandlersHelper.generateString(60);
       const expireIn = dayjs()
         .tz(VIET_NAM_TZ)
-        .add(PASSWORD_LINK_EXPIRE_MINUTES, 'm')
+        .add(RESET_PASSWORD_TOKEN_EXPIRE, 'm')
         .format();
 
       await this.passwordResetModel.findOneAndUpdate(

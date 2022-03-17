@@ -26,4 +26,4 @@ import { LikesService } from './providers/likes.service';
   controllers: [LikesController],
   exports: [LikesService],
 })
-export class ReactionsModule { }
+export class LikesModule { }

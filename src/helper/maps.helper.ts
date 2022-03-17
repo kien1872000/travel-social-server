@@ -62,6 +62,7 @@ export class MapsHelper {
       birthday: birthday,
       avatar: user.avatar,
       coverPhoto: user.coverPhoto,
+      bio: user.bio,
       sex: sex,
       sexNumber: user.sex,
       followers: user.followers,
@@ -163,7 +164,6 @@ export class MapsHelper {
   public mapToPostOutPut(post: PostDocument, currentUser: string): PostOutput {
     const postId = (post as any)._id;
     const user = post.user as any;
-    
 
     const createdAt = this.stringhandlersHelper.getDateWithTimezone(
       String((post as any).createdAt),
