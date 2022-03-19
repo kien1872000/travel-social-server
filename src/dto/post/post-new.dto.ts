@@ -27,6 +27,7 @@ export class PostOutput {
   userDisplayName: string;
   userAvatar: string;
   files: FileType[];
+  liked: boolean;
   description: string;
   likes: number;
   comments: number;

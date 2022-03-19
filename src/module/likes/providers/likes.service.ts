@@ -5,6 +5,8 @@ import { FollowingsService } from '@following/providers/followings.service';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   Post,
@@ -24,6 +26,7 @@ export class LikesService {
   constructor(
     @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
     private stringHandlersHelper: StringHandlersHelper,
+    @Inject(forwardRef(() => PostsService))
     private postService: PostsService,
     private usersSerivce: UsersService,
     private followingService: FollowingsService,
@@ -175,4 +178,18 @@ export class LikesService {
   //     throw new InternalServerErrorException(error);
   //   }
   // }
+  public async isUserLikedPost(
+    userId: string,
+    postId: string,
+  ): Promise<boolean> {
+    try {
+      const like = await this.likeModel.findOne({
+        user: Types.ObjectId(userId),
+        post: Types.ObjectId(postId),
+      });
+      return like ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
 }

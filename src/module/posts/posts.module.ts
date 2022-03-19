@@ -8,6 +8,7 @@ import { HashtagsModule } from '../hashtags/hashtags.module';
 import { MediaFilesModule } from '../media-files/media-files.module';
 import { PostsController } from './controllers/posts.controller';
 import { PostsService } from './providers/posts.service';
+import { LikesModule } from '@like/likes.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PostsService } from './providers/posts.service';
     ]),
     MediaFilesModule,
     HashtagsModule,
+    LikesModule,
     FollowingsModule,
   ],
   controllers: [PostsController],

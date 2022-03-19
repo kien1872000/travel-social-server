@@ -63,7 +63,7 @@ export class UsersAuthService {
       payload._id.toString(),
     );
     const token = await this.authService.login(payload);
-    console.log(token);
+    
 
     return this.mapsHelpler.mapToLoginOutput(
       token.accessToken,

@@ -163,7 +163,11 @@ export class MapsHelper {
       createdAt: createdAt,
     };
   }
-  public mapToPostOutPut(post: PostDocument, currentUser: string): PostOutput {
+  public mapToPostOutPut(
+    post: PostDocument,
+    currentUser: string,
+    liked: boolean,
+  ): PostOutput {
     const postId = (post as any)._id;
     const user = post.user as any;
 
@@ -177,6 +181,7 @@ export class MapsHelper {
     const groupBackgroundImage = (post.group as unknown as GroupDocument)
       ?.backgroundImage;
     return {
+      liked: liked,
       postId: postId,
       groupId: groupId?.toString(),
       groupBackgroundImage: groupBackgroundImage,

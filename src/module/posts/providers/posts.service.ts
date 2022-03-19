@@ -23,6 +23,7 @@ import {
 import { Interaction, PostLimit, Privacy, Time } from 'src/util/enums';
 import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
+import { LikesService } from '@like/providers/likes.service';
 @Injectable()
 export class PostsService {
   // Chỉ dùng cho trending
@@ -64,8 +65,14 @@ export class PostsService {
       return {
         popular: poplular,
         posts: {
-          items: posts.items.map((i) =>
-            this.mapsHelper.mapToPostOutPut(i, currentUser),
+          items: await Promise.all(
+            posts.items.map(async (i) => {
+              const liked = await this.likesService.isUserLikedPost(
+                currentUser,
+                (i as any)._id.toString(),
+              );
+              return this.mapsHelper.mapToPostOutPut(i, currentUser, liked);
+            }),
           ),
           meta: posts.meta,
         },
@@ -76,13 +83,14 @@ export class PostsService {
   }
   constructor(
     @InjectModel(Post.name)
-    private postModel: Model<PostDocument>,
-    private stringHandlersHelper: StringHandlersHelper,
-    private mapsHelper: MapsHelper,
+    private readonly postModel: Model<PostDocument>,
+    private readonly stringHandlersHelper: StringHandlersHelper,
+    private readonly likesService: LikesService,
+    private readonly mapsHelper: MapsHelper,
     @Inject(forwardRef(() => MediaFilesService))
-    private filesService: MediaFilesService,
-    private followingsService: FollowingsService,
-    private hashtagsService: HashtagsService,
+    private readonly filesService: MediaFilesService,
+    private readonly followingsService: FollowingsService,
+    private readonly hashtagsService: HashtagsService,
   ) {}
 
   public async createNewPost(
@@ -140,7 +148,7 @@ export class PostsService {
         .findById(postId)
         .populate('user', ['displayName', 'avatar'])
         .populate('group', ['name', 'backgroundImage']);
-      return this.mapsHelper.mapToPostOutPut(post, userId);
+      return this.mapsHelper.mapToPostOutPut(post, userId, false);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -282,8 +290,14 @@ export class PostsService {
       page: page,
     });
     return {
-      items: postsResult.items.map((i) =>
-        this.mapsHelper.mapToPostOutPut(i, currentUser),
+      items: await Promise.all(
+        postsResult.items.map(async (i) => {
+          const liked = await this.likesService.isUserLikedPost(
+            currentUser,
+            (i as any)._id.toString(),
+          );
+          return this.mapsHelper.mapToPostOutPut(i, currentUser, liked);
+        }),
       ),
       meta: postsResult.meta,
     };
@@ -314,9 +328,15 @@ export class PostsService {
           .skip(skip)
           .limit(limit);
 
-        const postsResult = posts.map((post) =>
-          this.mapsHelper.mapToPostOutPut(post, userId),
-        );
+        const postsResult = await Promise.all([
+          posts.map(async (post) => {
+            const liked = await this.likesService.isUserLikedPost(
+              userId,
+              (post as any)._id.toString(),
+            );
+            return this.mapsHelper.mapToPostOutPut(post, userId, liked);
+          }),
+        ]);
         return {
           searchResults: posts.length,
           postsResult,
@@ -349,9 +369,13 @@ export class PostsService {
             .skip(skip)
             .limit(limit);
 
-          const postsResult = postByHashtag.map((post) =>
-            this.mapsHelper.mapToPostOutPut(post, userId),
-          );
+          const postsResult = postByHashtag.map(async (post) => {
+            const liked = await this.likesService.isUserLikedPost(
+              userId,
+              (post as any)._id.toString(),
+            );
+            return this.mapsHelper.mapToPostOutPut(post, userId, liked);
+          });
           return {
             hashtagInfo,
             postByHashtag: postsResult,
@@ -367,9 +391,13 @@ export class PostsService {
           .select(['-__v'])
           .skip(skip)
           .limit(limit);
-        const postsResult = postByHashtags.map((post) =>
-          this.mapsHelper.mapToPostOutPut(post, userId),
-        );
+        const postsResult = postByHashtags.map(async (post) => {
+          const liked = await this.likesService.isUserLikedPost(
+            userId,
+            (post as any)._id.toString(),
+          );
+          return this.mapsHelper.mapToPostOutPut(post, userId, liked);
+        });
         return {
           searchReults: postByHashtags.length,
           postByHashtags: postsResult,
@@ -383,69 +411,20 @@ export class PostsService {
       throw new InternalServerErrorException(err);
     }
   }
-  public async getTrending(currentUser: string): Promise<PostOutput[]> {
-    try {
-      const posts: PostDocument[] = await this.postModel.aggregate([
-        {
-          $addFields: {
-            total: {
-              $sum: [
-                '$reactions.loves',
-                '$reactions.likes',
-                '$reactions.hahas',
-                '$reactions.wows',
-                '$reactions.sads',
-                '$reactions.angrys',
-              ],
-            },
-          },
-        },
-        {
-          $sort: {
-            total: -1,
-          },
-        },
-        {
-          $lookup: {
-            from: 'users',
-            let: { user: 'user' },
-            pipeline: [{ $project: { _id: 1, displayName: 1, avatar: 1 } }],
-            as: 'user',
-          },
-        },
-        { $match: { group: { $exists: false } } },
-        {
-          $project: {
-            user: { $arrayElemAt: ['$user', 0] },
-            description: 1,
-            mediaFiles: 1,
-            reactions: 1,
-            comments: 1,
-            createdAt: 1,
-          },
-        },
 
-        { $limit: TRENDING_LENGTH },
-      ]);
-
-      const result = posts.map((post) =>
-        this.mapsHelper.mapToPostOutPut(post, currentUser),
-      );
-      return result;
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
   public async getPostById(
     postId: string,
     currentUser: string,
   ): Promise<PostOutput> {
     try {
-      const post = await this.postModel
-        .findById(postId)
-        .populate('user', ['displayName', 'avatar']);
+      const [post, liked] = await Promise.all([
+        this.postModel
+          .findById(postId)
+          .populate('user', ['displayName', 'avatar']),
+        this.likesService.isUserLikedPost(currentUser, postId),
+      ]);
       // .populate('group', ['_id', 'name', 'backgroundImage']);
-      return this.mapsHelper.mapToPostOutPut(post, currentUser);
+      return this.mapsHelper.mapToPostOutPut(post, currentUser, liked);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

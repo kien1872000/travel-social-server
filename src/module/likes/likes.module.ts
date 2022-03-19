@@ -18,12 +18,11 @@ import { LikesService } from './providers/likes.service';
       },
     ]),
     forwardRef(() => UsersModule),
-    PostsModule,
+    forwardRef(() => PostsModule),
     FollowingsModule,
-   
   ],
   providers: [LikesService, StringHandlersHelper],
   controllers: [LikesController],
   exports: [LikesService],
 })
-export class LikesModule { }
+export class LikesModule {}
