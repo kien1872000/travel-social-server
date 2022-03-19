@@ -43,9 +43,9 @@ export class FollowingsController {
   @Delete('unfollow')
   @ApiBody({ type: FollowingInput })
   @ApiOperation({ description: 'Bỏ theo dõi người dùng' })
-  async unFollow(@Body() followingInput: FollowingInput, @Request() req) {
+  async unFollow(@Body() followingInput: FollowingInput, @User() user) {
     return this.followingsService.unFollow(
-      req.user.userId,
+      user._id,
       followingInput.followingId,
     );
   }

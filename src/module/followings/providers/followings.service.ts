@@ -66,8 +66,8 @@ export class FollowingsService {
       followingId = followingId.trim();
       if (userId === followingId) return;
       const followingDelete = await this.followingModel.findOneAndDelete({
-        user: new Types.ObjectId(userId),
-        following: new Types.ObjectId(followingId),
+        user: Types.ObjectId(userId),
+        following: Types.ObjectId(followingId),
       });
       if (!followingDelete) {
         throw new BadRequestException("You haven't followed this person yet");
