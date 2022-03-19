@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Delete,
+  Param,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -67,7 +68,7 @@ export class LikesController {
   @ApiOperation({
     description: 'Lấy thông tin các lượt likes của 1 post',
   })
-  @ApiQuery({
+  @ApiParam({
     type: String,
     name: 'postId',
     required: true,
@@ -78,7 +79,7 @@ export class LikesController {
   })
   async getLikesOfPost(
     @User() user,
-    @Query('postId') postId: string,
+    @Param('postId') postId: string,
     @PaginateQuery(LIKE_OF_POSTS_PERPAGE) paginateOptions: PaginateOptions,
   ) {
     return this.likesSerivce.getLikesOfPost(
