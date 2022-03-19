@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { MediaFile, MediaFileDocument } from '@entity/mediaFile.entity';
 import { FileType } from '@entity/post.entity';
 import { MapsHelper } from '@helper/maps.helper';
-import { StringHandlersHelper } from '@helper/stringHandler.helper';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { UploadsService } from '@upload/uploads.service';
 import {
   MEDIA_FILES_PER_PAGE,
@@ -13,7 +13,7 @@ import {
 } from 'src/util/constants';
 import { File, Privacy } from 'src/util/enums';
 import { PaginationRes } from '@util/types';
-import { MediaFileDto } from '@dto/mediaFile/mediaFile.dto';
+import { MediaFileDto } from '@dto/media-file/media-file.dto';
 import { User } from '@entity/user.entity';
 import { paginate } from '@util/paginate';
 import { INSTANCE_METADATA_SYMBOL } from '@nestjs/core/injector/instance-wrapper';
@@ -70,6 +70,7 @@ export class MediaFilesService {
     type: string,
     userId: string,
     page: number,
+    perPage: number,
     groupId?: string,
   ): Promise<PaginationRes<MediaFileDto>> {
     const match = groupId
@@ -91,7 +92,7 @@ export class MediaFilesService {
       .populate('user', ['displayName', 'avatar'], User.name)
       .sort({ createdAt: -1 });
     const files = await paginate(query, {
-      perPage: MEDIA_FILES_PER_PAGE,
+      perPage: perPage,
       page: page,
     });
     return {
@@ -103,6 +104,7 @@ export class MediaFilesService {
   }
   public async getVideosWatch(
     page: number,
+    perPage: number,
     userId: string,
   ): Promise<PaginationRes<MediaFileDto>> {
     try {
@@ -169,7 +171,7 @@ export class MediaFilesService {
       const videos = await paginate(
         query,
         {
-          perPage: VIDEOS_PERPAGE,
+          perPage: perPage,
           page: page,
         },
         project,

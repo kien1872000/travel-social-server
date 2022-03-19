@@ -100,7 +100,7 @@ async function insertUser(a_users, number, dbo) {
         },
         {
           type: 'image',
-          des: 'Ảnh đại diện',
+          des: 'Ảnh bìa',
           url: bg,
         },
       ];
@@ -113,6 +113,7 @@ async function insertUser(a_users, number, dbo) {
 async function insertFollowing(a_users, follow_number, dbo) {
   let followPromise = new Promise(async function (resolve) {
     console.log('generate followings');
+    const promises = [];
     for (let i = 0; i < a_users.length; i++) {
       var a_follow = [];
       for (let j = 0; j < follow_number; j++) {
@@ -124,20 +125,25 @@ async function insertFollowing(a_users, follow_number, dbo) {
       a_follow = [...new Set(a_follow)];
       for (let j = 0; j < a_follow.length; j++) {
         var follow_id = a_follow[j];
+        if (!follow_id || !a_users[i]) continue;
+        if (follow_id.toString() === a_users[i].toString()) continue;
         var followObject = {
           user: a_users[i],
           following: follow_id,
           __v: 0,
         };
-        await dbo.collection('followings').insertOne(followObject);
-        await dbo
-          .collection('users')
-          .updateOne({ _id: a_users[i] }, { $inc: { followers: 1 } });
-        await dbo
-          .collection('users')
-          .updateOne({ _id: follow_id }, { $inc: { followings: 1 } });
+        promises.push(
+          dbo.collection('followings').insertOne(followObject),
+          dbo
+            .collection('users')
+            .updateOne({ _id: a_users[i] }, { $inc: { followings: 1 } }),
+          dbo
+            .collection('users')
+            .updateOne({ _id: follow_id }, { $inc: { followers: 1 } }),
+        );
       }
     }
+    await Promise.all(promises);
     resolve('insert followings done');
   });
   console.log(await followPromise);
@@ -231,21 +237,25 @@ async function insertHagtash(a_ht, post_date, dbo) {
       0,
       0,
     );
+    const promises = [];
     for (let h = 0; h < a_ht.length; h++) {
       var ht = a_ht[h];
-      await dbo.collection('hashtags').updateOne(
-        {
-          hashtag: ht,
-        },
-        {
-          $inc: { popular: 1 },
-          $set: { __v: 0 },
-        },
-        {
-          upsert: true,
-        },
+      promises.push(
+        await dbo.collection('hashtags').updateOne(
+          {
+            hashtag: ht,
+          },
+          {
+            $inc: { popular: 1 },
+            $set: { __v: 0 },
+          },
+          {
+            upsert: true,
+          },
+        ),
       );
     }
+    await Promise.all(promises);
     resolve('insert hashtags done.');
   });
   console.log(await hashtagPromise);
@@ -303,6 +313,7 @@ async function insertComment(
 async function insertLike(a_users, postId, post_like, post_date, dbo) {
   let likePromise = new Promise(async function (resolve) {
     var like_count = getRandomInRange(post_like + 1);
+    const promises = [];
     for (var r = 0; r < like_count; r++) {
       var likeTime = getTimeAfterTime(post_date, 0);
       var likeItem = {
@@ -312,16 +323,19 @@ async function insertLike(a_users, postId, post_like, post_date, dbo) {
         updatedAt: likeTime,
         __v: 0,
       };
-      await dbo.collection('likes').insertOne(likeItem);
-      await dbo.collection('posts').updateOne(
-        {
-          _id: postId,
-        },
-        {
-          $inc: { like: 1 },
-        },
+      promises.push(
+        dbo.collection('likes').insertOne(likeItem),
+        dbo.collection('posts').updateOne(
+          {
+            _id: postId,
+          },
+          {
+            $inc: { likes: 1 },
+          },
+        ),
       );
     }
+    await Promise.all(promises);
     resolve('insert like done.');
   });
   console.log(await likePromise);
@@ -356,29 +370,33 @@ async function insertPost(
 
         var a_post_media = [];
         var a_mediafile = [];
-        for (let k = 0; k < getRandomInRange(post_image + 1); k++) {
+        const description =
+          faker.lorem.paragraphs().toString() + a_ht.join(' ');
+        for (let k = 0; k < getRandomInRange(post_image + 1) + 1; k++) {
+          const imgUrl = getRandom(a_image);
           var post_media_obj = {
             type: 'image',
-            url: getRandom(a_image),
+            url: imgUrl,
           };
           var mediafile_obj = {
             type: 'image',
-            url: getRandom(a_image),
-            des: faker.lorem.paragraphs().toString() + a_ht.join(' '),
+            url: imgUrl,
+            des: description,
           };
           a_post_media.push(post_media_obj);
           a_mediafile.push(mediafile_obj);
         }
 
-        for (let k = 0; k < getRandomInRange(post_video + 1); k++) {
+        for (let k = 0; k < getRandomInRange(post_video + 1) + 1; k++) {
+          const videoUrl = getRandom(a_video);
           var post_media_obj = {
             type: 'video',
-            url: getRandom(a_video),
+            url: videoUrl,
           };
           var mediafile_obj = {
             type: 'video',
-            url: getRandom(a_video),
-            des: faker.lorem.paragraphs().toString() + a_ht.join(' '),
+            url: videoUrl,
+            des: description,
           };
           a_post_media.push(post_media_obj);
           a_mediafile.push(mediafile_obj);
@@ -390,7 +408,7 @@ async function insertPost(
             user: a_members[i],
             hashtags: a_ht,
             isPublic: true,
-            description: faker.lorem.paragraphs().toString() + a_ht.join(' '),
+            description: description,
             mediaFiles: a_post_media,
             likes: 0,
             comments: 0,
@@ -440,6 +458,7 @@ async function insertMediaFile(
   groupId = null,
 ) {
   let mediaFilePromise = new Promise(async function (resolve) {
+    const promises = [];
     for (var i = 0; i < a_media.length; i++) {
       var media = a_media[i];
       if (!date) date = new Date(2010, 1, 1, 4, 3, 5);
@@ -466,8 +485,9 @@ async function insertMediaFile(
       //     'updatedAt':date,
       //     '__v':0};
       // }
-      await dbo.collection('mediafiles').insertOne(mediaFileObj);
+      promises.push(dbo.collection('mediafiles').insertOne(mediaFileObj));
     }
+    await Promise.all(promises);
     resolve('insert mediafiles dones.');
   });
   console.log(await mediaFilePromise);
@@ -571,6 +591,6 @@ function removeAccent(alias) {
   return str;
 }
 function changeToGmail(mail) {
-    regex = /@.*/i;
-    return mail.replace(regex, getRandomInRange(10000).toString() + "@gmail.com");
+  regex = /@.*/i;
+  return mail.replace(regex, getRandomInRange(10000).toString() + '@gmail.com');
 }

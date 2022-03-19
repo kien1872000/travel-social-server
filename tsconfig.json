@@ -27,7 +27,7 @@
       "@user/*": ["src/module/users/*"],
       "@post/*": ["src/module/posts/*"],
       "@following/*": ["src/module/followings/*"],
-      "@mediaFile/*": ["src/module/mediaFiles/*"],
+      "@mediaFile/*": ["src/module/media-files/*"],
       "@comment/*": ["src/module/comments/*"],
       "@hashtag/*": ["src/module/hashtags/*"],
       "@like/*": ["src/module/likes/*"],

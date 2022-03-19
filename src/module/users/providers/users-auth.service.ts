@@ -29,7 +29,7 @@ import {
 } from 'src/util/constants';
 import { PasswordResetInput } from 'src/dto/user/passwordReset.dto';
 import { MailService } from 'src/mail/mail.service';
-import { StringHandlersHelper } from 'src/helper/stringHandler.helper';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { MapsHelper } from 'src/helper/maps.helper';
 @Injectable()
 export class UsersAuthService {

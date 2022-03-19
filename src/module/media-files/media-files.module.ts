@@ -2,10 +2,10 @@ import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MediaFile, MediaFileSchema } from '@entity/mediaFile.entity';
 import { MapsHelper } from '@helper/maps.helper';
-import { StringHandlersHelper } from '@helper/stringHandler.helper';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { UploadsModule } from '@upload/uploads.module';
-import { MediaFilesController } from './mediaFiles.controller';
-import { MediaFilesService } from './mediaFiles.service';
+import { MediaFilesController } from './media-files.controller';
+import { MediaFilesService } from './media-files.service';
 
 @Module({
   imports: [

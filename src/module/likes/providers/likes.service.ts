@@ -2,18 +2,21 @@ import { UserLike } from '@dto/like/like.dto';
 import { Like, LikeDocument } from '@entity/like.entity';
 import { UserDocument } from '@entity/user.entity';
 import { FollowingsService } from '@following/providers/followings.service';
-import { StringHandlersHelper } from '@helper/stringHandler.helper';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
 import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
   Post,
 } from '@nestjs/common';
+import { INSTANCE_METADATA_SYMBOL } from '@nestjs/core/injector/instance-wrapper';
 import { InjectModel } from '@nestjs/mongoose';
 import { PostsService } from '@post/providers/posts.service';
 import { UsersService } from '@user/providers/users.service';
 import { FOLLOWINGS_PER_PAGE } from '@util/constants';
 import { Interaction } from '@util/enums';
+import { paginate } from '@util/paginate';
+import { PaginateOptions, PaginationRes } from '@util/types';
 import { Model, Types } from 'mongoose';
 
 @Injectable()
@@ -61,32 +64,35 @@ export class LikesService {
   public async getLikesOfPost(
     userId: string,
     postId: string,
-    pageNumber,
-  ): Promise<UserLike[]> {
+    page: number,
+    perPage: number,
+  ): Promise<PaginationRes<UserLike>> {
     try {
-      const perPage = FOLLOWINGS_PER_PAGE;
-      const skip = !pageNumber || pageNumber <= 0 ? 0 : pageNumber * perPage;
-      const likes = await this.likeModel
-        .find({ postId: Types.ObjectId(postId) })
-        .populate('userId', ['displayName', 'avatar'])
-        .select(['-_id', '-__v', '-createdAt', '-updatedAt', '-postId'])
-        .skip(skip)
-        .limit(perPage);
+      const query = this.likeModel
+        .find({ post: Types.ObjectId(postId) })
+        .populate('user', ['displayName', 'avatar'])
+        .select(['-_id', '-__v', '-createdAt', '-updatedAt', '-postId']);
       const followedUsers = await this.followingService.getFollowingIds(userId);
-      return likes.map((like) => {
-        const user = like.user as any;
-        return {
-          userId: user._id,
-          displayName: user.displayName,
-          avatar: user?.avatar,
-          isFollowed: followedUsers.includes(user._id.toString())
-        }
-      });
+      const likes = await paginate(query, { page: page, perPage: perPage });
+      console.log(likes.items);
+
+      return {
+        items: likes.items.map((like) => {
+          const user = like.user as any;
+          return {
+            userId: user._id,
+            displayName: user.displayName,
+            avatar: user?.avatar,
+            isFollowed: followedUsers.includes(user._id.toString()),
+          };
+        }),
+        meta: likes.meta,
+      };
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
   }
-  public async dislike(userId: string, postId: string): Promise<void> {
+  public async removeLike(userId: string, postId: string): Promise<void> {
     try {
       const post = await this.postService.getPost(postId);
       if (!post) throw new BadRequestException('Post không tồn tại');

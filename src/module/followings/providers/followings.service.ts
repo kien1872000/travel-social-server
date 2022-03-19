@@ -84,6 +84,7 @@ export class FollowingsService {
   public async getFollowings(
     userId: string,
     page: number,
+    perPage: number,
     currentUser: string,
   ): Promise<PaginationRes<FollowingsOutput>> {
     try {
@@ -91,10 +92,10 @@ export class FollowingsService {
         .find({
           user: new Types.ObjectId(userId),
         })
-        .populate('user', ['displayName', 'avatar'])
+        .populate('following', ['displayName', 'avatar'])
         .select(['-_id', '-__v']);
       const [followings, followingIds] = await Promise.all([
-        paginate(query, { perPage: FOLLOWERS_PER_PAGE, page: page }),
+        paginate(query, { perPage: perPage, page: page }),
         this.getFollowingIds(currentUser),
       ]);
       return {
@@ -112,6 +113,7 @@ export class FollowingsService {
   public async getFollowers(
     userId: string,
     page: number,
+    perPage: number,
     currentUser: string,
   ): Promise<PaginationRes<FollowingsOutput>> {
     try {
@@ -123,7 +125,7 @@ export class FollowingsService {
         .populate('user', ['displayName', 'avatar'])
         .select(['-_id', '-__v']);
       const [followings, followingIds] = await Promise.all([
-        paginate(query, { perPage: FOLLOWERS_PER_PAGE, page: page }),
+        paginate(query, { perPage: perPage, page: page }),
         this.getFollowingIds(currentUser),
       ]);
       return {

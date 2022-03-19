@@ -1,6 +1,6 @@
 import { Like, LikeSchema } from '@entity/like.entity';
 import { FollowingsModule } from '@following/followings.module';
-import { StringHandlersHelper } from '@helper/stringHandler.helper';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 

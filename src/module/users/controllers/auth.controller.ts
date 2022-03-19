@@ -20,7 +20,7 @@ import { PasswordResetInput } from '@dto/user/passwordReset.dto';
 import { RefreshTokenInput } from '@dto/user/refreshToken.dto';
 import { UserSignUp } from '@dto/user/userSignup.dto';
 import { JwtPayLoad } from '@util/types';
-import { UsersAuthService } from '../providers/auth.service';
+import { UsersAuthService } from '../providers/users-auth.service';
 
 @ApiTags('Auth')
 @Controller('user/auth')

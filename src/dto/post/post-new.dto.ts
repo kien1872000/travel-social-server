@@ -1,5 +1,6 @@
 import { FileType } from '@entity/post.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { PaginationRes } from '@util/types';
 import { IsNumber, IsString } from 'class-validator';
 import { Types } from 'mongoose';
 
@@ -34,7 +35,7 @@ export class PostOutput {
 }
 export class TrendingPostOutput {
   popular: number;
-  posts: PostOutput[];
+  posts: PaginationRes<PostOutput>;
 }
 export class PostGroupInput {
   @ApiProperty({ type: Types.ObjectId, description: 'GroupID' })

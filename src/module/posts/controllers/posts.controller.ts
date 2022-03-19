@@ -25,7 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@auth/jwt-auth.guard';
 import { User } from '@decorator/user.decorator';
-import { PostInput } from '@dto/post/postNew.dto';
+import { PostInput } from '@dto/post/post-new.dto';
 import { imageOrVideoFileFilter, storage } from '@helper/storage.helper';
 import { PostLimit, Time } from '@util/enums';
 import { PostsService } from '../providers/posts.service';
@@ -140,8 +140,7 @@ export class PostsController {
   }
   @Get('posts/by-hashtag')
   @ApiQuery({
-    type: Number,
-    name: 'page',
+    type: PaginateOptions,
   })
   @ApiQuery({
     type: String,
@@ -158,7 +157,7 @@ export class PostsController {
   async getPostsByHahstag(
     @Query('time') time: string,
     @Query('hashtag') hashtag: string,
-    @Query('page') page: number,
+    @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
     @User() user,
   ) {
     if (!time) time = Time.All;
@@ -166,7 +165,8 @@ export class PostsController {
       user._id,
       time,
       hashtag.trim(),
-      page,
+      paginateOptions.page,
+      paginateOptions.perPage,
     );
   }
   @Get('post/:postId')

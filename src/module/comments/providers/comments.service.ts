@@ -7,12 +7,13 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Comment, CommentDocument } from '@entity/comment.entity';
-import { StringHandlersHelper } from '@helper/stringHandler.helper';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { PostsService } from '@post/providers/posts.service';
 import { Interaction } from '@util/enums';
 import { FOLLOWINGS_PER_PAGE, POSTS_PER_PAGE } from '@util/constants';
 import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
+import { UserCommentDto } from '@dto/comment/user-comment.dto';
 
 @Injectable()
 export class CommentsService {
@@ -120,7 +121,8 @@ export class CommentsService {
     userId: string,
     postId: string,
     page: number,
-  ): Promise<PaginationRes<Partial<CommentDocument>>> {
+    perPage: number,
+  ): Promise<PaginationRes<UserCommentDto>> {
     try {
       const post = await this.postService.getPost(postId);
       if (!post) throw new BadRequestException('Post không tồn tại');
@@ -132,10 +134,25 @@ export class CommentsService {
         .populate('userId', ['displayName', 'avatar'])
         .select(['-__v', '-updatedAt']);
 
-      return await paginate(query, {
-        perPage: POSTS_PER_PAGE,
+      const comments = await paginate(query, {
+        perPage: perPage,
         page: page,
       });
+      return {
+        items: comments.items.map((i) => {
+          const user = i.userId as any;
+          return {
+            commentId: (i as any)._id,
+            comment: i.comment,
+            userId: user._id,
+            displayName: user.displayName,
+            avatar: user.avatar,
+            replys: i.replys,
+            createdAt: (i as any).createdAt,
+          };
+        }),
+        meta: comments.meta,
+      };
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
@@ -145,7 +162,8 @@ export class CommentsService {
     userId: string,
     commentId: string,
     page: number,
-  ): Promise<PaginationRes<Partial<CommentDocument>>> {
+    perPage: number,
+  ): Promise<PaginationRes<Partial<UserCommentDto>>> {
     try {
       const cmt = await this.commentModel.findById(commentId);
       if (!cmt) throw new BadRequestException('Comment không tồn tại');
@@ -155,7 +173,24 @@ export class CommentsService {
         })
         .populate('userId', ['displayName', 'avatar'])
         .select(['-__v', '-updatedAt']);
-      return await paginate(query, { perPage: POSTS_PER_PAGE, page: page });
+      const replys = await paginate(query, {
+        perPage: perPage,
+        page: page,
+      });
+      return {
+        items: replys.items.map((i) => {
+          const user = i.userId as any;
+          return {
+            commentId: (i as any)._id,
+            comment: i.comment,
+            userId: user._id,
+            displayName: user.displayName,
+            avatar: user.avatar,
+            createdAt: (i as any).createdAt,
+          };
+        }),
+        meta: replys.meta,
+      };
     } catch (err) {
       throw new InternalServerErrorException(err);
     }

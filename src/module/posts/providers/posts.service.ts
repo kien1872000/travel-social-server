@@ -7,13 +7,13 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { PostOutput, TrendingPostOutput } from '@dto/post/postNew.dto';
+import { PostOutput, TrendingPostOutput } from '@dto/post/post-new.dto';
 import { FileType, Post, PostDocument } from '@entity/post.entity';
 import { MapsHelper } from '@helper/maps.helper';
-import { StringHandlersHelper } from '@helper/stringHandler.helper';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { FollowingsService } from '@following/providers/followings.service';
 import { HashtagsService } from '@hashtag/hashtags.service';
-import { MediaFilesService } from '@mediaFile/mediaFiles.service';
+import { MediaFilesService } from 'src/module/media-files/media-files.service';
 import {
   GROUPS_SUGGESSTION_LENGTH,
   POSTS_PER_PAGE,
@@ -31,10 +31,9 @@ export class PostsService {
     time: string,
     hashtag: string,
     page: number,
+    perPage: number,
   ): Promise<TrendingPostOutput> {
     try {
-      const limit = POSTS_PER_PAGE;
-      const skip = !page || page < 0 ? 0 : page * POSTS_PER_PAGE;
       let match;
       if (time === Time.All) {
         match = { hashtags: hashtag, isPublic: true };
@@ -52,21 +51,25 @@ export class PostsService {
           createdAt: { $gte: start, $lte: end },
         };
       }
-      const promises = await Promise.all([
-        this.postModel
-          .find(match)
-          .populate('user', ['displayName', 'avatar'])
-          .populate('group', ['name', 'backgroundImage'])
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit),
+      const query = this.postModel
+        .find(match)
+        .populate('user', ['displayName', 'avatar'])
+        .populate('group', ['name', 'backgroundImage'])
+        .sort({ createdAt: -1 });
+      const [posts, poplular] = await Promise.all([
+        paginate(query, { page: page, perPage: perPage }),
         this.postModel.countDocuments(match),
       ]);
 
-      const posts = promises[0].map((post) =>
-        this.mapsHelper.mapToPostOutPut(post, currentUser),
-      );
-      return { popular: promises[1], posts: posts };
+      return {
+        popular: poplular,
+        posts: {
+          items: posts.items.map((i) =>
+            this.mapsHelper.mapToPostOutPut(i, currentUser),
+          ),
+          meta: posts.meta,
+        },
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -215,12 +218,7 @@ export class PostsService {
     currentUser: string,
   ): Promise<PaginationRes<PostOutput>> {
     try {
-      return await this.getPosts(
-        page,
-        perPage,
-        currentUser,
-        PostLimit.Profile,
-      );
+      return await this.getPosts(page, perPage, currentUser, PostLimit.Profile);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

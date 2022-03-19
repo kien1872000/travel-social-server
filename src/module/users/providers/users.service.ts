@@ -16,8 +16,8 @@ import * as bcrypt from 'bcrypt';
 import { ChangePasswordInput } from '@dto/user/changePassword.dto';
 import { RENAMABLE_TIME, SEARCH_USER_PER_PAGE } from '@util/constants';
 import { MapsHelper } from '@helper/maps.helper';
-import { StringHandlersHelper } from '@helper/stringHandler.helper';
-import { MediaFilesService } from '@mediaFile/mediaFiles.service';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
+import { MediaFilesService } from 'src/module/media-files/media-files.service';
 import { FollowingsOutput } from '@dto/following/following.dto';
 import { FollowingsService } from '@following/providers/followings.service';
 @Injectable()

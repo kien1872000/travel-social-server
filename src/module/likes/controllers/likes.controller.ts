@@ -1,3 +1,4 @@
+import { PaginateQuery } from '@decorator/pagination.decorator';
 import { User } from '@decorator/user.decorator';
 import {
   Controller,
@@ -16,6 +17,8 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { LIKE_OF_POSTS_PERPAGE } from '@util/constants';
+import { PaginateOptions } from '@util/types';
 
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { LikesService } from '../providers/likes.service';
@@ -46,7 +49,7 @@ export class LikesController {
   //   if (!userId) userId = req.user.userId;
   //   return this.likesSerivce.getReactionStatisticByTime(userId, time);
   // }
-  @Post('/addToPost')
+  @Post('/add/to-post')
   @ApiOperation({
     description: 'thêm like mới',
   })
@@ -71,21 +74,23 @@ export class LikesController {
     description: 'id của post',
   })
   @ApiQuery({
-    type: Number,
-    name: 'page',
-    required: false,
-    description: 'page number',
+    type: PaginateOptions,
   })
   async getLikesOfPost(
     @User() user,
     @Query('postId') postId: string,
-    @Query('page') page: number,
+    @PaginateQuery(LIKE_OF_POSTS_PERPAGE) paginateOptions: PaginateOptions,
   ) {
-    return this.likesSerivce.getLikesOfPost(user._id, postId, page);
+    return this.likesSerivce.getLikesOfPost(
+      user._id,
+      postId,
+      paginateOptions.page,
+      paginateOptions.perPage,
+    );
   }
-  @Delete('/dislike')
+  @Delete('/remove-like')
   @ApiOperation({
-    description: 'dislike',
+    description: 'remove like',
   })
   @ApiQuery({
     type: String,
@@ -93,7 +98,7 @@ export class LikesController {
     required: true,
     description: 'id của post',
   })
-  async dislike(@User() user, @Query('postId') postId: string) {
-    return this.likesSerivce.dislike(user._id, postId);
+  async removeLike(@User() user, @Query('postId') postId: string) {
+    return this.likesSerivce.removeLike(user._id, postId);
   }
 }

@@ -6,13 +6,13 @@ import * as utc from 'dayjs/plugin/utc';
 import * as timezone from 'dayjs/plugin/timezone';
 import { VIET_NAM_TZ } from '@util/constants';
 import { LoginOutput } from '@dto/user/login.dto';
-import { StringHandlersHelper } from './stringHandler.helper';
+import { StringHandlersHelper } from './string-handler.helper';
 import { PostDocument } from '@entity/post.entity';
 import { MediaFileDocument } from '@entity/mediaFile.entity';
-import { MediaFileDto } from '@dto/mediaFile/mediaFile.dto';
+import { MediaFileDto } from '@dto/media-file/media-file.dto';
 import { GroupDocument } from '@entity/group.entity';
 import { FollowingDocument } from '@entity/following.entity';
-import { PostOutput } from '@dto/post/postNew.dto';
+import { PostOutput } from '@dto/post/post-new.dto';
 export class MapsHelper {
   stringhandlersHelper: StringHandlersHelper;
   constructor() {
@@ -78,9 +78,11 @@ export class MapsHelper {
     currentUserId: string,
   ): FollowingsOutput[] {
     return followings.map((i) => {
-      const user = (i.user ? i.user : i) as unknown as any;
+      let user = (i.user ? i.user : i) as unknown as any;
+      if (!user.displayName)
+        user = (i.following ? i.following : i) as unknown as any;
       return {
-        userId: user._id.toHexString(),
+        userId: user._id,
         displayName: user.displayName,
         avatar: user.avatar,
         followed: followingIds.includes(user._id.toString()),

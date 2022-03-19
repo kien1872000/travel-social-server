@@ -9,6 +9,7 @@ export const SEARCH_USER_PER_PAGE = 10;
 export const MEDIA_FILES_PER_PAGE = 8;
 export const VIDEOS_PERPAGE = 8;
 export const TRENDING_LENGTH = 10;
+export const LIKE_OF_POSTS_PERPAGE = 10;
 export const FOLLOWs_SUGGESTION_LENGTH = 40;
 export const GROUPS_SUGGESSTION_LENGTH = 40;
 export const PASSWORD_REGEX =

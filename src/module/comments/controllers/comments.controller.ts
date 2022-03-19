@@ -21,6 +21,9 @@ import {
 import { JwtAuthGuard } from '@auth/jwt-auth.guard';
 import { CommentsService } from '../providers/comments.service';
 import { User } from '@decorator/user.decorator';
+import { PaginateOptions } from '@util/types';
+import { PaginateQuery } from '@decorator/pagination.decorator';
+import { LIKE_OF_POSTS_PERPAGE, POSTS_PER_PAGE } from '@util/constants';
 
 @Controller('comment')
 @ApiTags('Comment')
@@ -29,7 +32,7 @@ import { User } from '@decorator/user.decorator';
 export class CommentsController {
   constructor(private commentService: CommentsService) {}
 
-  @Post('/addCommentToPost')
+  @Post('/add/comment-to-post')
   @ApiOperation({
     description: 'thêm comment mới',
   })
@@ -53,7 +56,7 @@ export class CommentsController {
     return this.commentService.addComment(userId, postId, comment);
   }
 
-  @Post('/addReplyToComment')
+  @Post('/add/reply-to-comment')
   @ApiOperation({
     description: 'thêm reply mới',
   })
@@ -90,7 +93,7 @@ export class CommentsController {
     return this.commentService.deleteComment(user._id, commentId);
   }
 
-  @Get('/getCommentsOfPost/:postId')
+  @Get('/comments/of-post/:postId')
   @ApiOperation({
     description: 'get comment',
   })
@@ -101,20 +104,22 @@ export class CommentsController {
     description: 'id của post',
   })
   @ApiQuery({
-    type: Number,
-    name: 'page',
-    required: false,
-    description: 'page number',
+    type: PaginateOptions,
   })
   async getListComments(
     @User() user,
     @Query('postId') postId: string,
-    @Query('page') page: number,
+    @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
   ) {
-    return this.commentService.getListCommentParent(user._id, postId, page);
+    return this.commentService.getListCommentParent(
+      user._id,
+      postId,
+      paginateOptions.page,
+      paginateOptions.perPage,
+    );
   }
 
-  @Get('/getCommentsReply/:commentId')
+  @Get('/comment-replies/:commentId')
   @ApiOperation({
     description: 'get comment reply',
   })
@@ -125,17 +130,19 @@ export class CommentsController {
     description: 'id của comment',
   })
   @ApiQuery({
-    type: Number,
-    name: 'page',
-    required: false,
-    description: 'page number',
+    type: PaginateOptions,
   })
   async getListCommentReply(
     @User() user,
     @Query('commentId') commentId: string,
-    @Query('page') page: number,
+    @PaginateQuery(LIKE_OF_POSTS_PERPAGE) paginateOptions: PaginateOptions,
   ) {
-    return this.commentService.getListCommentReply(user._id, commentId, page);
+    return this.commentService.getListCommentReply(
+      user._id,
+      commentId,
+      paginateOptions.page,
+      paginateOptions.perPage,
+    );
   }
   // @Get('/statistic')
   // @ApiOperation({
