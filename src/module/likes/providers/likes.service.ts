@@ -41,8 +41,8 @@ export class LikesService {
         throw new BadRequestException('Post không tồn tại');
       }
       const checkIfReact = await this.likeModel.findOne({
-        postId: Types.ObjectId(postId),
-        userId: Types.ObjectId(userId),
+        post: Types.ObjectId(postId),
+        user: Types.ObjectId(userId),
       });
       if (!checkIfReact) {
         const like: Partial<LikeDocument> = {
@@ -77,7 +77,6 @@ export class LikesService {
         .select(['-_id', '-__v', '-createdAt', '-updatedAt', '-postId']);
       const followedUsers = await this.followingService.getFollowingIds(userId);
       const likes = await paginate(query, { page: page, perPage: perPage });
-      console.log(likes.items);
 
       return {
         items: likes.items.map((like) => {

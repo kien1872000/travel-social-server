@@ -3,6 +3,7 @@ import {
   NotificationDto,
   NotificationMessage,
 } from '@dto/notification/notification.dto';
+import { Notification } from '@entity/notification.entity';
 import { UserDocument } from '@entity/user.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import {
@@ -64,11 +65,12 @@ export class NotificationsGateway
     @MessageBody() noti: NotificationDto,
     @ConnectedSocket() client: Socket,
   ) {
-
     const [sender, receiverSocketId] = await Promise.all([
       this.connectedSocketsService.getSocketBySocketId(client.id),
       this.connectedSocketsService.getSocketId(noti.receiver),
     ]);
+    console.log(receiverSocketId);
+
     if (sender && receiverSocketId) {
       const notification = await this.notificationsService.create({
         sender: (sender.user as any)._id.toString(),
@@ -87,7 +89,9 @@ export class NotificationsGateway
         commentId: noti.commentId,
         action: noti.action,
         createdAt: (notification as any).createdAt,
+        seen: false,
       };
+      console.log(receiverSocketId);
 
       this.server.to(receiverSocketId).emit(RECEIVE_NOTIFICATION, message);
     }

@@ -29,4 +29,5 @@ export class NotificationMessage {
   postId?: string;
   commentId?: string;
   createdAt: Date;
+  seen: boolean;
 }
