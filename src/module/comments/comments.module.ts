@@ -6,6 +6,7 @@ import { PostsModule } from '../posts/posts.module';
 import { UsersModule } from '../users/users.module';
 import { CommentsController } from './controllers/comments.controller';
 import { CommentsService } from './providers/comments.service';
+import { MapsHelper } from '@helper/maps.helper';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { CommentsService } from './providers/comments.service';
     forwardRef(() => UsersModule),
     PostsModule,
   ],
-  providers: [CommentsService, StringHandlersHelper],
+  providers: [CommentsService, StringHandlersHelper, MapsHelper],
   controllers: [CommentsController],
   exports: [CommentsService],
 })

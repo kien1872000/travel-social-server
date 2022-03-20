@@ -97,23 +97,30 @@ export class CommentsController {
   @ApiOperation({
     description: 'get comment',
   })
-  @ApiQuery({
+  @ApiParam({
     type: String,
     name: 'postId',
     required: true,
     description: 'id của post',
   })
   @ApiQuery({
+    type: String,
+    name: 'commentId',
+    required: false,
+    description: 'id cuả comment muốn gán lên đầu',
+  })
+  @ApiQuery({
     type: PaginateOptions,
   })
   async getListComments(
-    @User() user,
-    @Query('postId') postId: string,
+    @Param('postId') postId: string,
+    @Query('commentId') commentId: string,
     @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
   ) {
-    return this.commentService.getListCommentParent(
-      user._id,
+
+    return this.commentService.getComments(
       postId,
+      commentId,
       paginateOptions.page,
       paginateOptions.perPage,
     );

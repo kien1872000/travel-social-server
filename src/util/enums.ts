@@ -77,6 +77,8 @@ export enum TimeCheck {
 export enum NotificationAction {
   Like = 'like',
   Comment = 'comment',
+  ReplyComment = 'replyComment',
+  Follow = 'follow'
 }
 
 export enum Interaction {

@@ -34,6 +34,15 @@ export class AuthService {
       accessToken: this.jwtService.sign(payload),
     };
   }
+  public getPayloadFromAccessToken(token: string): JwtPayLoad {
+    try {
+      return this.jwtService.verify<JwtPayLoad>(token, {
+        secret: process.env.JWT_KEY,
+      });
+    } catch (error) {
+      return null;
+    }
+  }
   private async generateRefreshToken(userId: string): Promise<string> {
     try {
       const refreshToken = randToken.generate(16);

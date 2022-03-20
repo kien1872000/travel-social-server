@@ -13,6 +13,8 @@ import { MediaFileDto } from '@dto/media-file/media-file.dto';
 import { GroupDocument } from '@entity/group.entity';
 import { FollowingDocument } from '@entity/following.entity';
 import { PostOutput } from '@dto/post/post-new.dto';
+import { CommentDocument } from '@entity/comment.entity';
+import { UserCommentDto } from '@dto/comment/user-comment.dto';
 export class MapsHelper {
   stringhandlersHelper: StringHandlersHelper;
   constructor() {
@@ -195,6 +197,21 @@ export class MapsHelper {
       comments: post.comments,
       isCurrentUser: user._id.toString() === currentUser,
       createdAt: createdAt,
+    };
+  }
+  public mapToUserCommentDto(
+    comment: CommentDocument | CommentDocument[],
+  ): UserCommentDto {
+    const cmt = comment as unknown as CommentDocument;
+    const user = cmt.userId as any;
+    return {
+      commentId: (cmt as any)._id,
+      comment: cmt.comment,
+      userId: user._id,
+      displayName: user.displayName,
+      avatar: user.avatar,
+      replys: cmt.replys,
+      createdAt: (cmt as any).createdAt,
     };
   }
 }

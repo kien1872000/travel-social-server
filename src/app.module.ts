@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from './config/config.module';
 import { ConfigService } from './config/config.service';
+import { NotificationsModule } from './module/notifications/notifications.module';
 import { PostsModule } from './module/posts/posts.module';
 import { UsersModule } from './module/users/users.module';
 
@@ -22,6 +23,7 @@ import { UsersModule } from './module/users/users.module';
     PostsModule,
     LikesModule,
     CommentsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

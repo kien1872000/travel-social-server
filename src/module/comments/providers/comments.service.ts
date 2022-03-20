@@ -14,11 +14,13 @@ import { FOLLOWINGS_PER_PAGE, POSTS_PER_PAGE } from '@util/constants';
 import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
 import { UserCommentDto } from '@dto/comment/user-comment.dto';
+import { MapsHelper } from '@helper/maps.helper';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
+    private readonly mapsHelper: MapsHelper,
     private stringHandlersHelper: StringHandlersHelper,
     private postService: PostsService,
   ) {}
@@ -117,8 +119,7 @@ export class CommentsService {
     }
   }
 
-  public async getListCommentParent(
-    userId: string,
+  private async getListCommentParent(
     postId: string,
     page: number,
     perPage: number,
@@ -178,17 +179,7 @@ export class CommentsService {
         page: page,
       });
       return {
-        items: replys.items.map((i) => {
-          const user = i.userId as any;
-          return {
-            commentId: (i as any)._id,
-            comment: i.comment,
-            userId: user._id,
-            displayName: user.displayName,
-            avatar: user.avatar,
-            createdAt: (i as any).createdAt,
-          };
-        }),
+        items: replys.items.map((i) => this.mapsHelper.mapToUserCommentDto(i)),
         meta: replys.meta,
       };
     } catch (err) {
@@ -254,4 +245,95 @@ export class CommentsService {
   //     throw new InternalServerErrorException(error);
   //   }
   // }
+  public async getComments(
+    postId: string,
+    commentId: string,
+    page: number,
+    perPage: number,
+  ): Promise<PaginationRes<UserCommentDto>> {
+    try {
+      if (commentId) {
+        const comment = await this.commentModel.findOne({
+          _id: Types.ObjectId(commentId),
+          postId: Types.ObjectId(postId),
+        });
+
+        if (comment) {
+          commentId = comment.parentId
+            ? comment.parentId.toString()
+            : commentId;
+        } else throw new BadRequestException('Comment not found');
+        return await this.getListCommentWithCommentAtTop(
+          postId,
+          commentId,
+          page,
+          perPage,
+        );
+      }
+      return await this.getListCommentParent(postId, page, perPage);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  private async getListCommentWithCommentAtTop(
+    postId: string,
+    commentId: string,
+    page: number,
+    perPage: number,
+  ): Promise<PaginationRes<UserCommentDto>> {
+    try {
+      const post = await this.postService.getPost(postId);
+      if (!post) throw new BadRequestException('Post không tồn tại');
+      const query = this.commentModel.aggregate<CommentDocument>([
+        {
+          $lookup: {
+            from: 'users',
+            let: { user: '$userId' },
+            pipeline: [
+              { $match: { $expr: { $eq: ['$$user', '$_id'] } } },
+              { $project: { avatar: 1, displayName: 1 } },
+            ],
+            as: 'userId',
+          },
+        },
+        {
+          $match: {
+            postId: Types.ObjectId(postId),
+            parentId: null,
+          },
+        },
+        {
+          $addFields: {
+            sortId: { $eq: ['$_id', Types.ObjectId(commentId)] },
+          },
+        },
+        {
+          $sort: { sortId: -1 },
+        },
+      ]);
+
+      const project = {
+        $project: {
+          userId: { $arrayElemAt: ['$userId', 0] },
+          comment: 1,
+          replys: 1,
+          createdAt: 1,
+        },
+      };
+      const comments = await paginate(
+        query,
+        { page: page, perPage: perPage },
+        project,
+      );
+      return {
+        items: comments.items.map((i) =>
+          this.mapsHelper.mapToUserCommentDto(i),
+        ),
+        meta: comments.meta,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error);
+    }
+  }
 }
