@@ -14,6 +14,8 @@ export class Notification {
   post?: Types.ObjectId;
   @Prop({ type: Types.ObjectId, required: false, ref: 'Comment' })
   comment?: Types.ObjectId;
+  @Prop({ type: Boolean, required: true })
+  seen: boolean;
 }
 export type NotificationDocument = Notification & Document;
 export const NotificationSchema = SchemaFactory.createForClass(Notification);

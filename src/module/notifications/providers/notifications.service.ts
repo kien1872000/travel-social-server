@@ -1,4 +1,7 @@
-import { NotificationDto } from '@dto/notification/notification.dto';
+import {
+  NotificationDto,
+  NotificationMessage,
+} from '@dto/notification/notification.dto';
 import {
   Notification,
   NotificationDocument,
@@ -27,10 +30,24 @@ export class NotificationsService {
         post: postId ? Types.ObjectId(postId) : undefined,
         comment: commentId ? Types.ObjectId(commentId) : undefined,
         action: action,
+        seen: false,
       };
       return await new this.notificationModel(notification).save();
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
+  // public async getNotificationList(
+  //   receiver: string,
+  //   page: number,
+  //   perPage: number,
+  // ): Promise<NotificationMessage[]> {
+  //   try {
+  //     const query = this.notificationModel.find({
+  //       receiver: Types.ObjectId(receiver),
+  //     }).populate;
+  //   } catch (error) {
+  //     throw new InternalServerErrorException(error);
+  //   }
+  // }
 }

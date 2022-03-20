@@ -24,6 +24,11 @@ import { User } from '@decorator/user.decorator';
 import { PaginateOptions } from '@util/types';
 import { PaginateQuery } from '@decorator/pagination.decorator';
 import { LIKE_OF_POSTS_PERPAGE, POSTS_PER_PAGE } from '@util/constants';
+import {
+  AddCommentInput,
+  AddReplyInput,
+  DeleteCommentInput,
+} from '@dto/comment/user-comment.dto';
 
 @Controller('comment')
 @ApiTags('Comment')
@@ -36,46 +41,17 @@ export class CommentsController {
   @ApiOperation({
     description: 'thêm comment mới',
   })
-  @ApiQuery({
-    type: String,
-    name: 'postId',
-    required: true,
-    description: 'id của post cần comment',
-  })
-  @ApiQuery({
-    name: 'comment',
-    type: String,
-    description: 'nội dung',
-  })
-  async addComment(
-    @Request() req,
-    @Query('postId') postId: string,
-    @Query('comment') comment: string,
-  ) {
-    const userId = req.user.userId.toString();
-    return this.commentService.addComment(userId, postId, comment);
+  @ApiBody({ type: AddCommentInput })
+  async addComment(@User() user, @Body() { postId, comment }: AddCommentInput) {
+    return this.commentService.addComment(user._id, postId, comment);
   }
 
   @Post('/add/reply-to-comment')
   @ApiOperation({
     description: 'thêm reply mới',
   })
-  @ApiQuery({
-    type: String,
-    name: 'commentId',
-    required: true,
-    description: 'id của  comment',
-  })
-  @ApiQuery({
-    name: 'comment',
-    type: String,
-    description: 'nội dung',
-  })
-  async addReply(
-    @User() user,
-    @Query('commentId') commentId: string,
-    @Query('comment') comment: string,
-  ) {
+  @ApiBody({ type: AddReplyInput })
+  async addReply(@User() user, @Body() { commentId, comment }: AddReplyInput) {
     return this.commentService.addReplyToComment(user._id, commentId, comment);
   }
 
@@ -83,13 +59,10 @@ export class CommentsController {
   @ApiOperation({
     description: 'Xoa comment',
   })
-  @ApiQuery({
-    type: String,
-    name: 'commentId',
-    required: true,
-    description: 'id của comment cần xoa',
+  @ApiBody({
+    type: DeleteCommentInput,
   })
-  async deleteComment(@User() user, @Query('commentId') commentId: string) {
+  async deleteComment(@User() user, @Body() { commentId }: DeleteCommentInput) {
     return this.commentService.deleteComment(user._id, commentId);
   }
 
@@ -117,7 +90,6 @@ export class CommentsController {
     @Query('commentId') commentId: string,
     @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
   ) {
-
     return this.commentService.getComments(
       postId,
       commentId,
@@ -128,20 +100,20 @@ export class CommentsController {
 
   @Get('/comment-replies/:commentId')
   @ApiOperation({
-    description: 'get comment reply',
+    description: 'get comment replies',
   })
-  @ApiQuery({
+  @ApiParam({
     type: String,
     name: 'commentId',
     required: true,
-    description: 'id của comment',
+    description: 'id của comment muốn lấy replies',
   })
   @ApiQuery({
     type: PaginateOptions,
   })
   async getListCommentReply(
     @User() user,
-    @Query('commentId') commentId: string,
+    @Param('commentId') commentId: string,
     @PaginateQuery(LIKE_OF_POSTS_PERPAGE) paginateOptions: PaginateOptions,
   ) {
     return this.commentService.getListCommentReply(

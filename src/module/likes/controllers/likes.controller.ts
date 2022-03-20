@@ -1,5 +1,6 @@
 import { PaginateQuery } from '@decorator/pagination.decorator';
 import { User } from '@decorator/user.decorator';
+import { LikeInput } from '@dto/like/like.dto';
 import {
   Controller,
   Get,
@@ -9,6 +10,7 @@ import {
   Query,
   Delete,
   Param,
+  Body,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -54,13 +56,10 @@ export class LikesController {
   @ApiOperation({
     description: 'thêm like mới',
   })
-  @ApiQuery({
-    type: String,
-    name: 'postId',
-    required: true,
-    description: 'id của post',
+  @ApiBody({
+    type: LikeInput,
   })
-  async addLike(@User() user, @Query('postId') postId: string) {
+  async addLike(@User() user, @Body() { postId }: LikeInput) {
     return this.likesSerivce.addLikeToPost(user._id, postId);
   }
 
@@ -93,13 +92,12 @@ export class LikesController {
   @ApiOperation({
     description: 'remove like',
   })
-  @ApiQuery({
-    type: String,
-    name: 'postId',
+  @ApiBody({
+    type: LikeInput,
     required: true,
     description: 'id của post',
   })
-  async removeLike(@User() user, @Query('postId') postId: string) {
+  async removeLike(@User() user, @Body() { postId }: LikeInput) {
     return this.likesSerivce.removeLike(user._id, postId);
   }
 }
