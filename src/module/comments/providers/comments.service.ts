@@ -61,13 +61,15 @@ export class CommentsService {
     try {
       const cmt = await this.commentModel.findById(commentId);
       if (!cmt) throw new BadRequestException('Comment không tồn tại');
-      const commentToUpdateReplys = cmt.parentId ? cmt.parentId : commentId;
+      const commentToUpdateReplys = cmt.parentId
+        ? cmt.parentId
+        : Types.ObjectId(commentId);
       const [result, _, __] = await Promise.all([
         new this.commentModel({
           postId: cmt.postId,
           userId: Types.ObjectId(userId),
           parentId: commentToUpdateReplys,
-          comment,
+          comment: comment,
           replys: 0,
         }).save(),
         this.commentModel.findByIdAndUpdate(commentToUpdateReplys, {
