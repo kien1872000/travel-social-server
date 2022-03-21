@@ -89,8 +89,9 @@ export class NotificationsGateway
       createdAt: (notification as any).createdAt,
       seen: false,
     };
-    this.server.to(receiverSocketId).emit(RECEIVE_NOTIFICATION, message);
     if (receiverSocketId) {
+      console.log('message', message, 'receiver socket Id', receiverSocketId);
+
       this.server.to(receiverSocketId).emit(RECEIVE_NOTIFICATION, message);
     }
   }

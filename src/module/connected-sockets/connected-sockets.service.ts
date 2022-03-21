@@ -14,6 +14,7 @@ export class ConnectedSocketsService {
   ) {}
   public async saveSocket(socketId: string, userId: string): Promise<void> {
     try {
+      await this.socketModel.deleteMany({ user: Types.ObjectId(userId) });
       const socket: Partial<ConnectedSocketDocument> = {
         socketId: socketId,
         user: Types.ObjectId(userId),
