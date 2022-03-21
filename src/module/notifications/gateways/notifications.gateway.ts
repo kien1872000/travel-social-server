@@ -69,30 +69,27 @@ export class NotificationsGateway
       this.connectedSocketsService.getSocketBySocketId(client.id),
       this.connectedSocketsService.getSocketId(noti.receiver),
     ]);
-    console.log(receiverSocketId);
-
-    if (sender && receiverSocketId) {
-      const notification = await this.notificationsService.create({
-        sender: (sender.user as any)._id.toString(),
-        receiver: noti.receiver,
-        postId: noti.postId,
-        commentId: noti.commentId,
-        action: noti.action,
-      });
-      const message: NotificationMessage = {
-        sender: {
-          _id: (sender.user as any)._id.toString(),
-          displayName: (sender.user as unknown as UserDocument).displayName,
-          avatar: (sender.user as unknown as UserDocument).avatar,
-        },
-        postId: noti.postId,
-        commentId: noti.commentId,
-        action: noti.action,
-        createdAt: (notification as any).createdAt,
-        seen: false,
-      };
-      console.log(receiverSocketId);
-
+    const notification = await this.notificationsService.create({
+      sender: (sender.user as any)._id.toString(),
+      receiver: noti.receiver,
+      postId: noti.postId,
+      commentId: noti.commentId,
+      action: noti.action,
+    });
+    const message: NotificationMessage = {
+      sender: {
+        _id: (sender.user as any)._id.toString(),
+        displayName: (sender.user as unknown as UserDocument).displayName,
+        avatar: (sender.user as unknown as UserDocument).avatar,
+      },
+      postId: noti.postId,
+      commentId: noti.commentId,
+      action: noti.action,
+      createdAt: (notification as any).createdAt,
+      seen: false,
+    };
+    this.server.to(receiverSocketId).emit(RECEIVE_NOTIFICATION, message);
+    if (receiverSocketId) {
       this.server.to(receiverSocketId).emit(RECEIVE_NOTIFICATION, message);
     }
   }
