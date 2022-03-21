@@ -43,6 +43,7 @@ export class UserInfoInput {
 export class UserProfile {
   email: string;
   displayName: string;
+  renamableTime: Date;
   birthday: string;
   avatar: string;
   coverPhoto: string;

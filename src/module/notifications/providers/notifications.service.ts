@@ -1,14 +1,21 @@
+import { NotificationDetailOutput } from '@dto/notification/notification-detail.dto';
 import {
   NotificationDto,
   NotificationMessage,
 } from '@dto/notification/notification.dto';
+import { PostDetail } from '@dto/post/post-detail.dto';
+import { UserProfile } from '@dto/user/userProfile.dto';
 import {
   Notification,
   NotificationDocument,
 } from '@entity/notification.entity';
 import { UserDocument } from '@entity/user.entity';
+import { MediaFilesService } from '@mediaFile/media-files.service';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { PostDetailService } from '@post/providers/post-detail.service';
+import { UsersService } from '@user/providers/users.service';
+import { NotificationAction } from '@util/enums';
 import { paginate } from '@util/paginate';
 import { PaginationRes } from '@util/types';
 import { Model, Types } from 'mongoose';
@@ -18,6 +25,8 @@ export class NotificationsService {
   constructor(
     @InjectModel(Notification.name)
     private readonly notificationModel: Model<NotificationDocument>,
+    private readonly postDetailService: PostDetailService,
+    private readonly usersService: UsersService,
   ) {}
   public async create({
     sender,
@@ -69,6 +78,57 @@ export class NotificationsService {
           };
         }),
         meta: notifications.meta,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async showNotificationDetail(
+    page: number,
+    perPage: number,
+    currentUser: string,
+    notificationId: string,
+  ): Promise<NotificationDetailOutput> {
+    try {
+      const notification = await this.notificationModel.findOneAndUpdate(
+        {
+          _id: Types.ObjectId(notificationId),
+        },
+        { seen: true },
+      );
+      if (!notification) return;
+      let data: UserProfile | PostDetail;
+      switch (notification.action) {
+        case NotificationAction.Like:
+          data = await this.postDetailService.getPostDetail(
+            page,
+            perPage,
+            currentUser,
+            notification.post.toString(),
+          );
+          break;
+        case NotificationAction.Comment:
+        case NotificationAction.ReplyComment:
+          data = await this.postDetailService.getPostDetail(
+            page,
+            perPage,
+            currentUser,
+            notification.post.toString(),
+            notification.comment.toString(),
+          );
+          break;
+        case NotificationAction.Follow:
+          data = await this.usersService.getUserProfile(
+            currentUser,
+            currentUser,
+          );
+          break;
+        default:
+          return;
+      }
+      return {
+        action: notification.action,
+        data: data,
       };
     } catch (error) {
       throw new InternalServerErrorException(error);

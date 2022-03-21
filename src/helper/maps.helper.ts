@@ -61,6 +61,7 @@ export class MapsHelper {
     return {
       email: user.email,
       displayName: user.displayName,
+      renamableTime: user.renamableTime,
       birthday: birthday,
       avatar: user.avatar,
       coverPhoto: user.coverPhoto,

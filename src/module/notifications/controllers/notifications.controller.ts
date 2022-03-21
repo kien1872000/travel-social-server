@@ -1,14 +1,16 @@
 import { JwtAuthGuard } from '@auth/jwt-auth.guard';
 import { PaginateQuery } from '@decorator/pagination.decorator';
 import { User } from '@decorator/user.decorator';
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { NotificationDetailInput } from '@dto/notification/notification-detail.dto';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { NOTIFICATIONS_PERPAGE } from '@util/constants';
+import { NOTIFICATIONS_PERPAGE, POSTS_PER_PAGE } from '@util/constants';
 import { PaginateOptions } from '@util/types';
 import { NotificationsService } from '../providers/notifications.service';
 
@@ -31,6 +33,25 @@ export class NotificationsController {
       user._id,
       paginateOptions.page,
       paginateOptions.perPage,
+    );
+  }
+  @ApiOperation({
+    description:
+      'Xem chi tiết thông báo, các thông báo như like, comment sẽ có phân trang của list comment',
+  })
+  @ApiQuery({ type: PaginateOptions })
+  @ApiBody({ type: NotificationDetailInput })
+  @Post('see/notification-detail')
+  async seeNotificationDetail(
+    @User() user,
+    @Body() { notificationId }: NotificationDetailInput,
+    @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
+  ) {
+    return this.notificationsService.showNotificationDetail(
+      paginateOptions.page,
+      paginateOptions.perPage,
+      user._id,
+      notificationId,
     );
   }
 }

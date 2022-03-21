@@ -9,6 +9,8 @@ import { MediaFilesModule } from '../media-files/media-files.module';
 import { PostsController } from './controllers/posts.controller';
 import { PostsService } from './providers/posts.service';
 import { LikesModule } from '@like/likes.module';
+import { PostDetailService } from './providers/post-detail.service';
+import { CommentsModule } from '@comment/comments.module';
 
 @Module({
   imports: [
@@ -22,9 +24,15 @@ import { LikesModule } from '@like/likes.module';
     HashtagsModule,
     LikesModule,
     FollowingsModule,
+    forwardRef(() => CommentsModule),
   ],
   controllers: [PostsController],
-  providers: [PostsService, StringHandlersHelper, MapsHelper],
-  exports: [PostsService],
+  providers: [
+    PostsService,
+    StringHandlersHelper,
+    MapsHelper,
+    PostDetailService,
+  ],
+  exports: [PostsService, PostDetailService],
 })
-export class PostsModule { }
+export class PostsModule {}
