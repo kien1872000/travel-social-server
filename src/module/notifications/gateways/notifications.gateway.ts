@@ -78,6 +78,7 @@ export class NotificationsGateway
       action: noti.action,
     });
     const message: NotificationMessage = {
+      notificationId: (notification as any)._id.toString(),
       sender: {
         _id: (sender.user as any)._id.toString(),
         displayName: (sender.user as unknown as UserDocument).displayName,
@@ -89,6 +90,8 @@ export class NotificationsGateway
       createdAt: (notification as any).createdAt,
       seen: false,
     };
+    console.log(notification);
+
     if (receiverSocketId) {
       console.log('message', message, 'receiver socket Id', receiverSocketId);
 

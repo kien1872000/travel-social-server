@@ -62,9 +62,12 @@ export class NotificationsService {
         .populate('sender', ['displayName', 'avatar'])
         .sort({ createdAt: -1 });
       const notifications = await paginate(query, { page: page, perPage });
+      console.log(notifications);
+
       return {
         items: notifications.items.map((i) => {
           return {
+            notificationId: (i as any)._id.toString(),
             sender: {
               _id: (i.sender as any)._id,
               displayName: (i.sender as unknown as UserDocument).displayName,
@@ -80,6 +83,8 @@ export class NotificationsService {
         meta: notifications.meta,
       };
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException(error);
     }
   }

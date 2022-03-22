@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Notification {
-  @Prop({ type: Types.ObjectId, required: true })
+  @Prop({ type: Types.ObjectId, required: true, ref: 'User' })
   sender: Types.ObjectId;
   @Prop({ type: Types.ObjectId, required: true })
   receiver: Types.ObjectId;

@@ -20,6 +20,7 @@ export class NotificationDto {
   action: string;
 }
 export class NotificationMessage {
+  notificationId: string;
   sender: {
     _id: string;
     displayName: string;
