@@ -27,8 +27,6 @@ export class NotificationMessage {
     avatar: string;
   };
   action: string;
-  postId?: string;
-  commentId?: string;
   createdAt: Date;
   seen: boolean;
 }

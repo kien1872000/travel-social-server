@@ -24,7 +24,7 @@ const SEND_NOTIFICATION = 'sendNotification';
 const RECEIVE_NOTIFICATION = 'receiveNotification';
 @WebSocketGateway({
   cors: {
-    // origin: 'http://127.0.0.1:5500',
+    //origin: 'http://127.0.0.1:5500',
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     credentials: true,
@@ -70,6 +70,7 @@ export class NotificationsGateway
       this.connectedSocketsService.getSocketBySocketId(client.id),
       this.connectedSocketsService.getSocketId(noti.receiver),
     ]);
+    if ((sender.user as any)._id.toString() === noti.receiver) return;
     const notification = await this.notificationsService.create({
       sender: (sender.user as any)._id.toString(),
       receiver: noti.receiver,
@@ -84,8 +85,6 @@ export class NotificationsGateway
         displayName: (sender.user as unknown as UserDocument).displayName,
         avatar: (sender.user as unknown as UserDocument).avatar,
       },
-      postId: noti.postId,
-      commentId: noti.commentId,
       action: noti.action,
       createdAt: (notification as any).createdAt,
       seen: false,
