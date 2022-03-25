@@ -2,6 +2,7 @@ import {
   ConnectedSocket,
   ConnectedSocketSchema,
 } from '@entity/connected-socket.entity';
+import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConnectedSocketsService } from './connected-sockets.service';
@@ -15,7 +16,7 @@ import { ConnectedSocketsService } from './connected-sockets.service';
       },
     ]),
   ],
-  providers: [ConnectedSocketsService],
+  providers: [ConnectedSocketsService, StringHandlersHelper],
   exports: [ConnectedSocketsService],
 })
 export class ConnectedSocketsModule {}

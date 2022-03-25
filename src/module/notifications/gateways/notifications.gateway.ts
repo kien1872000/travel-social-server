@@ -26,7 +26,6 @@ const RECEIVE_NOTIFICATION = 'receiveNotification';
   cors: {
     //origin: 'http://127.0.0.1:5500',
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
     credentials: true,
   },
 })
@@ -42,10 +41,10 @@ export class NotificationsGateway
   server: Server;
   async handleConnection(client: Socket, ..._args: any[]) {
     try {
-      console.log(`client ${client.id} connected`);
       const token = client.handshake.auth.token;
       const payload = this.authService.getPayloadFromAccessToken(token);
       if (payload && payload.isActive) {
+        console.log(`client ${client.id} connected`);
         await this.connectedSocketsService.saveSocket(
           client.id,
           payload._id.toString(),

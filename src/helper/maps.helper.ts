@@ -15,6 +15,9 @@ import { FollowingDocument } from '@entity/following.entity';
 import { PostOutput } from '@dto/post/post-new.dto';
 import { CommentDocument } from '@entity/comment.entity';
 import { UserCommentDto } from '@dto/comment/user-comment.dto';
+import { RecentChatDocument } from '@entity/recent-chat.entity';
+import { RecentChatOutput } from '@dto/chat/recent-chat.dto';
+import { ChatDocument } from '@entity/chat.entity';
 export class MapsHelper {
   stringhandlersHelper: StringHandlersHelper;
   constructor() {
@@ -213,6 +216,27 @@ export class MapsHelper {
       avatar: user.avatar,
       replys: cmt.replys,
       createdAt: (cmt as any).createdAt,
+    };
+  }
+  public mapToRecentChatOutput(
+    currentUser: string,
+    recentChat: RecentChatDocument,
+  ): RecentChatOutput {
+    const chat = recentChat.chat as unknown as ChatDocument;
+    const participants = recentChat.participants.filter(
+      (i) => (i as any)._id.toString() !== currentUser,
+    );
+
+    const partner =
+      participants.length > 0 ? participants[0] : recentChat.participants[0];
+    return {
+      partnerId: (partner as any)._id.toString(),
+      displayName: (partner as unknown as UserDocument).displayName,
+      avatar: (partner as unknown as UserDocument).avatar,
+      isCurrentUserMessage: chat.owner.toString() === currentUser,
+      message: chat.message,
+      createdAt: (chat as any).createdAt,
+      seen: chat.seen,
     };
   }
 }

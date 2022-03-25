@@ -1,3 +1,4 @@
+import { ChatsModule } from '@chat/chat.module';
 import { CommentsModule } from '@comment/comments.module';
 import { LikesModule } from '@like/likes.module';
 import { Module } from '@nestjs/common';
@@ -24,6 +25,7 @@ import { UsersModule } from './module/users/users.module';
     LikesModule,
     CommentsModule,
     NotificationsModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
