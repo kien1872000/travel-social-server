@@ -65,7 +65,7 @@ export class ChatsService {
         })
         .populate('chat', ['owner', 'createdAt', 'message', 'seen'])
         .populate('participants', ['displayName', 'avatar'])
-        .sort('-createdAt');
+        .sort('-updatedAt');
       const recentChats = await paginate(query, {
         page: page,
         perPage: perPage,
