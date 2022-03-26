@@ -91,13 +91,19 @@ export class ChatsService {
         Types.ObjectId(currentUser),
         Types.ObjectId(partnerId),
       ];
-      await this.chatModel.updateMany(
-        {
-          participants: { $all: participants },
-        },
-        { $set: { seen: true } },
-        { new: true },
-      );
+      const mostRecentChat = (
+        await this.chatModel
+          .find({
+            participants: { $all: participants },
+            seen: false,
+          })
+          .sort('-createdAt')
+          .limit(1)
+      )[0];
+      const seen = currentUser !== mostRecentChat?.owner.toString();
+      await this.chatModel.findByIdAndUpdate(mostRecentChat?._id, {
+        seen: seen,
+      });
       const query = this.chatModel
         .find({
           participants: { $all: participants },
@@ -106,7 +112,7 @@ export class ChatsService {
       const inbox = await paginate(query, { page: page, perPage: perPage });
       return {
         items: inbox.items.map((i) =>
-          this.mapsHelper.mapToInboxOutput(currentUser, i),
+          this.mapsHelper.mapToInboxOutput(currentUser, i, seen),
         ),
         meta: inbox.meta,
       };

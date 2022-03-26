@@ -243,6 +243,7 @@ export class MapsHelper {
   public mapToInboxOutput(
     currentUser: string,
     inbox: ChatDocument,
+    seen: boolean,
   ): InboxOutput {
     return {
       userId: (inbox.owner as any)._id.toString(),
@@ -251,7 +252,7 @@ export class MapsHelper {
       isCurrentUserMessage: (inbox.owner as any)._id.toString() === currentUser,
       message: inbox.message,
       createdAt: (inbox as any).createdAt,
-      seen: inbox.seen,
+      seen: seen,
     };
   }
 }
