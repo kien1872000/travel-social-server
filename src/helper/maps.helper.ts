@@ -18,6 +18,7 @@ import { UserCommentDto } from '@dto/comment/user-comment.dto';
 import { RecentChatDocument } from '@entity/recent-chat.entity';
 import { RecentChatOutput } from '@dto/chat/recent-chat.dto';
 import { ChatDocument } from '@entity/chat.entity';
+import { InboxOutput } from '@dto/chat/chat.dto';
 export class MapsHelper {
   stringhandlersHelper: StringHandlersHelper;
   constructor() {
@@ -237,6 +238,20 @@ export class MapsHelper {
       message: chat.message,
       createdAt: (chat as any).createdAt,
       seen: chat.seen,
+    };
+  }
+  public mapToInboxOutput(
+    currentUser: string,
+    inbox: ChatDocument,
+  ): InboxOutput {
+    return {
+      userId: (inbox.owner as any)._id.toString(),
+      displayName: (inbox.owner as unknown as UserDocument).displayName,
+      avatar: (inbox.owner as unknown as UserDocument).avatar,
+      isCurrentUserMessage: (inbox.owner as any)._id.toString() === currentUser,
+      message: inbox.message,
+      createdAt: (inbox as any).createdAt,
+      seen: inbox.seen,
     };
   }
 }

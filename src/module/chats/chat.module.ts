@@ -5,6 +5,8 @@ import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { Controller, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UsersService } from '@user/providers/users.service';
+import { UsersModule } from '@user/users.module';
 import { ChatsController } from './controllers/chats.controller';
 import { ChatGateway } from './gateways/chats.gateway';
 import { ChatsService } from './providers/chats.service';
@@ -22,6 +24,7 @@ import { ChatsService } from './providers/chats.service';
       },
     ]),
     ConnectedSocketsModule,
+    UsersModule,
   ],
   providers: [ChatsService, ChatGateway, StringHandlersHelper, MapsHelper],
   controllers: [ChatsController],

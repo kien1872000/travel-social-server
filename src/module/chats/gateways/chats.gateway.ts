@@ -11,6 +11,7 @@ import {
   MessageBody,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { UsersService } from '@user/providers/users.service';
 import { Server, Socket } from 'socket.io';
 
 const JOIN_ROOM = 'joinRoom';
@@ -29,6 +30,7 @@ export class ChatGateway {
   constructor(
     private readonly stringHandlersHelper: StringHandlersHelper,
     private readonly chatsService: ChatsService,
+    private readonly usersService: UsersService,
     private readonly connectedSocketsService: ConnectedSocketsService,
   ) {}
   @WebSocketServer()
@@ -47,11 +49,13 @@ export class ChatGateway {
       const partnerSocket = (
         await this.server.to(partnerSocketId).fetchSockets()
       )[0];
-      console.log(partnerSocket.id);
-
       client.join(room);
-      partnerSocket.join(room);
-      console.log(`${client.id} and ${partnerSocket.id} have joined ${room}`);
+      if (partnerSocket) {
+        partnerSocket.join(room);
+        console.log(`${client.id} and ${partnerSocket.id} have joined ${room}`);
+      } else {
+        console.log(`${client.id} has joined ${room}`);
+      }
 
       this.server.to(room).emit(RECEIVE_ROOM, room);
     } catch (error) {
@@ -61,6 +65,7 @@ export class ChatGateway {
   @SubscribeMessage(LEAVE_ROOM)
   leaveRoom(@MessageBody() room: string, @ConnectedSocket() client: Socket) {
     client.leave(room);
+    console.log(`client ${client.id} left the room ${room}`);
   }
   @SubscribeMessage(SEND_MESSAGE)
   async sendMessage(
@@ -73,12 +78,12 @@ export class ChatGateway {
     const partnerSocketId = partnerSocket[0] ? partnerSocket[0].id : client.id;
     const [user, partner] = await Promise.all([
       this.connectedSocketsService.getSocketBySocketId(client.id),
-      this.connectedSocketsService.getSocketBySocketId(partnerSocketId),
+      this.usersService.findUserById(chatMessage.partnerId),
     ]);
     console.log(`client: ${client.id}---partner: ${partnerSocketId}`);
 
     const owner = (user.user as any)._id.toString();
-    const participants = [(user.user as any)._id, (partner.user as any)._id];
+    const participants = [(user.user as any)._id, (partner as any)._id];
     await this.chatsService.saveChat(owner, participants, chatMessage.message);
     const message = {
       message: chatMessage.message,
@@ -88,9 +93,9 @@ export class ChatGateway {
         avatar: (user.user as unknown as UserDocument).avatar,
       },
       receiver: {
-        _id: (partner.user as any)._id.toString(),
-        displayName: (partner.user as unknown as UserDocument).displayName,
-        avatar: (partner.user as unknown as UserDocument).avatar,
+        _id: (partner as any)._id.toString(),
+        displayName: partner.displayName,
+        avatar: partner.avatar,
       },
     };
     console.log('message', message);
