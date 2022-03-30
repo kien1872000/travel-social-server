@@ -357,4 +357,27 @@ export class UsersService {
       throw new InternalServerErrorException(error);
     }
   }
+  public async getUserAvatars(users: string[]): Promise<string[]> {
+    try {
+      const userAvatars = await this.userModel
+        .find({
+          _id: { $in: users.map((i) => Types.ObjectId(i)) },
+        })
+        .select('avatar');
+      return userAvatars.map((i) => i.avatar);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async getUsers(users: string[]): Promise<UserDocument[]> {
+    try {
+      return await this.userModel
+        .find({
+          _id: { $in: users.map((i) => Types.ObjectId(i)) },
+        })
+        .select('name');
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
 }

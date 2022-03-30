@@ -1,20 +1,13 @@
 export class ChatMessageInput {
-  room: string;
   message: string;
-  partnerId: string;
+  chatGroupId: string;
 }
 export class ChatMessageOutput {
   message: string;
-  sender: {
-    _id: string;
-    displayName: string;
-    avatar: string;
-  };
-  receiver: {
-    _id: string;
-    displayName: string;
-    avatar: string;
-  };
+  userId: string;
+  displayName: string;
+  avatar: string;
+  createdAt: Date;
 }
 export class InboxOutput {
   userId: string;
@@ -23,5 +16,4 @@ export class InboxOutput {
   isCurrentUserMessage: boolean;
   message: string;
   createdAt: string;
-  seen: boolean;
 }

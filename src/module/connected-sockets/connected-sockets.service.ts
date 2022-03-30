@@ -41,6 +41,20 @@ export class ConnectedSocketsService {
       throw new InternalServerErrorException(error);
     }
   }
+  public async getSockets(
+    userIds: string[],
+  ): Promise<ConnectedSocketDocument[]> {
+    try {
+      const sockets = await this.socketModel
+        .find({
+          user: { $in: userIds.map((i) => Types.ObjectId(i)) },
+        })
+        .select(['socketId', 'user']);
+      return sockets;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
   public async getSocketBySocketId(
     socketId: string,
   ): Promise<ConnectedSocketDocument> {

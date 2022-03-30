@@ -1,7 +1,8 @@
 export class RecentChatOutput {
-  partnerId: string;
-  displayName: string;
-  avatar: string;
+  chatGroupId: string;
+  chatId: string;
+  chatGroupName: string;
+  image: string | string[];
   isCurrentUserMessage: boolean;
   message: string;
   createdAt: string;

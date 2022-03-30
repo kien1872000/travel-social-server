@@ -1,6 +1,8 @@
+import { ChatGroupsService } from '@chat/providers/chat-groups.service';
+import { ChatRoomsService } from '@chat/providers/chat-rooms.service';
 import { ChatsService } from '@chat/providers/chats.service';
 import { ConnectedSocketsService } from '@connected-socket/connected-sockets.service';
-import { ChatMessageInput } from '@dto/chat/chat.dto';
+import { ChatMessageInput, ChatMessageOutput } from '@dto/chat/chat.dto';
 import { UserDocument } from '@entity/user.entity';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { InternalServerErrorException } from '@nestjs/common';
@@ -12,94 +14,54 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { UsersService } from '@user/providers/users.service';
+import { corsOptions } from '@util/constants';
 import { Server, Socket } from 'socket.io';
 
-const JOIN_ROOM = 'joinRoom';
-const LEAVE_ROOM = 'leaveRoom';
+
 const SEND_MESSAGE = 'sendMessage';
-const RECEIVE_ROOM = 'receiveRoom';
 const RECEIVE_MESSAGE = 'receiveMessage';
 @WebSocketGateway({
-  cors: {
-    // origin: 'http://127.0.0.1:5500',
-    origin: 'http://localhost:3000',
-    credentials: true,
-  },
+  cors: corsOptions,
 })
 export class ChatGateway {
   constructor(
-    private readonly stringHandlersHelper: StringHandlersHelper,
     private readonly chatsService: ChatsService,
-    private readonly usersService: UsersService,
+    private readonly chatGroupsService: ChatGroupsService,
+    private readonly chatRoomsService: ChatRoomsService,
     private readonly connectedSocketsService: ConnectedSocketsService,
   ) {}
   @WebSocketServer()
   server: Server;
-  @SubscribeMessage(JOIN_ROOM)
-  async joinRoom(
-    @MessageBody() partnerId: string,
-    @ConnectedSocket() client: Socket,
-  ) {
-    try {
-      //   const room = 'room#' + this.stringHandlersHelper.generateString(12);
-      const room = 'room123';
-      const partnerSocketId = await this.connectedSocketsService.getSocketId(
-        partnerId,
-      );
-      const partnerSocket = (
-        await this.server.to(partnerSocketId).fetchSockets()
-      )[0];
-      client.join(room);
-      if (partnerSocket) {
-        partnerSocket.join(room);
-        console.log(`${client.id} and ${partnerSocket.id} have joined ${room}`);
-      } else {
-        console.log(`${client.id} has joined ${room}`);
-      }
 
-      this.server.to(room).emit(RECEIVE_ROOM, room);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-  @SubscribeMessage(LEAVE_ROOM)
-  leaveRoom(@MessageBody() room: string, @ConnectedSocket() client: Socket) {
-    client.leave(room);
-    console.log(`client ${client.id} left the room ${room}`);
-  }
   @SubscribeMessage(SEND_MESSAGE)
   async sendMessage(
     @MessageBody() chatMessage: ChatMessageInput,
     @ConnectedSocket() client: Socket,
   ) {
-    const partnerSocket = (
-      await this.server.to(chatMessage.room).fetchSockets()
-    ).filter((i) => i.id !== client.id);
-    const partnerSocketId = partnerSocket[0] ? partnerSocket[0].id : client.id;
-    const [user, partner] = await Promise.all([
+    const [participants, room, socket] = await Promise.all([
+      this.chatGroupsService.getParticipants(chatMessage.chatGroupId),
+      this.chatRoomsService.getRoom(chatMessage.chatGroupId),
       this.connectedSocketsService.getSocketBySocketId(client.id),
-      this.usersService.findUserById(chatMessage.partnerId),
     ]);
-    console.log(`client: ${client.id}---partner: ${partnerSocketId}`);
+    const currentUserId = (socket.user as any)._id.toString();
 
-    const owner = (user.user as any)._id.toString();
-    const participants = [(user.user as any)._id, (partner as any)._id];
-    await this.chatsService.saveChat(owner, participants, chatMessage.message);
-    const message = {
+    if (!participants.includes(currentUserId)) return;
+    console.log(`client: ${client.id}---partner: ${chatMessage.chatGroupId}`);
+
+    const chat = await this.chatsService.saveChat(
+      currentUserId,
+      chatMessage.chatGroupId,
+      chatMessage.message,
+    );
+    const message: ChatMessageOutput = {
       message: chatMessage.message,
-      sender: {
-        _id: (user.user as any)._id.toString(),
-        displayName: (user.user as unknown as UserDocument).displayName,
-        avatar: (user.user as unknown as UserDocument).avatar,
-      },
-      receiver: {
-        _id: (partner as any)._id.toString(),
-        displayName: partner.displayName,
-        avatar: partner.avatar,
-      },
+      userId: currentUserId,
+      displayName: (socket.user as unknown as UserDocument).displayName,
+      avatar: (socket.user as unknown as UserDocument).avatar,
+      createdAt: (chat as any).createdAt,
     };
     console.log('message', message);
 
-    this.server.to(chatMessage.room).emit(RECEIVE_MESSAGE, message);
+    this.server.to(room).emit(RECEIVE_MESSAGE, message);
   }
 }

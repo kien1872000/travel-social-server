@@ -16,6 +16,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { corsOptions } from '@util/constants';
 import { Server, Socket } from 'socket.io';
 import { ConnectedSocketsService } from 'src/module/connected-sockets/connected-sockets.service';
 import { NotificationsService } from '../providers/notifications.service';
@@ -23,43 +24,17 @@ import { NotificationsService } from '../providers/notifications.service';
 const SEND_NOTIFICATION = 'sendNotification';
 const RECEIVE_NOTIFICATION = 'receiveNotification';
 @WebSocketGateway({
-  cors: {
-    // origin: 'http://127.0.0.1:5500',
-    origin: 'http://localhost:3000',
-    credentials: true,
-  },
+  cors: corsOptions,
 })
-export class NotificationsGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class NotificationsGateway {
   constructor(
     private readonly authService: AuthService,
     private readonly notificationsService: NotificationsService,
     private readonly connectedSocketsService: ConnectedSocketsService,
   ) {}
+
   @WebSocketServer()
   server: Server;
-  async handleConnection(client: Socket, ..._args: any[]) {
-    try {
-      const token = client.handshake.auth.token;
-      const payload = this.authService.getPayloadFromAccessToken(token);
-      if (payload && payload.isActive) {
-        console.log(`client ${client.id} connected`);
-        await this.connectedSocketsService.saveSocket(
-          client.id,
-          payload._id.toString(),
-        );
-      } else {
-        client.disconnect();
-      }
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-  async handleDisconnect(client: Socket) {
-    await this.connectedSocketsService.deleteSocket(client.id);
-    console.log(`client ${client.id} disconnected`);
-  }
   @SubscribeMessage(SEND_NOTIFICATION)
   async sendNotification(
     @MessageBody() noti: NotificationDto,

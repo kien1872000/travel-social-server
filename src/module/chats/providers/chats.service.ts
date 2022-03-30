@@ -1,13 +1,22 @@
+import { CreateChatGroupDto } from '@dto/chat/chat-group.dto';
 import { InboxOutput } from '@dto/chat/chat.dto';
 import { RecentChatOutput } from '@dto/chat/recent-chat.dto';
+import { ChatGroup, ChatGroupDocument } from '@entity/chat-group.entity';
 import { Chat, ChatDocument } from '@entity/chat.entity';
 import { RecentChat, RecentChatDocument } from '@entity/recent-chat.entity';
 import { MapsHelper } from '@helper/maps.helper';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { UsersService } from '@user/providers/users.service';
 import { paginate } from '@util/paginate';
 import { PaginationRes } from '@util/types';
 import { Model, Types } from 'mongoose';
+import { ChatGroupsService } from './chat-groups.service';
 
 @Injectable()
 export class ChatsService {
@@ -16,36 +25,31 @@ export class ChatsService {
     @InjectModel(RecentChat.name)
     private readonly recentChatModel: Model<RecentChatDocument>,
     private readonly mapsHelper: MapsHelper,
+    private readonly usersService: UsersService,
+    private readonly chatGroupsService: ChatGroupsService,
   ) {}
+
   public async saveChat(
     owner: string,
-    participants: Types.ObjectId[],
+    chatGroup: string,
     message: string,
   ): Promise<ChatDocument> {
     try {
-      const query = {
-        $and: [
-          { participants: { $all: participants } },
-          { participants: { $size: participants.length } },
-        ],
-      };
-      const [chat, recentChat] = await Promise.all([
-        new this.chatModel({
-          participants: participants,
-          message: message,
-          owner: Types.ObjectId(owner),
-          seen: false,
-        }).save(),
-        this.recentChatModel.findOne(query),
-      ]);
-      const update = {
-        chat: chat._id,
-        participants: participants,
-      };
-      await this.recentChatModel.findByIdAndUpdate(recentChat?._id, update, {
-        upsert: true,
-        new: true,
-      });
+      const chat = await new this.chatModel({
+        chatGroup: Types.ObjectId(chatGroup),
+        message: message,
+        owner: Types.ObjectId(owner),
+        seen: false,
+      }).save();
+
+      const recentChat = await this.recentChatModel.findOneAndUpdate(
+        { chatGroup: chatGroup },
+        { chatGroup: chatGroup, chat: chat._id },
+        {
+          upsert: true,
+          new: true,
+        },
+      );
       console.log('recent chat', recentChat);
 
       return chat;
@@ -56,7 +60,7 @@ export class ChatsService {
   public async getRecentChats(
     user: string,
     page: number,
-    perPage,
+    perPage: number,
   ): Promise<PaginationRes<RecentChatOutput>> {
     try {
       const query = this.recentChatModel
@@ -64,7 +68,7 @@ export class ChatsService {
           participants: Types.ObjectId(user),
         })
         .populate('chat', ['owner', 'createdAt', 'message', 'seen'])
-        .populate('participants', ['displayName', 'avatar'])
+        .populate('chatGroup', ['name', 'image'])
         .sort('-updatedAt');
       const recentChats = await paginate(query, {
         page: page,
@@ -82,37 +86,37 @@ export class ChatsService {
   }
   public async getInbox(
     currentUser: string,
-    partnerId: string,
+    chatGroupId: string,
     page: number,
     perPage: number,
-  ): Promise<any> {
+  ): Promise<PaginationRes<InboxOutput>> {
     try {
-      const participants = [
-        Types.ObjectId(currentUser),
-        Types.ObjectId(partnerId),
-      ];
-      const mostRecentChat = (
-        await this.chatModel
-          .find({
-            participants: { $all: participants },
-            seen: false,
-          })
-          .sort('-createdAt')
-          .limit(1)
-      )[0];
-      const seen = currentUser !== mostRecentChat?.owner.toString();
-      await this.chatModel.findByIdAndUpdate(mostRecentChat?._id, {
-        seen: seen,
-      });
+      const [chatGroup, recentChat] = await Promise.all([
+        this.chatGroupsService.getChatGroupById(chatGroupId),
+        this.recentChatModel.findOne({
+          chatGroup: Types.ObjectId(chatGroupId),
+        }),
+      ]);
+      const participants = chatGroup.participants.map((i) => i.toString());
+      if (!participants.includes(currentUser)) {
+        throw new BadRequestException('you have not joined the chat group');
+      }
+      const chatId = recentChat.chat.toString();
+
       const query = this.chatModel
         .find({
-          participants: { $all: participants },
+          chatGroup: Types.ObjectId(chatGroupId),
         })
         .sort('-createdAt');
-      const inbox = await paginate(query, { page: page, perPage: perPage });
+      const [inbox, _] = await Promise.all([
+        paginate(query, { page: page, perPage: perPage }),
+        this.chatModel.findByIdAndUpdate(chatId, {
+          $addtoSet: { seenUsers: Types.ObjectId(currentUser) },
+        }),
+      ]);
       return {
         items: inbox.items.map((i) =>
-          this.mapsHelper.mapToInboxOutput(currentUser, i, seen),
+          this.mapsHelper.mapToInboxOutput(currentUser, i),
         ),
         meta: inbox.meta,
       };

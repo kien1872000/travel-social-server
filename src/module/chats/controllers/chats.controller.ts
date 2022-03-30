@@ -2,9 +2,11 @@ import { JwtAuthGuard } from '@auth/jwt-auth.guard';
 import { ChatsService } from '@chat/providers/chats.service';
 import { PaginateQuery } from '@decorator/pagination.decorator';
 import { User } from '@decorator/user.decorator';
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { CreateChatGroupDto } from '@dto/chat/chat-group.dto';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -12,6 +14,7 @@ import {
 } from '@nestjs/swagger';
 import { CHATS_PERPAGE } from '@util/constants';
 import { PaginateOptions } from '@util/types';
+import { userInfo } from 'os';
 
 @Controller('chat')
 @ApiBearerAuth()
@@ -32,23 +35,29 @@ export class ChatsController {
       paginateOptions.perPage,
     );
   }
-  @Get('inbox/:partnerId')
+  @Get('inbox/:chatGroupId')
   @ApiQuery({ type: PaginateOptions })
   @ApiParam({
     type: String,
-    name: 'partnerId',
-    description: 'id của user muốn xem inbox',
+    name: 'chatGroupId',
+    description: 'id của group chat muốn xem inbox',
   })
   async getInbox(
     @User() user,
-    @Param('partnerId') partnerId,
-    @PaginateQuery(CHATS_PERPAGE) paginateOptions: PaginateOptions,
+    @Param('chatGroupId') chatGroupId,
+    @PaginateQuery(CHATS_PERPAGE)
+    paginateOptions: PaginateOptions,
   ) {
     return this.chatsService.getInbox(
       user._id,
-      partnerId,
+      chatGroupId,
       paginateOptions.page,
       paginateOptions.perPage,
     );
+  }
+  @Post('create/chat-group')
+  @ApiBody({ type: CreateChatGroupDto })
+  async createChatGroup(@User() user, createChatGroupDto: CreateChatGroupDto) {
+    // return this.chatsService.createChatGroup()
   }
 }

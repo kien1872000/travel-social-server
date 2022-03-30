@@ -19,6 +19,7 @@ import { RecentChatDocument } from '@entity/recent-chat.entity';
 import { RecentChatOutput } from '@dto/chat/recent-chat.dto';
 import { ChatDocument } from '@entity/chat.entity';
 import { InboxOutput } from '@dto/chat/chat.dto';
+import { ChatGroupDocument } from '@entity/chat-group.entity';
 export class MapsHelper {
   stringhandlersHelper: StringHandlersHelper;
   constructor() {
@@ -224,26 +225,22 @@ export class MapsHelper {
     recentChat: RecentChatDocument,
   ): RecentChatOutput {
     const chat = recentChat.chat as unknown as ChatDocument;
-    const participants = recentChat.participants.filter(
-      (i) => (i as any)._id.toString() !== currentUser,
-    );
-
-    const partner =
-      participants.length > 0 ? participants[0] : recentChat.participants[0];
+    const chatGroup = recentChat.chatGroup as unknown as ChatGroupDocument;
+    const seenUsers = chat.seenUsers.map((i) => i.toString());
     return {
-      partnerId: (partner as any)._id.toString(),
-      displayName: (partner as unknown as UserDocument).displayName,
-      avatar: (partner as unknown as UserDocument).avatar,
+      chatId: (chat as any)._id.toString(),
+      chatGroupId: (chatGroup as any)._id.toString(),
+      chatGroupName: chatGroup.name,
+      image: chatGroup.image,
       isCurrentUserMessage: chat.owner.toString() === currentUser,
       message: chat.message,
       createdAt: (chat as any).createdAt,
-      seen: chat.seen,
+      seen: seenUsers.includes(currentUser),
     };
   }
   public mapToInboxOutput(
     currentUser: string,
     inbox: ChatDocument,
-    seen: boolean,
   ): InboxOutput {
     return {
       userId: (inbox.owner as any)._id.toString(),
@@ -252,7 +249,6 @@ export class MapsHelper {
       isCurrentUserMessage: (inbox.owner as any)._id.toString() === currentUser,
       message: inbox.message,
       createdAt: (inbox as any).createdAt,
-      seen: seen,
     };
   }
 }

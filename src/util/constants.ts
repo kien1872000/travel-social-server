@@ -21,3 +21,9 @@ export const EMAIL_REGEX = /^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/;
 export const RENAMABLE_TIME = 30;
 export const ACTIVATION_CODE_EXPIRE = 7;
 export const RESET_PASSWORD_TOKEN_EXPIRE = 3;
+
+export const corsOptions = {
+  origin: 'http://127.0.0.1:5500',
+  //origin: 'http://localhost:3000',
+  credentials: true,
+};
