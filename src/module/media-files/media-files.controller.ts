@@ -57,37 +57,16 @@ export class MediaFilesController {
   }
   @Get('videos/watch')
   @ApiQuery({ type: PaginateOptions })
-  @ApiQuery({ type: Number, name: 'page', required: false })
   @ApiOperation({
     description:
       'Video cho phần watch, lấy theo thứ tự gần đây nhất, của cả app',
   })
   async getVideosWatch(
     @PaginateQuery(VIDEOS_PERPAGE) paginateOptions: PaginateOptions,
-    @User() user,
   ) {
     return this.mediaFilesService.getVideosWatch(
       paginateOptions.page,
       paginateOptions.perPage,
-      user._id,
     );
   }
-  // @Get('files/in/group/:groupId')
-  // @ApiParam({ type: String, name: 'groupId' })
-  // @ApiQuery({ type: Number, name: 'pageNumber' })
-  // @ApiQuery({ type: String, enum: File, name: 'type' })
-  // @ApiOperation({ description: 'Lấy file trong group' })
-  // async getMediaFilesGroup(
-  //   @Request() req,
-  //   @Param('groupId') groupId: string,
-  //   @Query('pageNumber') pageNumber: number,
-  //   @Query('type') fileType: string,
-  // ) {
-  //   return this.mediaFilesService.getFilesInGroup(
-  //     fileType,
-  //     req.user.userId,
-  //     pageNumber,
-  //     groupId,
-  //   );
-  // }
 }

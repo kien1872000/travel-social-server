@@ -51,21 +51,7 @@ export class MediaFilesService {
       throw new InternalServerErrorException(error);
     }
   }
-  // public async getFilesInGroup(
-  //   type: string,
-  //   userId: string,
-  //   pageNumber: number,
-  //   groupId: string,
-  // ): Promise<MediaFileDto[]> {
-  //   try {
-  //     if (!this.groupsService.IsMemberOfGroup(userId, groupId)) {
-  //       throw new BadRequestException('You have not joined the group');
-  //     }
-  //     return await this.getFiles(type, userId, pageNumber, groupId);
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
+
   public async getFiles(
     type: string,
     userId: string,
@@ -105,78 +91,14 @@ export class MediaFilesService {
   public async getVideosWatch(
     page: number,
     perPage: number,
-    userId: string,
   ): Promise<PaginationRes<MediaFileDto>> {
     try {
-      page = !page || page < 0 ? 0 : page;
-      const query = this.fileModel.aggregate<MediaFileDocument>([
-        {
-          $lookup: {
-            from: 'users',
-            let: { user: '$user' },
-            pipeline: [
-              { $match: { $expr: { $eq: ['$$user', '$_id'] } } },
-              { $project: { avatar: 1, displayName: 1 } },
-            ],
-            as: 'user',
-          },
-        },
-        // {
-        //   $lookup: {
-        //     from: 'groups',
-        //     let: {
-        //       group: '$group',
-        //     },
-        //     pipeline: [
-        //       {
-        //         $match: {
-        //           $expr: {
-        //             $and: [
-        //               { $eq: ['$_id', '$$group'] },
-        //               {
-        //                 $or: [
-        //                   { $eq: ['$admin_id', Types.ObjectId(userId)] },
-        //                   { $in: [Types.ObjectId(userId), '$member'] },
-        //                   { $eq: ['$privacy', Privacy.Public] },
-        //                 ],
-        //               },
-        //             ],
-        //           },
-        //         },
-        //       },
-        //       { $project: { name: 1, backgroundImage: 1 } },
-        //     ],
-        //     as: 'group',
-        //   },
-        // },
-        {
-          $match: {
-            type: File.Video,
-          },
-        },
-        {
-          $sort: { createdAt: -1 },
-        },
-      ]);
-      const project = {
-        $project: {
-          user: { $arrayElemAt: ['$user', 0] },
-          // group: { $arrayElemAt: ['$group', 0] },
-          type: 1,
-          des: 1,
-          url: 1,
-          createdAt: 1,
-        },
-      };
-      const videos = await paginate(
-        query,
-        {
-          perPage: perPage,
-          page: page,
-        },
-        project,
-      );
-
+      const query = this.fileModel
+        .find({ type: File.Video })
+        .select(['-__v', '-updatedAt', '-_id'])
+        .populate('user', ['displayName', 'avatar'])
+        .sort('-createdAt');
+      const videos = await paginate(query, { page: page, perPage });
       return {
         items: videos.items.map((i) =>
           this.mapsHelper.mapToMediaFileDto(i as unknown as MediaFileDocument),
