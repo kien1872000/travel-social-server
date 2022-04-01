@@ -2,12 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 
-export class JwtPayLoad {
+export interface JwtPayLoad {
   _id: Types.ObjectId;
   isActive: boolean;
 }
 
-export class PaginationRes<T> {
+export interface PaginationRes<T> {
   items: T[];
   meta: {
     perPage: number;

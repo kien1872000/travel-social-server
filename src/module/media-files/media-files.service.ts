@@ -106,7 +106,7 @@ export class MediaFilesService {
         meta: videos.meta,
       };
     } catch (error) {
-      console.log(error);
+      throw new InternalServerErrorException(error);
     }
   }
 }

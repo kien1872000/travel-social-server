@@ -1,4 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Coordinate } from './place.entity';
+
+@Schema()
+export class Address {
+  @Prop({ type: String, required: true })
+  name: string;
+  @Prop({ type: String, required: true })
+  formattedAddress: string;
+  @Prop({ type: Coordinate, required: true })
+  coordinate: Coordinate;
+}
 
 @Schema({ timestamps: true })
 export class User {
@@ -10,6 +21,8 @@ export class User {
   isActive: boolean;
   @Prop({ type: String, required: true })
   displayName: string;
+  @Prop({ type: Address })
+  address: Address;
   @Prop({ type: String, required: true })
   displayNameNoAccent: string;
   @Prop({ type: Date })

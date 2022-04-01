@@ -1,3 +1,4 @@
+import { Address } from '@entity/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDateString,
@@ -40,13 +41,14 @@ export class UserInfoInput {
   sex: number;
 }
 
-export class UserProfile {
+export interface UserProfile {
   email: string;
   displayName: string;
   renamableTime: Date;
   birthday: string;
   avatar: string;
   coverPhoto: string;
+  address: Address;
   sex: string;
   bio: string;
   sexNumber: number;

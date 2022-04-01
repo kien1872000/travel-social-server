@@ -8,7 +8,7 @@ export class AddUsersToRoomDto {
   @IsNotEmpty()
   userIds: string[];
 }
-export class AddUsersToRoomOutput {
+export interface AddUsersToRoomOutput {
   adder: {
     _id: string;
     displayName: string;

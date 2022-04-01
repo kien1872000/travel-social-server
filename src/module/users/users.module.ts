@@ -17,6 +17,8 @@ import { UsersAuthController } from './controllers/auth.controller';
 import { UsersController } from './controllers/users.controller';
 import { UsersAuthService } from './providers/users-auth.service';
 import { UsersService } from './providers/users.service';
+import { UsersAddressService } from './providers/users-address.service';
+import { UsersAddressController } from './controllers/users-address.controller';
 
 @Module({
   imports: [
@@ -39,8 +41,14 @@ import { UsersService } from './providers/users.service';
     MediaFilesModule,
     forwardRef(() => FollowingsModule),
   ],
-  controllers: [UsersAuthController, UsersController],
-  providers: [UsersService, UsersAuthService, StringHandlersHelper, MapsHelper],
+  controllers: [UsersAuthController, UsersController, UsersAddressController],
+  providers: [
+    UsersService,
+    UsersAuthService,
+    StringHandlersHelper,
+    MapsHelper,
+    UsersAddressService,
+  ],
   exports: [UsersService, UsersAuthService],
 })
 export class UsersModule {}

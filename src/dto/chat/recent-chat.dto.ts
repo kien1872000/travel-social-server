@@ -1,4 +1,4 @@
-export class RecentChatOutput {
+export interface RecentChatOutput {
   chatGroupId: string;
   chatId: string;
   chatGroupName: string;

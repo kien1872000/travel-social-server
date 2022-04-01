@@ -66,11 +66,8 @@ export class PostsController {
     }
     if (!files || files.length <= 0)
       throw new BadRequestException('Images or videos files required');
-    return this.postsService.createNewPost(
-      user._id,
-      postPrivateInput.description,
-      files,
-    );
+    postPrivateInput.mediaFiles = files;
+    return this.postsService.createNewPost(user._id, postPrivateInput);
   }
 
   @Get('search/posts')

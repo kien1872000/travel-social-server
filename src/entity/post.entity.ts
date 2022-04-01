@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Address } from './user.entity';
 export class FileType {
   @Prop({ type: String })
   url: string;
@@ -27,6 +28,8 @@ export class Post {
   comments: number;
   @Prop({ type: Number, required: true })
   likes: number;
+  @Prop({ type: Address, required: true })
+  place: Address;
 }
 export type PostDocument = Post & Document;
 export const PostSchema = SchemaFactory.createForClass(Post);

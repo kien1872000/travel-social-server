@@ -28,16 +28,6 @@ export enum ReactionType {
   Angry = 'angry',
 }
 
-export enum ReactionTypeQuery {
-  All = 'all',
-  Like = 'like',
-  Haha = 'haha',
-  Love = 'love',
-  Sad = 'sad',
-  Wow = 'wow',
-  Angry = 'angry',
-}
-
 export enum SearchTypes {
   All = 'all',
   Users = 'users',
@@ -78,7 +68,7 @@ export enum NotificationAction {
   Like = 'like',
   Comment = 'comment',
   ReplyComment = 'replyComment',
-  Follow = 'follow'
+  Follow = 'follow',
 }
 
 export enum Interaction {

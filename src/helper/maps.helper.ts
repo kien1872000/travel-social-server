@@ -69,6 +69,7 @@ export class MapsHelper {
       renamableTime: user.renamableTime,
       birthday: birthday,
       avatar: user.avatar,
+      address: user.address,
       coverPhoto: user.coverPhoto,
       bio: user.bio,
       sex: sex,
@@ -189,6 +190,7 @@ export class MapsHelper {
     const groupBackgroundImage = (post.group as unknown as GroupDocument)
       ?.backgroundImage;
     return {
+      place: post.place,
       liked: liked,
       postId: postId,
       groupId: groupId?.toString(),

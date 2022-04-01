@@ -31,10 +31,10 @@ import { UsersService } from '../providers/users.service';
 @ApiTags('User')
 @ApiBearerAuth()
 @Controller('user')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
   @Get('profile')
-  @UseGuards(JwtAuthGuard)
   @ApiQuery({
     type: String,
     name: 'userId',
@@ -49,7 +49,6 @@ export class UsersController {
     return this.usersService.getUserProfile(user._id, userId);
   }
   @Put('change-password')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: 'Đổi mật khẩu' })
   @ApiBody({ type: ChangePasswordInput })
   async changePassword(
@@ -59,14 +58,12 @@ export class UsersController {
     return this.usersService.updateNewPassword(user._id, changePasswordInput);
   }
   @Put('update-info')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: 'Cập nhật thông tin' })
   @ApiBody({ type: UserInfoInput })
   async updateInfo(@Body() userInfoInput: UserInfoInput, @User() user) {
     return this.usersService.updateInfo(user._id, userInfoInput);
   }
   @Post('upload/profile-image')
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -106,7 +103,6 @@ export class UsersController {
     );
   }
   @Get('search/users')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ description: 'Tìm kiếm người dùng theo tên' })
   @ApiQuery({
     type: String,

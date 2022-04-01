@@ -7,7 +7,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { PostOutput, TrendingPostOutput } from '@dto/post/post-new.dto';
+import {
+  PostInput,
+  PostOutput,
+  TrendingPostOutput,
+} from '@dto/post/post-new.dto';
 import { FileType, Post, PostDocument } from '@entity/post.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
@@ -24,8 +28,21 @@ import { Interaction, PostLimit, Privacy, Time } from 'src/util/enums';
 import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
 import { LikesService } from '@like/providers/likes.service';
+import { Address } from '@entity/user.entity';
 @Injectable()
 export class PostsService {
+  constructor(
+    @InjectModel(Post.name)
+    private readonly postModel: Model<PostDocument>,
+    private readonly stringHandlersHelper: StringHandlersHelper,
+    private readonly likesService: LikesService,
+    private readonly mapsHelper: MapsHelper,
+    @Inject(forwardRef(() => MediaFilesService))
+    private readonly filesService: MediaFilesService,
+    private readonly followingsService: FollowingsService,
+    private readonly hashtagsService: HashtagsService,
+  ) {}
+
   // Chỉ dùng cho trending
   public async getPostsByHashtag(
     currentUser: string,
@@ -81,62 +98,50 @@ export class PostsService {
       throw new InternalServerErrorException(error);
     }
   }
-  constructor(
-    @InjectModel(Post.name)
-    private readonly postModel: Model<PostDocument>,
-    private readonly stringHandlersHelper: StringHandlersHelper,
-    private readonly likesService: LikesService,
-    private readonly mapsHelper: MapsHelper,
-    @Inject(forwardRef(() => MediaFilesService))
-    private readonly filesService: MediaFilesService,
-    private readonly followingsService: FollowingsService,
-    private readonly hashtagsService: HashtagsService,
-  ) {}
 
   public async createNewPost(
     userId: string,
-    description: string,
-    imageOrVideos: Express.Multer.File[],
-    groupId?: string,
+    postInput: PostInput,
   ): Promise<PostOutput> {
     try {
       const isPublic = true;
-      // if (groupId) {
-      //   const group = await this.groupsService.getGroup(groupId, userId);
-      //   if (!group)
-      //     throw new BadRequestException('You have not joined the group');
-      //   else isPublic = Privacy.Public === group.privacy;
-      // }
       const fileUrlPromises = [];
-      for (const item of imageOrVideos) {
+      for (const item of postInput.mediaFiles) {
         const filePath = `post/imageOrVideos/${userId}${this.stringHandlersHelper.generateString(
           15,
         )}`;
         const promise = this.filesService.saveFile(
           item,
           filePath,
-          description,
+          postInput.description,
           userId,
-          groupId,
         );
         fileUrlPromises.push(promise);
       }
 
       const fileUrls: FileType[] = await Promise.all(fileUrlPromises);
-      const hashtags =
-        this.stringHandlersHelper.getHashtagFromString(description);
+      const hashtags = this.stringHandlersHelper.getHashtagFromString(
+        postInput.description,
+      );
+      const place: Address = {
+        name: postInput.name,
+        formattedAddress: postInput.formattedAddress,
+        coordinate: {
+          latitude: postInput.latitude,
+          longitude: postInput.longitude,
+        },
+      };
       const newPost: Partial<PostDocument> = {
-        group: Types.ObjectId(groupId),
+        place: place,
         user: Types.ObjectId(userId),
         isPublic: isPublic,
-        description: description.trim(),
+        description: postInput.description.trim(),
         mediaFiles: fileUrls,
         hashtags: hashtags,
         likes: 0,
         comments: 0,
       };
       let postId;
-      if (!groupId) delete newPost.group;
       if (isPublic) {
         const promises = await Promise.all([
           new this.postModel(newPost).save(),
@@ -200,26 +205,6 @@ export class PostsService {
       throw new InternalServerErrorException(err);
     }
   }
-  // private async getPostsGroup(
-  //   pageNumber: number,
-  //   currentUser: string,
-  //   groupId: string,
-  // ): Promise<PostOutput[]> {
-  //   try {
-  //     if (groupId) {
-  //       if (!(await this.groupsService.IsMemberOfGroup(currentUser, groupId)))
-  //         throw new BadRequestException('You have not joined the group');
-  //     }
-  //     return await this.getPosts(
-  //       pageNumber,
-  //       currentUser,
-  //       PostLimit.Group,
-  //       groupId,
-  //     );
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
   private async getPostsProfile(
     page: number,
     perPage: number,
@@ -429,42 +414,6 @@ export class PostsService {
       throw new InternalServerErrorException(error);
     }
   }
-  // public async getMostPostsGroupIds(userId: string): Promise<any[]> {
-  //   try {
-  //     const time = this.stringHandlersHelper.getStartAndEndDate(VIET_NAM_TZ);
-  //     const start = new Date(time[0]);
-  //     const end = new Date(time[1]);
-  //     const groupIds = await this.postModel.aggregate([
-  //       {
-  //         $match: {
-  //           createdAt: { $gte: start, $lte: end },
-  //           user: Types.ObjectId(userId),
-  //           group: { $exists: true },
-  //         },
-  //       },
-  //       { $group: { _id: { group: '$group' }, totalPosts: { $sum: 1 } } },
-  //       { $sort: { totalPosts: -1 } },
-  //       {
-  //         $project: {
-  //           groupId: '$_id.group',
-  //           totalPosts: 1,
-  //           _id: 0,
-  //         },
-  //       },
-  //       { $limit: GROUPS_SUGGESSTION_LENGTH },
-  //     ]);
-  //     return groupIds;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
-  // public async deleteManyPostsOfGroup(groupId: string): Promise<void> {
-  //   try {
-  //     await this.postModel.deleteMany({ group: Types.ObjectId(groupId) });
-  //   } catch (err) {
-  //     throw new InternalServerErrorException(err);
-  //   }
-  // }
   public async getPostIdsInProfile(userId: string): Promise<string[]> {
     try {
       const posts = await this.postModel

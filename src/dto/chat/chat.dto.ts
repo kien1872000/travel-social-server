@@ -1,15 +1,15 @@
-export class ChatMessageInput {
+export interface ChatMessageInput {
   message: string;
   chatGroupId: string;
 }
-export class ChatMessageOutput {
+export interface ChatMessageOutput {
   message: string;
   userId: string;
   displayName: string;
   avatar: string;
   createdAt: Date;
 }
-export class InboxOutput {
+export interface InboxOutput {
   userId: string;
   displayName: string;
   avatar: string;
