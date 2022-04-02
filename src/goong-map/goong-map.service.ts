@@ -59,7 +59,7 @@ export class GoongMapService {
       .send()
       .then((response) => {
         const result = response.body?.result;
-        if (!result) return result;
+        if (!result) throw new Error('place not found');
         return {
           placeId: result.place_id,
           formattedAddress: result.formatted_address,

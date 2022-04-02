@@ -44,35 +44,28 @@ export class PlacesService {
     userId: string,
     postId: string,
     count: number,
-    updatePlaceDto: UpdatePlaceDto,
+    placeId: string,
   ): Promise<void> {
     try {
       const [userPlace, place] = await Promise.all([
-        this.userPlacesService.updateUserPlace(
-          userId,
-          updatePlaceDto.placeId,
-          postId,
-        ),
-        this.findPlaceById(updatePlaceDto.placeId),
+        this.userPlacesService.updateUserPlace(userId, placeId, postId),
+        this.findPlaceById(placeId),
       ]);
-
       if (!place) {
-        const place: Partial<PlaceDocument> = {
-          _id: updatePlaceDto.placeId,
-          name: updatePlaceDto.name,
-          formattedAddress: updatePlaceDto.formattedAddress,
+        const placeDetail = await this.goongmapService.placeDetail(placeId);
+        const newPlace: Place = {
+          _id: placeDetail.placeId,
+          formattedAddress: placeDetail.formattedAddress,
+          name: placeDetail.name,
+          coordinate: placeDetail.coordinate,
           visits: 1,
-          coordinate: {
-            latitude: updatePlaceDto.latitude,
-            longitude: updatePlaceDto.longitude,
-          },
         };
-        await new this.placeModel(place).save();
+        await new this.placeModel(newPlace).save();
         return;
       }
       if (!userPlace) {
         await this.placeModel.findOneAndUpdate(
-          { _id: updatePlaceDto.placeId },
+          { _id: placeId },
           {
             $inc: { visits: count },
           },

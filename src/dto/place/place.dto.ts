@@ -1,15 +1,8 @@
-import { UpdateAddressDto } from '@dto/user/userProfile.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdatePlaceDto extends UpdateAddressDto {
+export class UpdatePlaceDto {
   @ApiProperty({ type: String, required: true, description: 'id cuả địa điểm' })
   @IsString()
   @IsNotEmpty()

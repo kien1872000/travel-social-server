@@ -80,23 +80,3 @@ export class ProfileImageOutPut {
   coverPhoto: string;
 }
 
-export class UpdateAddressDto {
-  @ApiProperty({ type: String, required: true, description: 'tên địa điểm' })
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-  @ApiProperty({ type: String, required: true, description: 'địa chỉ đầy đủ' })
-  @IsString()
-  @IsNotEmpty()
-  formattedAddress: string;
-  @ApiProperty({ type: Number, required: true })
-  @Type(() => Number)
-  @IsNumber()
-  @IsNotEmpty()
-  latitude: number;
-  @ApiProperty({ type: Number, required: true })
-  @Type(() => Number)
-  @IsNumber()
-  @IsNotEmpty()
-  longitude: number;
-}

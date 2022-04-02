@@ -19,6 +19,7 @@ import { UsersAuthService } from './providers/users-auth.service';
 import { UsersService } from './providers/users.service';
 import { UsersAddressService } from './providers/users-address.service';
 import { UsersAddressController } from './controllers/users-address.controller';
+import { GoongMapModule } from 'src/goong-map/goong-map.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { UsersAddressController } from './controllers/users-address.controller';
     MailModule,
     MediaFilesModule,
     forwardRef(() => FollowingsModule),
+    GoongMapModule
   ],
   controllers: [UsersAuthController, UsersController, UsersAddressController],
   providers: [

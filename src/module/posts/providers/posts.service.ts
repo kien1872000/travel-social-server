@@ -133,23 +133,16 @@ export class PostsService {
         likes: 0,
         comments: 0,
       };
-      const updatePlaceDto: UpdatePlaceDto = {
-        placeId: postInput.placeId,
-        formattedAddress: postInput.formattedAddress,
-        name: postInput.name,
-        latitude: postInput.latitude,
-        longitude: postInput.longitude,
-      };
+
       const [post, _] = await Promise.all([
         new this.postModel(newPost).save(),
         this.hashtagsService.addHastags(hashtags),
       ]);
-
       await this.placesServive.updateVisits(
         userId,
         post._id.toString(),
         1,
-        updatePlaceDto,
+        postInput.placeId,
       );
     } catch (error) {
       throw new InternalServerErrorException(error);
