@@ -155,20 +155,6 @@ export class PostsService {
       throw new InternalServerErrorException(err);
     }
   }
-  public getPostsWithLimit(
-    page: number,
-    perPage: number,
-    currentUser: string,
-    limit: PostLimit,
-  ): Promise<PaginationRes<PostOutput>> {
-    switch (limit) {
-      case PostLimit.Profile:
-        return this.getPostsProfile(page, perPage, currentUser);
-      case PostLimit.NewsFeed:
-      default:
-        return this.getPostsNewFeed(page, perPage, currentUser);
-    }
-  }
 
   public async updateTotalPostCommentsOrLikes(
     postId: string,
@@ -191,29 +177,8 @@ export class PostsService {
       throw new InternalServerErrorException(err);
     }
   }
-  private async getPostsProfile(
-    page: number,
-    perPage: number,
-    currentUser: string,
-  ): Promise<PaginationRes<PostOutput>> {
-    try {
-      return await this.getPosts(page, perPage, currentUser, PostLimit.Profile);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-  private async getPostsNewFeed(
-    page: number,
-    perPage: number,
-    currentUser: string,
-  ): Promise<PaginationRes<PostOutput>> {
-    try {
-      return await this.getPosts(page, perPage, currentUser);
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-  private async getPosts(
+
+  public async getPosts(
     page: number,
     perPage: number,
     currentUser: string,
@@ -243,7 +208,11 @@ export class PostsService {
     const query = this.postModel
       .find(match)
       .populate('user', ['displayName', 'avatar'])
-      .populate('place', ['name', 'formattedAddress', 'coordinate', 'visits'])
+      .populate(
+        'place',
+        ['name', 'formattedAddress', 'coordinate', 'visits'],
+        Place.name,
+      )
       .select(['-mediaFiles._id'])
       .sort({ createdAt: -1 });
     const postsResult = await paginate<PostDocument>(query, {

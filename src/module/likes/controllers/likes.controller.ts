@@ -79,14 +79,9 @@ export class LikesController {
   async getLikesOfPost(
     @User() user,
     @Param('postId') postId: string,
-    @PaginateQuery(LIKE_OF_POSTS_PERPAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(LIKE_OF_POSTS_PERPAGE) { page, perPage }: PaginateOptions,
   ) {
-    return this.likesSerivce.getLikesOfPost(
-      user._id,
-      postId,
-      paginateOptions.page,
-      paginateOptions.perPage,
-    );
+    return this.likesSerivce.getLikesOfPost(user._id, postId, page, perPage);
   }
   @Delete('/remove-like')
   @ApiOperation({

@@ -111,7 +111,8 @@ export class PostsController {
     description: 'Lấy post trong trang cá nhân, newsfeed',
   })
   async getPosts(
-    @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(POSTS_PER_PAGE) { page, perPage }: PaginateOptions,
+
     @Query('postLimit') postLimit: PostLimit,
     @Query('userId') userId: string,
     @User() user,
@@ -119,12 +120,7 @@ export class PostsController {
     if (userId) {
       if (postLimit !== PostLimit.Profile) return;
     } else userId = user._id;
-    return this.postsService.getPostsWithLimit(
-      paginateOptions.page,
-      paginateOptions.perPage,
-      userId,
-      postLimit,
-    );
+    return this.postsService.getPosts(page, perPage, userId, postLimit);
   }
   @Get('posts/by-hashtag')
   @ApiQuery({
@@ -145,7 +141,7 @@ export class PostsController {
   async getPostsByHahstag(
     @Query('time') time: string,
     @Query('hashtag') hashtag: string,
-    @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(POSTS_PER_PAGE) { page, perPage }: PaginateOptions,
     @User() user,
   ) {
     if (!time) time = Time.All;
@@ -153,8 +149,8 @@ export class PostsController {
       user._id,
       time,
       hashtag.trim(),
-      paginateOptions.page,
-      paginateOptions.perPage,
+      page,
+      perPage,
     );
   }
   @Get('post/:postId')

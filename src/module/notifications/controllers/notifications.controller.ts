@@ -27,12 +27,12 @@ export class NotificationsController {
   @Get()
   async getNotificationList(
     @User() user,
-    @PaginateQuery(NOTIFICATIONS_PERPAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(NOTIFICATIONS_PERPAGE) { page, perPage }: PaginateOptions,
   ) {
     return this.notificationsService.getNotificationList(
       user._id,
-      paginateOptions.page,
-      paginateOptions.perPage,
+      page,
+      perPage,
     );
   }
   @ApiOperation({
@@ -45,11 +45,11 @@ export class NotificationsController {
   async seeNotificationDetail(
     @User() user,
     @Body() { notificationId }: NotificationDetailInput,
-    @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(POSTS_PER_PAGE) { page, perPage }: PaginateOptions,
   ) {
     return this.notificationsService.showNotificationDetail(
-      paginateOptions.page,
-      paginateOptions.perPage,
+      page,
+      perPage,
       user._id,
       notificationId,
     );

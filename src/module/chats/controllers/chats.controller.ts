@@ -26,14 +26,10 @@ export class ChatsController {
   @ApiQuery({ type: PaginateOptions })
   @ApiOperation({ description: 'Lấy danh sách chat với người khác' })
   async getChatsList(
-    @PaginateQuery(CHATS_PERPAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(CHATS_PERPAGE) { page, perPage }: PaginateOptions,
     @User() user,
   ) {
-    return this.chatsService.getRecentChats(
-      user._id,
-      paginateOptions.page,
-      paginateOptions.perPage,
-    );
+    return this.chatsService.getRecentChats(user._id, page, perPage);
   }
   @Get('inbox/:chatGroupId')
   @ApiQuery({ type: PaginateOptions })
@@ -46,14 +42,9 @@ export class ChatsController {
     @User() user,
     @Param('chatGroupId') chatGroupId,
     @PaginateQuery(CHATS_PERPAGE)
-    paginateOptions: PaginateOptions,
+    { page, perPage }: PaginateOptions,
   ) {
-    return this.chatsService.getInbox(
-      user._id,
-      chatGroupId,
-      paginateOptions.page,
-      paginateOptions.perPage,
-    );
+    return this.chatsService.getInbox(user._id, chatGroupId, page, perPage);
   }
   @Post('create/chat-group')
   @ApiBody({ type: CreateChatGroupDto })

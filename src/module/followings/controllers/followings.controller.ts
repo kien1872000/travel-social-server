@@ -64,13 +64,13 @@ export class FollowingsController {
   async getFollowings(
     @User() user,
     @Query('userId') userId: string,
-    @PaginateQuery(FOLLOWINGS_PER_PAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(FOLLOWINGS_PER_PAGE) { page, perPage }: PaginateOptions,
   ) {
     if (!userId) userId = user._id;
     return this.followingsService.getFollowings(
       userId,
-      paginateOptions.page,
-      paginateOptions.perPage,
+      page,
+      perPage,
       user._id,
     );
   }
@@ -91,14 +91,9 @@ export class FollowingsController {
   async getFollowers(
     @User() user,
     @Query('userId') userId: string,
-    @PaginateQuery(FOLLOWERS_PER_PAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(FOLLOWERS_PER_PAGE) { page, perPage }: PaginateOptions,
   ) {
     if (!userId) userId = user._id;
-    return this.followingsService.getFollowers(
-      userId,
-      paginateOptions.page,
-      paginateOptions.perPage,
-      user._id,
-    );
+    return this.followingsService.getFollowers(userId, page, perPage, user._id);
   }
 }

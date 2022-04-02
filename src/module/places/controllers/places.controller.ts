@@ -58,7 +58,7 @@ export class PlacesController {
     description: 'Thời gian theo dạng tuần này, tháng này,...',
   })
   async getVisitedPlace(
-    @PaginateQuery(VISITED_PLACES_PERPAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(VISITED_PLACES_PERPAGE) { page, perPage }: PaginateOptions,
     @Query('time') time: string,
     @User() user,
     @Query('userId') userId: string,
@@ -66,8 +66,8 @@ export class PlacesController {
     if (!userId) userId = user._id.toString();
     return await this.visitedPlacesService.getVisitedPlaces(
       userId,
-      paginateOptions.page,
-      paginateOptions.perPage,
+      page,
+      perPage,
       time,
     );
   }

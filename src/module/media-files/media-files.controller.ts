@@ -44,16 +44,11 @@ export class MediaFilesController {
   async getMediaFilesProfile(
     @User() user,
     @Query('userId') userId: string,
-    @PaginateQuery(VIDEOS_PERPAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(VIDEOS_PERPAGE) { page, perPage }: PaginateOptions,
     @Query('type') fileType: string,
   ) {
     if (!userId) userId = user._id;
-    return this.mediaFilesService.getFiles(
-      fileType,
-      userId,
-      paginateOptions.page,
-      paginateOptions.perPage,
-    );
+    return this.mediaFilesService.getFiles(fileType, userId, page, perPage);
   }
   @Get('videos/watch')
   @ApiQuery({ type: PaginateOptions })
@@ -62,11 +57,8 @@ export class MediaFilesController {
       'Video cho phần watch, lấy theo thứ tự gần đây nhất, của cả app',
   })
   async getVideosWatch(
-    @PaginateQuery(VIDEOS_PERPAGE) paginateOptions: PaginateOptions,
+    @PaginateQuery(VIDEOS_PERPAGE) { page, perPage }: PaginateOptions,
   ) {
-    return this.mediaFilesService.getVideosWatch(
-      paginateOptions.page,
-      paginateOptions.perPage,
-    );
+    return this.mediaFilesService.getVideosWatch(page, perPage);
   }
 }
