@@ -13,6 +13,7 @@ import { PostDetailService } from './providers/post-detail.service';
 import { CommentsModule } from '@comment/comments.module';
 import { PlacesService } from '../places/providers/places.service';
 import { PlacesModule } from '../places/places.module';
+import { PostPlaceService } from './providers/post-place.service';
 
 @Module({
   imports: [
@@ -31,11 +32,12 @@ import { PlacesModule } from '../places/places.module';
   ],
   controllers: [PostsController],
   providers: [
+    PostPlaceService,
     PostsService,
     StringHandlersHelper,
     MapsHelper,
     PostDetailService,
   ],
-  exports: [PostsService, PostDetailService],
+  exports: [PostsService, PostDetailService, PostPlaceService],
 })
 export class PostsModule {}

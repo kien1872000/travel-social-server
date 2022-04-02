@@ -1,4 +1,7 @@
+import { Visitor, VisitorsPlace } from '@dto/place/discovery.dto';
+import { PlaceDocument } from '@entity/place.entity';
 import { UserPlace, UserPlaceDocument } from '@entity/user-place.entity';
+import { UserDocument } from '@entity/user.entity';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -38,7 +41,24 @@ export class UserPlacesService {
         { upsert: true },
       );
     } catch (error) {
-
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async getUserVisiteds(
+    placeId: string,
+    limit: number,
+  ): Promise<VisitorsPlace> {
+    try {
+      const visitors = await this.userPlaceModel
+        .find({ place: placeId })
+        .populate('user', ['displayName', 'avatar'])
+        .select('user')
+        .limit(limit);
+      return {
+        placeId: placeId,
+        visitors: visitors.map((i) => i.user as unknown as Visitor),
+      };
+    } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }

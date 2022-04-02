@@ -1,11 +1,10 @@
 import { UpdatePlaceDto } from '@dto/place/place.dto';
 import { UserProfile } from '@dto/user/userProfile.dto';
-import { Coordinate } from '@entity/place.entity';
 import { Address, User, UserDocument } from '@entity/user.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { GoongMapService } from 'src/goong-map/goong-map.service';
 
 @Injectable()

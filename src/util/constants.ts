@@ -12,7 +12,7 @@ export const TRENDING_LENGTH = 10;
 export const LIKE_OF_POSTS_PERPAGE = 10;
 export const FOLLOWs_SUGGESTION_LENGTH = 40;
 export const VISITED_PLACES_PERPAGE = 10;
-
+export const DISCOVERY_LENGTH = 10;
 export const NOTIFICATIONS_PERPAGE = 10;
 export const CHATS_PERPAGE = 10;
 export const PASSWORD_REGEX =

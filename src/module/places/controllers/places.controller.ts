@@ -12,9 +12,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { VISITED_PLACES_PERPAGE } from '@util/constants';
+import { POSTS_PER_PAGE, VISITED_PLACES_PERPAGE } from '@util/constants';
 import { Time } from '@util/enums';
 import { PaginateOptions } from '@util/types';
+import { DiscoveryPlacesService } from '../providers/discovery-places.service';
 import { PlacesService } from '../providers/places.service';
 import { VisitedPlacesService } from '../providers/visited-places.service';
 
@@ -26,6 +27,7 @@ export class PlacesController {
   constructor(
     private readonly placesSerivce: PlacesService,
     private readonly visitedPlacesService: VisitedPlacesService,
+    private readonly discoveryPlacesService: DiscoveryPlacesService,
   ) {}
   @Get('search')
   @ApiOperation({ description: 'search địa điểm theo text nhập vào' })
@@ -69,6 +71,31 @@ export class PlacesController {
       page,
       perPage,
       time,
+    );
+  }
+  @Get('discovery-places')
+  @ApiOperation({ description: 'Danh  sách discovery' })
+  async getDiscoveryPlaces() {
+    return this.discoveryPlacesService.getDiscoveryPlaces();
+  }
+  @Get('discovery-detail/:placeId')
+  @ApiOperation({ description: 'discovery detail' })
+  @ApiParam({
+    description: 'id của địa điểm muốn lấy discovery detail',
+    name: 'placeId',
+    type: String,
+  })
+  @ApiQuery({ type: PaginateOptions })
+  async getDiscoveryDetai(
+    @Param('placeId') placeId: string,
+    @PaginateQuery(POSTS_PER_PAGE) { page, perPage }: PaginateOptions,
+    @User() user,
+  ) {
+    return this.discoveryPlacesService.getDiscoveryDetail(
+      placeId,
+      user._id,
+      page,
+      perPage,
     );
   }
 }

@@ -19,7 +19,7 @@ export class NotificationDto {
   @IsNotEmpty()
   action: string;
 }
-export class NotificationMessage {
+export interface NotificationMessage {
   notificationId: string;
   sender: {
     _id: string;
