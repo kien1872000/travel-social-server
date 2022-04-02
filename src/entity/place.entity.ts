@@ -10,6 +10,8 @@ export class Coordinate {
 @Schema()
 export class Place {
   @Prop({ type: String, required: true })
+  _id: string;
+  @Prop({ type: String, required: true })
   name: string;
   @Prop({ type: String, required: true })
   formattedAddress: string;

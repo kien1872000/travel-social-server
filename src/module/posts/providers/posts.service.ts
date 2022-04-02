@@ -19,7 +19,6 @@ import { FollowingsService } from '@following/providers/followings.service';
 import { HashtagsService } from '@hashtag/hashtags.service';
 import { MediaFilesService } from 'src/module/media-files/media-files.service';
 import {
-  GROUPS_SUGGESSTION_LENGTH,
   POSTS_PER_PAGE,
   TRENDING_LENGTH,
   VIET_NAM_TZ,
@@ -29,6 +28,9 @@ import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
 import { LikesService } from '@like/providers/likes.service';
 import { Address } from '@entity/user.entity';
+import { Place } from '@entity/place.entity';
+import { PlacesService } from 'src/module/places/providers/places.service';
+import { UpdatePlaceDto } from '@dto/place/place.dto';
 @Injectable()
 export class PostsService {
   constructor(
@@ -41,6 +43,7 @@ export class PostsService {
     private readonly filesService: MediaFilesService,
     private readonly followingsService: FollowingsService,
     private readonly hashtagsService: HashtagsService,
+    private readonly placesServive: PlacesService,
   ) {}
 
   // Chỉ dùng cho trending
@@ -72,7 +75,6 @@ export class PostsService {
       const query = this.postModel
         .find(match)
         .populate('user', ['displayName', 'avatar'])
-        .populate('group', ['name', 'backgroundImage'])
         .sort({ createdAt: -1 });
       const [posts, poplular] = await Promise.all([
         paginate(query, { page: page, perPage: perPage }),
@@ -104,7 +106,6 @@ export class PostsService {
     postInput: PostInput,
   ): Promise<PostOutput> {
     try {
-      const isPublic = true;
       const fileUrlPromises = [];
       for (const item of postInput.mediaFiles) {
         const filePath = `post/imageOrVideos/${userId}${this.stringHandlersHelper.generateString(
@@ -123,37 +124,38 @@ export class PostsService {
       const hashtags = this.stringHandlersHelper.getHashtagFromString(
         postInput.description,
       );
-      const place: Address = {
-        name: postInput.name,
-        formattedAddress: postInput.formattedAddress,
-        coordinate: {
-          latitude: postInput.latitude,
-          longitude: postInput.longitude,
-        },
-      };
       const newPost: Partial<PostDocument> = {
-        place: place,
+        place: postInput.placeId,
         user: Types.ObjectId(userId),
-        isPublic: isPublic,
         description: postInput.description.trim(),
         mediaFiles: fileUrls,
         hashtags: hashtags,
         likes: 0,
         comments: 0,
       };
-      let postId;
-      if (isPublic) {
-        const promises = await Promise.all([
-          new this.postModel(newPost).save(),
-          this.hashtagsService.addHastags(hashtags),
-        ]);
-        postId = promises[0]._id;
-      } else postId = (await new this.postModel(newPost).save())._id;
-      const post = await this.postModel
-        .findById(postId)
+      const updatePlaceDto: UpdatePlaceDto = {
+        placeId: postInput.placeId,
+        formattedAddress: postInput.formattedAddress,
+        name: postInput.name,
+        latitude: postInput.latitude,
+        longitude: postInput.longitude,
+      };
+      const [post, _] = await Promise.all([
+        new this.postModel(newPost).save(),
+        this.hashtagsService.addHastags(hashtags),
+        this.placesServive.updateVisits(userId, 1, updatePlaceDto),
+      ]);
+      console.log(post._id);
+
+      const result = await this.postModel
+        .findById(post._id)
         .populate('user', ['displayName', 'avatar'])
-        .populate('group', ['name', 'backgroundImage']);
-      return this.mapsHelper.mapToPostOutPut(post, userId, false);
+        .populate(
+          'place',
+          ['name', 'formattedAddress', 'coordinate', 'visits'],
+          Place.name,
+        );
+      return this.mapsHelper.mapToPostOutPut(result, userId, false);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -170,12 +172,8 @@ export class PostsService {
     perPage: number,
     currentUser: string,
     limit: PostLimit,
-    groupId: string,
   ): Promise<PaginationRes<PostOutput>> {
     switch (limit) {
-      case PostLimit.Group:
-        break;
-      //return this.getPostsGroup(pageNumber, currentUser, groupId);
       case PostLimit.Profile:
         return this.getPostsProfile(page, perPage, currentUser);
       case PostLimit.NewsFeed:
@@ -232,7 +230,6 @@ export class PostsService {
     perPage: number,
     currentUser: string,
     option?: PostLimit,
-    groupId?: string,
   ): Promise<PaginationRes<PostOutput>> {
     const followings = await this.followingsService.getFollowingIds(
       currentUser,
@@ -241,33 +238,24 @@ export class PostsService {
     const userObjectIds = followings.map((i) => new Types.ObjectId(i));
     let match = {};
     switch (option) {
-      case PostLimit.Group:
-        match = { group: new Types.ObjectId(groupId) };
-        if (!groupId)
-          match = {
-            user: new Types.ObjectId(currentUser),
-            group: { $exists: true },
-          };
-        break;
       case PostLimit.Profile:
         match = {
           user: new Types.ObjectId(currentUser),
-          group: { $exists: false },
         };
         break;
       case PostLimit.NewsFeed:
       default:
         match = {
           $or: [
-            { user: { $in: userObjectIds }, group: { $exists: false } },
-            { user: new Types.ObjectId(currentUser), group: { $exists: true } },
+            { user: { $in: userObjectIds } },
+            { user: new Types.ObjectId(currentUser) },
           ],
         };
     }
     const query = this.postModel
       .find(match)
-      .populate('user', ['_id', 'displayName', 'avatar'])
-      .populate('group', ['_id', 'name', 'backgroundImage'])
+      .populate('user', ['displayName', 'avatar'])
+      .populate('place', ['name', 'formattedAddress', 'coordinate', 'visits'])
       .select(['-mediaFiles._id'])
       .sort({ createdAt: -1 });
     const postsResult = await paginate<PostDocument>(query, {
@@ -408,7 +396,6 @@ export class PostsService {
           .populate('user', ['displayName', 'avatar']),
         this.likesService.isUserLikedPost(currentUser, postId),
       ]);
-      // .populate('group', ['_id', 'name', 'backgroundImage']);
       return this.mapsHelper.mapToPostOutPut(post, currentUser, liked);
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -419,7 +406,6 @@ export class PostsService {
       const posts = await this.postModel
         .find({
           user: Types.ObjectId(userId),
-          group: { $exists: false },
         })
         .select(['_id']);
       return posts.map((post) => (post as any)._id.toString());

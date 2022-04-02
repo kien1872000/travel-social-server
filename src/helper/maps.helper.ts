@@ -10,7 +10,6 @@ import { StringHandlersHelper } from './string-handler.helper';
 import { PostDocument } from '@entity/post.entity';
 import { MediaFileDocument } from '@entity/mediaFile.entity';
 import { MediaFileDto } from '@dto/media-file/media-file.dto';
-import { GroupDocument } from '@entity/group.entity';
 import { FollowingDocument } from '@entity/following.entity';
 import { PostOutput } from '@dto/post/post-new.dto';
 import { CommentDocument } from '@entity/comment.entity';
@@ -20,6 +19,7 @@ import { RecentChatOutput } from '@dto/chat/recent-chat.dto';
 import { ChatDocument } from '@entity/chat.entity';
 import { InboxOutput } from '@dto/chat/chat.dto';
 import { ChatGroupDocument } from '@entity/chat-group.entity';
+import { Place } from '@entity/place.entity';
 export class MapsHelper {
   stringhandlersHelper: StringHandlersHelper;
   constructor() {
@@ -99,56 +99,6 @@ export class MapsHelper {
       };
     });
   }
-  // private getReactions(reactions: Reactions): Reactions {
-  //   const reactionsArrTemp = Object.entries<number>(reactions).sort(
-  //     (el1, el2) => {
-  //       return Number(el2[1]) - Number(el1[1]);
-  //     },
-  //   );
-  //   let total = 0;
-  //   const reactionsArr = reactionsArrTemp.map((i) => {
-  //     const keySize = i[0].length;
-  //     const key = i[0];
-  //     if (key[keySize - 1] === 's') i[0] = key.slice(0, keySize - 1);
-  //     return i;
-  //   });
-  //   for (const key in reactions) total += reactions[key];
-  //   const result: Reactions = Object.fromEntries<number>(
-  //     reactionsArr.slice(0, 3).filter((i) => Number(i[1]) > 0),
-  //   );
-  //   result.total = total;
-  //   return result;
-  // }
-  // public mapToPostOutPut(post: PostDocument, currentUser: string): PostOutput {
-  //   const postId = (post as any)._id;
-  //   const user = post.user as any;
-  //   const reactions = this.getReactions(post.reactions);
-
-  //   const createdAt = this.stringhandlersHelper.getDateWithTimezone(
-  //     String((post as any).createdAt),
-  //     VIET_NAM_TZ,
-  //   );
-
-  //   const groupId = (post.group as any)?._id;
-  //   const groupName = (post.group as unknown as GroupDocument)?.name;
-  //   const groupBackgroundImage = (post.group as unknown as GroupDocument)
-  //     ?.backgroundImage;
-  //   return {
-  //     postId: postId,
-  //     groupId: groupId?.toString(),
-  //     groupBackgroundImage: groupBackgroundImage,
-  //     groupName: groupName,
-  //     userId: user._id,
-  //     userDisplayName: user.displayName,
-  //     userAvatar: user.avatar,
-  //     description: post.description,
-  //     files: post.mediaFiles,
-  //     reactions: reactions,
-  //     comments: post.comments,
-  //     isCurrentUser: user._id.toString() === currentUser,
-  //     createdAt: createdAt,
-  //   };
-  // }
   public mapToMediaFileDto(mediaFile: MediaFileDocument): MediaFileDto {
     const displayName = (mediaFile.user as unknown as UserDocument).displayName;
     const avatar = (mediaFile.user as unknown as UserDocument).avatar;
@@ -164,10 +114,6 @@ export class MapsHelper {
       des: mediaFile.des,
       url: mediaFile.url,
       type: mediaFile.type,
-      groupId: (mediaFile.group as any)?._id,
-      groupName: (mediaFile.group as unknown as GroupDocument)?.name,
-      groupBackgroundImage: (mediaFile.group as unknown as GroupDocument)
-        ?.backgroundImage,
 
       createdAt: createdAt,
     };
@@ -185,17 +131,10 @@ export class MapsHelper {
       VIET_NAM_TZ,
     );
 
-    const groupId = (post.group as any)?._id;
-    const groupName = (post.group as unknown as GroupDocument)?.name;
-    const groupBackgroundImage = (post.group as unknown as GroupDocument)
-      ?.backgroundImage;
     return {
-      place: post.place,
+      place: post.place as unknown as Place,
       liked: liked,
       postId: postId,
-      groupId: groupId?.toString(),
-      groupBackgroundImage: groupBackgroundImage,
-      groupName: groupName,
       userId: user._id,
       userDisplayName: user.displayName,
       userAvatar: user.avatar,

@@ -1,5 +1,5 @@
 import { UpdatePlaceDto } from '@dto/place/place.dto';
-import { UserProfile } from '@dto/user/userProfile.dto';
+import { UpdateAddressDto, UserProfile } from '@dto/user/userProfile.dto';
 import { Coordinate } from '@entity/place.entity';
 import { Address, User, UserDocument } from '@entity/user.entity';
 import { MapsHelper } from '@helper/maps.helper';
@@ -15,7 +15,7 @@ export class UsersAddressService {
   ) {}
   public async updateAddress(
     userId: string,
-    updatePlaceDto: UpdatePlaceDto,
+    updatePlaceDto: UpdateAddressDto,
   ): Promise<UserProfile> {
     try {
       const coordinate: Coordinate = {

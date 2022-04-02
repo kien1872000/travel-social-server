@@ -11,6 +11,8 @@ import { PostsService } from './providers/posts.service';
 import { LikesModule } from '@like/likes.module';
 import { PostDetailService } from './providers/post-detail.service';
 import { CommentsModule } from '@comment/comments.module';
+import { PlacesService } from '../places/providers/places.service';
+import { PlacesModule } from '../places/places.module';
 
 @Module({
   imports: [
@@ -25,6 +27,7 @@ import { CommentsModule } from '@comment/comments.module';
     LikesModule,
     FollowingsModule,
     forwardRef(() => CommentsModule),
+    PlacesModule,
   ],
   controllers: [PostsController],
   providers: [

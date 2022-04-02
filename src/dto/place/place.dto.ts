@@ -1,3 +1,4 @@
+import { UpdateAddressDto } from '@dto/user/userProfile.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
@@ -8,27 +9,12 @@ import {
   IsString,
 } from 'class-validator';
 
-export class UpdatePlaceDto {
-  @ApiProperty({ type: String, required: true, description: 'tên địa điểm' })
+export class UpdatePlaceDto extends UpdateAddressDto {
+  @ApiProperty({ type: String, required: true, description: 'id cuả địa điểm' })
   @IsString()
   @IsNotEmpty()
-  name: string;
-  @ApiProperty({ type: String, required: true, description: 'địa chỉ đầy đủ' })
-  @IsString()
-  @IsNotEmpty()
-  formattedAddress: string;
-  @ApiProperty({ type: Number, required: true })
-  @Type(() => Number)
-  @IsNumber()
-  @IsNotEmpty()
-  latitude: number;
-  @ApiProperty({ type: Number, required: true })
-  @Type(() => Number)
-  @IsNumber()
-  @IsNotEmpty()
-  longitude: number;
+  placeId: string;
 }
-
 export class SearchPlaceInput {
   @ApiProperty({
     type: String,

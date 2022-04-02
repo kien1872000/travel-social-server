@@ -8,10 +8,6 @@ export enum Privacy {
   Private = 'private',
 }
 
-export enum GroupMemberRole {
-  Admin = 'admin',
-  NormalUser = 'normalUser',
-}
 
 export enum File {
   Image = 'image',
@@ -32,10 +28,8 @@ export enum SearchTypes {
   All = 'all',
   Users = 'users',
   Posts = 'posts',
-  Groups = 'groups',
 }
 export enum PostLimit {
-  Group = 'group',
   Profile = 'profile',
   NewsFeed = 'newsfeed',
 }

@@ -96,15 +96,8 @@ export class PostsController {
     type: String,
     name: 'postLimit',
     enum: PostLimit,
-    description: 'Chọn phạm vi post: group, profile, newsfeed',
+    description: 'Chọn phạm vi post:  profile, newsfeed',
     required: true,
-  })
-  @ApiQuery({
-    type: String,
-    name: 'groupId',
-    required: false,
-    description:
-      'Nếu chọn phạm vi là post thì thêm groupId, nếu không có groupId thì sẽ lấy tất cả post trong các group đã tham gia',
   })
   @ApiQuery({
     type: String,
@@ -115,12 +108,11 @@ export class PostsController {
   })
   @ApiQuery({ type: PaginateOptions })
   @ApiOperation({
-    description: 'Lấy post trong trang cá nhân, newsfeed, group',
+    description: 'Lấy post trong trang cá nhân, newsfeed',
   })
   async getPosts(
     @PaginateQuery(POSTS_PER_PAGE) paginateOptions: PaginateOptions,
     @Query('postLimit') postLimit: PostLimit,
-    @Query('groupId') groupId: string,
     @Query('userId') userId: string,
     @User() user,
   ) {
@@ -132,7 +124,6 @@ export class PostsController {
       paginateOptions.perPage,
       userId,
       postLimit,
-      groupId,
     );
   }
   @Get('posts/by-hashtag')

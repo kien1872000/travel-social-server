@@ -32,14 +32,12 @@ export class MediaFilesService {
     path: string,
     des: string,
     userId: string,
-    groupId?: string,
   ): Promise<FileType> {
     try {
       const fileUrl = await this.uploadsService.uploadFile(uploadFile, path);
       const type = uploadFile.mimetype.split('/')[0];
       const newFile = {
         user: new Types.ObjectId(userId),
-        group: groupId ? new Types.ObjectId(groupId) : undefined,
         type: type,
         des: des,
         url: fileUrl,
@@ -57,11 +55,8 @@ export class MediaFilesService {
     userId: string,
     page: number,
     perPage: number,
-    groupId?: string,
   ): Promise<PaginationRes<MediaFileDto>> {
-    const match = groupId
-      ? { group: Types.ObjectId(groupId) }
-      : { user: Types.ObjectId(userId), group: { $exists: false } };
+    const match = { user: Types.ObjectId(userId) };
     switch (type) {
       case File.Video:
         (match as any).type = File.Video;

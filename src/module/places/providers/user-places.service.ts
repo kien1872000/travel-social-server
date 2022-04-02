@@ -16,19 +16,28 @@ export class UserPlacesService {
     try {
       return await this.userPlaceModel.findOne({
         user: Types.ObjectId(userId),
-        place: Types.ObjectId(placeId),
+        place: placeId,
       });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  public async createUserPlace(userId: string, placeId: string): Promise<void> {
+  public async updateUserPlace(
+    userId: string,
+    placeId: string,
+  ): Promise<UserPlaceDocument> {
     try {
-      await new this.userPlaceModel({
-        user: Types.ObjectId(userId),
-        place: Types.ObjectId(placeId),
-      }).save();
+      return await this.userPlaceModel.findOneAndUpdate(
+        { user: Types.ObjectId(userId), place: placeId },
+        {
+          user: Types.ObjectId(userId),
+          place: placeId,
+        },
+        { upsert: true },
+      );
     } catch (error) {
+      console.log('update');
+
       throw new InternalServerErrorException(error);
     }
   }

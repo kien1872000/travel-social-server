@@ -10,12 +10,8 @@ export class FileType {
 
 @Schema({ timestamps: true })
 export class Post {
-  @Prop({ type: Types.ObjectId, ref: 'Group' })
-  group?: Types.ObjectId;
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   user: Types.ObjectId;
-  @Prop({ type: Boolean, required: true })
-  isPublic: boolean;
   @Prop({ type: String })
   description: string;
   @Prop({
@@ -28,8 +24,8 @@ export class Post {
   comments: number;
   @Prop({ type: Number, required: true })
   likes: number;
-  @Prop({ type: Address, required: true })
-  place: Address;
+  @Prop({ type: String, required: true })
+  place: string;
 }
 export type PostDocument = Post & Document;
 export const PostSchema = SchemaFactory.createForClass(Post);

@@ -1,4 +1,5 @@
 import { UpdatePlaceDto } from '@dto/place/place.dto';
+import { Place } from '@entity/place.entity';
 import { FileType } from '@entity/post.entity';
 import { Address } from '@entity/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
@@ -17,10 +18,7 @@ export class PostInput extends UpdatePlaceDto {
 export class PostOutput {
   postId: string;
   userId: string;
-  groupId?: string;
-  groupName?: string;
-  place: Address;
-  groupBackgroundImage?: string;
+  place: Place;
   userDisplayName: string;
   userAvatar: string;
   files: FileType[];
@@ -35,13 +33,4 @@ export class TrendingPostOutput {
   popular: number;
   posts: PaginationRes<PostOutput>;
 }
-export class PostGroupInput extends UpdatePlaceDto {
-  @ApiProperty({ type: Types.ObjectId, description: 'GroupID' })
-  @IsNumber()
-  groupId: Types.ObjectId;
-  @ApiProperty({ type: String, description: 'description nếu có' })
-  @IsString()
-  description: string;
-  @ApiProperty({ type: 'file', description: 'image/video nếu có' })
-  imageOrVideo: Express.Multer.File;
-}
+

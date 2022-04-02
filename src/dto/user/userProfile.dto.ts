@@ -1,13 +1,16 @@
 import { Address } from '@entity/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsNotEmptyObject,
   IsNumber,
   IsObject,
   IsOptional,
+  IsString,
   ValidateNested,
 } from 'class-validator';
 import { Express } from 'express';
@@ -75,4 +78,25 @@ export class ProfileImageInput {
 export class ProfileImageOutPut {
   avatar: string;
   coverPhoto: string;
+}
+
+export class UpdateAddressDto {
+  @ApiProperty({ type: String, required: true, description: 'tên địa điểm' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+  @ApiProperty({ type: String, required: true, description: 'địa chỉ đầy đủ' })
+  @IsString()
+  @IsNotEmpty()
+  formattedAddress: string;
+  @ApiProperty({ type: Number, required: true })
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty()
+  latitude: number;
+  @ApiProperty({ type: Number, required: true })
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty()
+  longitude: number;
 }

@@ -1,5 +1,5 @@
 import { PlaceDetailDto, SearchPlaceDto } from '@dto/place/goong-map.dto';
-import { SearchPlaceInput } from '@dto/place/place.dto';
+import { SearchPlaceInput, UpdatePlaceDto } from '@dto/place/place.dto';
 import { Coordinate, Place, PlaceDocument } from '@entity/place.entity';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -42,20 +42,47 @@ export class PlacesService {
   }
   public async updateVisits(
     userId: string,
-    placeId: string,
     count: number,
+    updatePlaceDto: UpdatePlaceDto,
   ): Promise<void> {
     try {
-      const [userPlace, _] = await Promise.all([
-        this.userPlacesService.findUserPlace(userId, placeId),
-        this.userPlacesService.createUserPlace(userId, placeId),
+      const [userPlace, place] = await Promise.all([
+        this.userPlacesService.updateUserPlace(userId, updatePlaceDto.placeId),
+        this.findPlaceById(updatePlaceDto.placeId),
       ]);
+
+      if (!place) {
+        const place: Partial<PlaceDocument> = {
+          _id: updatePlaceDto.placeId,
+          name: updatePlaceDto.name,
+          formattedAddress: updatePlaceDto.formattedAddress,
+          visits: 1,
+          coordinate: {
+            latitude: updatePlaceDto.latitude,
+            longitude: updatePlaceDto.longitude,
+          },
+        };
+        await new this.placeModel(place).save();
+        return;
+      }
       if (!userPlace) {
-        await this.placeModel.findByIdAndUpdate(placeId, {
-          $inc: { visits: count },
-        });
+        await this.placeModel.findOneAndUpdate(
+          { _id: updatePlaceDto.placeId },
+          {
+            $inc: { visits: count },
+          },
+        );
       }
     } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async findPlaceById(placeId: string): Promise<PlaceDocument> {
+    try {
+      return await this.placeModel.findOne({ _id: placeId });
+    } catch (error) {
+      console.log('find');
+
       throw new InternalServerErrorException(error);
     }
   }
