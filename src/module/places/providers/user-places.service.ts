@@ -25,18 +25,19 @@ export class UserPlacesService {
   public async updateUserPlace(
     userId: string,
     placeId: string,
+    postId: string,
   ): Promise<UserPlaceDocument> {
     try {
       return await this.userPlaceModel.findOneAndUpdate(
         { user: Types.ObjectId(userId), place: placeId },
         {
+          latestPost: Types.ObjectId(postId),
           user: Types.ObjectId(userId),
           place: placeId,
         },
         { upsert: true },
       );
     } catch (error) {
-      console.log('update');
 
       throw new InternalServerErrorException(error);
     }

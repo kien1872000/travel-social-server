@@ -104,7 +104,7 @@ export class PostsService {
   public async createNewPost(
     userId: string,
     postInput: PostInput,
-  ): Promise<PostOutput> {
+  ): Promise<void> {
     try {
       const fileUrlPromises = [];
       for (const item of postInput.mediaFiles) {
@@ -143,19 +143,14 @@ export class PostsService {
       const [post, _] = await Promise.all([
         new this.postModel(newPost).save(),
         this.hashtagsService.addHastags(hashtags),
-        this.placesServive.updateVisits(userId, 1, updatePlaceDto),
       ]);
-      console.log(post._id);
 
-      const result = await this.postModel
-        .findById(post._id)
-        .populate('user', ['displayName', 'avatar'])
-        .populate(
-          'place',
-          ['name', 'formattedAddress', 'coordinate', 'visits'],
-          Place.name,
-        );
-      return this.mapsHelper.mapToPostOutPut(result, userId, false);
+      await this.placesServive.updateVisits(
+        userId,
+        post._id.toString(),
+        1,
+        updatePlaceDto,
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

@@ -1,5 +1,5 @@
 import { ConfigService } from '@config/config.service';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as goongClient from '@goongmaps/goong-sdk';
 import * as geocoding from '@goongmaps/goong-sdk/services/geocoding';
 import * as autocomplete from '@goongmaps/goong-sdk/services/autocomplete';

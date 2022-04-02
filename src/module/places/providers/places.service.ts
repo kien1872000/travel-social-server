@@ -42,12 +42,17 @@ export class PlacesService {
   }
   public async updateVisits(
     userId: string,
+    postId: string,
     count: number,
     updatePlaceDto: UpdatePlaceDto,
   ): Promise<void> {
     try {
       const [userPlace, place] = await Promise.all([
-        this.userPlacesService.updateUserPlace(userId, updatePlaceDto.placeId),
+        this.userPlacesService.updateUserPlace(
+          userId,
+          updatePlaceDto.placeId,
+          postId,
+        ),
         this.findPlaceById(updatePlaceDto.placeId),
       ]);
 
