@@ -1,36 +1,34 @@
 var MongoClient = require('mongodb').MongoClient;
 var faker = require('faker');
+const fs = require('fs');
+
 faker.locale = 'vi';
 var url = 'mongodb://localhost:27017/';
-const a_reaction = ['love', 'like', 'sad', 'angry', 'haha', 'wow'];
-const a_comment = ['bình luận', 'hay', 'tuyệt vời', 'có vẻ được'];
-const a_fname = ['Nguyễn', 'Phạm', 'Võ', 'Ngô', 'Trần', 'Đỗ', 'Vũ', ''];
-const a_sname = ['Thi', 'Văn', 'Khắc', 'Trung', 'Quang'];
-const a_lname = [
-  'Hoàn',
-  'Duy',
-  'Trung',
-  'Dũng',
-  'Kiên',
-  'Anh',
-  'Mai',
-  'Hoa',
-  'Thi',
-  'Minh',
-];
-const a_image = [
-  'https://firebasestorage.googleapis.com/v0/b/social-network-c414c.appspot.com/o/images%2Favatar%2F61af7564103ae73a343f7db56LhFj8BM2zmyjEk?alt=media&token=cf64cc31-2877-4404-94ac-b451754cbbf2',
-  'https://firebasestorage.googleapis.com/v0/b/social-network-c414c.appspot.com/o/images%2Favatar%2F61af7564103ae73a343f7db5hSEaI5zZngxabwj?alt=media&token=c951033f-bc6c-41fd-b193-ebeebdaa8dda',
-  'https://firebasestorage.googleapis.com/v0/b/social-network-c414c.appspot.com/o/images%2Favatar%2F61af7564103ae73a343f7db5wfgIVEo2jQSRJKr?alt=media&token=4d539eaa-b964-45ea-9b7a-75eef029937a',
-];
+let placeDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
+let placeUrls = JSON.parse(fs.readFileSync('./places_url.json', 'utf-8'));
+let userAddressDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
+let userAvatarUrls = JSON.parse(
+  fs.readFileSync('./user_avatar_urls.json', 'utf-8'),
+);
+
+const avatarImages = userAvatarUrls.map((i) => i.url);
+const a_image = placeUrls.map((i) => i.url);
 const a_video = [
-  'https://firebasestorage.googleapis.com/v0/b/social-network-c414c.appspot.com/o/post%2FimageOrVideos%2F61af7564103ae73a343f7db5AyqFzcEkA5TIFgT?alt=media&token=29f20fd9-984d-40da-999f-edf08867096c',
-  'https://firebasestorage.googleapis.com/v0/b/social-network-c414c.appspot.com/o/post%2FimageOrVideos%2F61af7564103ae73a343f7db5nS8kWM1DvOlSzwh?alt=media&token=6b2e1849-d4db-4fa5-99c8-2777d4e10df4',
-  'https://firebasestorage.googleapis.com/v0/b/social-network-c414c.appspot.com/o/post%2FimageOrVideos%2F61af7564103ae73a343f7db5lHnv98HdlieNUZ6?alt=media&token=ed5cd49b-435c-44ad-bdf4-0232b59abc11',
+  'https://media.istockphoto.com/videos/picture-post-card-perfect-landscape-scenery-of-llyn-padarn-lake-with-video-id1324947942',
+  'https://media.istockphoto.com/videos/aerial-drone-video-over-river-tay-scotland-video-id1273093103',
+  'https://media.istockphoto.com/videos/aerial-view-of-mountains-covered-with-forest-trees-with-blue-sky-video-id1327884148',
+  'https://media.istockphoto.com/videos/aerial-view-on-tea-plantation-in-sri-lanka-video-id642460768',
+  'https://media.istockphoto.com/videos/summer-meadow-with-long-grass-gently-blowing-in-the-wind-video-id1225633028',
+  'https://media.istockphoto.com/videos/the-sun-casts-its-beautiful-rays-into-the-fresh-green-forest-time-video-id1168431157',
+  'https://media.istockphoto.com/videos/real-time-shot-of-sea-surf-aerial-top-down-view-video-id946257202',
+  'https://media.istockphoto.com/videos/view-of-clouds-over-the-mountains-from-above-video-id1316701553',
+  'https://stream.mux.com/mmpRcMlCgVPsGJgideQ6X1ttPASzbyQS/high.mp4?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InQ5UHZucm9ZY0hQNjhYSmlRQnRHTEVVSkVSSXJ0UXhKIn0.eyJleHAiOjE2NDg5ODU3NzEsImF1ZCI6InYiLCJzdWIiOiJtbXBSY01sQ2dWUHNHSmdpZGVRNlgxdHRQQVN6YnlRUyJ9.EEnnQX4-hi1-YUUj_FJaK0uDJbHYh0ljlKlcXClro46bAv03JhH2TqNf4xCa5x3uGI30lMPTTTsIcM9A8N2_YR9gxT2CZvtYrTjo45Xlohssof1tjxeXr3qGmhsscZFjRI8xEbptvW2grZz5uAqlHsAk2lhyB-LToo2ZKJ_66O4hx69HrsHCmC8LP9g-wXCdYK93d5bqP68JB7mA0-4k1oR77ig14bVyRrH6PwbN7kJwdwxTFSi_bZCFCEL7ulONGF9MMOXSrrCwuK9KXmZQQhpbN83Gz7ne9crDUWYGPd4NvAyMK5YMEO_xq2zRo2UPPHNrYGe2JW54JD7q4_0iHw',
+  'https://stream.mux.com/hFhdWkgUQ7Y8N8Xj01SfZGdOlB2DiWD2u/high.mp4?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InQ5UHZucm9ZY0hQNjhYSmlRQnRHTEVVSkVSSXJ0UXhKIn0.eyJleHAiOjE2NDg5ODU4NDMsImF1ZCI6InYiLCJzdWIiOiJoRmhkV2tnVVE3WThOOFhqMDFTZlpHZE9sQjJEaVdEMnUifQ.eZiLxIpkR-cj7x2YtWd0TP114ijUnvn916VIpUnYmB2D7w-gr6VTUoA3ukfk1cbfy1_gC47vnvCQKDIDgwLM3xH7ef591eOU4cjHvs7JHBUBsecAzkyliYLdnST0rVGo_4jVdNIzpYeHNjUMqE-EXdN4_z2ZEUZxl735DFKIbGQN_oz_b0DNjFS3qjGfBXK87P7k9OK-irrVbq_XL6OQDccIPDOXcp3_x9HO_-r8eTN9JgxYm7VlY0fI8uGXYvWFeUywGuYbu1EG1eBFXDmc7HxXuAQcqUI6sRrP3bcA44SpBJabIxj6n9YsQAY7lGoJv_M5uNlLz1SXrs1yTxAmng',
 ];
 var hashtagRange = 10;
 var a_users = [];
 var a_posts = [];
+let userPlaces = [];
 
 function getRandom(array) {
   return array[getRandomInRange(array.length)];
@@ -67,9 +65,10 @@ async function insertUser(a_users, number, dbo) {
     for (let i = 0; i < number; i++) {
       var name = faker.name.findName();
       var noAccent = removeAccent(name);
-      var avt = getRandom(a_image);
+      var avt = getRandom(avatarImages);
       var bg = getRandom(a_image);
       var date = new Date(2000, 1, 1, 0, 0, 0, 0);
+      const userAddress = getRandom(userAddressDetails);
       var userObject = {
         email: changeToGmail(faker.internet.email().toString()),
         password:
@@ -82,6 +81,11 @@ async function insertUser(a_users, number, dbo) {
         coverPhoto: bg,
         bio: faker.lorem.sentences(),
         sex: getRandomInRange(3),
+        address: {
+          name: userAddress.name,
+          coordinate: userAddress.coordinate,
+          formattedAddress: userAddress.formattedAddress,
+        },
         followers: 0,
         followings: 0,
         createdAt: date,
@@ -148,74 +152,6 @@ async function insertFollowing(a_users, follow_number, dbo) {
   });
   console.log(await followPromise);
 }
-// async function insertGroup(
-//   a_groups,
-//   a_users,
-//   a_posts,
-//   g_number,
-//   g_member,
-//   g_post,
-//   post_image,
-//   post_video,
-//   post_hashtag,
-//   post_react,
-//   post_comment,
-//   child_comment,
-//   dbo,
-// ) {
-//   let groupPromise = new Promise(async function (resolve) {
-//     console.log('generate groups');
-//     for (let i = 0; i < g_number; i++) {
-//       var count_member = getRandomInRange(g_member) + 1;
-//       a_members = [];
-//       for (var j = 0; j < count_member; j++) {
-//         a_members.push(getRandom(a_users));
-//       }
-//       a_members = [...new Set(a_members)];
-//       var admin = a_members[a_members.length - 1];
-//       var a_obj_member = [];
-//       for (let j = 0; j < a_members.length - 1; j++) {
-//         var obj_member = {
-//           'member_role':'normalUser',
-//           'member_id': a_members[j]
-//         };;
-//         a_obj_member.push(obj_member);
-//       }
-//       var bg = getRandom(a_image);
-//       var groupObject = {
-//         'admin_id':admin,
-//         'backgroundImage':bg,
-//         'name':'group ' + i,
-//         'privacy':'public',
-//         'totalMember':{'admins':1,'members':a_obj_member.length},
-//         'member':a_obj_member,
-//         '__v':0};
-//       var g_result = await dbo.collection('groups').insertOne(groupObject);
-//       a_groups.push(g_result.insertedId);
-//       await insertMediaFile(
-//         admin,
-//         [{ type: 'image', des: 'group ' + i, url: bg }],
-//         dbo,
-//       );
-//       await insertPost(
-//         a_users,
-//         a_posts,
-//         g_post,
-//         post_image,
-//         post_video,
-//         post_hashtag,
-//         post_react,
-//         post_comment,
-//         child_comment,
-//         dbo,
-//         g_result.insertedId,
-//         a_members,
-//       );
-//     }
-//     resolve('insert groups done.');
-//   });
-//   console.log(await groupPromise);
-// }
 async function insertHagtash(a_ht, post_date, dbo) {
   let hashtagPromise = new Promise(async function (resolve) {
     var start = new Date(
@@ -294,16 +230,18 @@ async function insertComment(
           postId: postId,
           userId: getRandom(a_users),
           parentId: r_comment.insertedId,
-          comment: getRandom(a_comment),
+          comment: faker.lorem.sentences(),
           replys: 0,
           createdAt: child_time,
           updatedAt: child_time,
           __v: 0,
         };
-        await dbo.collection('comments').insertOne(childObject);
-        await dbo
-          .collection('posts')
-          .updateOne({ _id: postId }, { $inc: { comments: 1 } });
+        await Promise.all([
+          dbo.collection('comments').insertOne(childObject),
+          dbo
+            .collection('posts')
+            .updateOne({ _id: postId }, { $inc: { comments: 1 } }),
+        ]);
       }
     }
     resolve('insert comments done');
@@ -352,14 +290,12 @@ async function insertPost(
   child_comment,
   dbo,
   groupId = null,
-  a_members = null,
 ) {
   let postPromise = new Promise(async function (resolve) {
     console.log('generate posts');
-
-    if (!a_members) a_members = a_users;
-    for (let i = 0; i < a_members.length; i++)
-      for (let j = 0; j < num_post; j++) {
+    for (let i = 0; i < a_users.length; i++) {
+      const currentUser = a_users[i];
+      for (let j = 0; j < getRandomInRange(num_post); j++) {
         var a_ht = randomHashtagArray(
           hashtagRange,
           getRandomInRange(post_hashtag + 1),
@@ -401,55 +337,91 @@ async function insertPost(
           a_post_media.push(post_media_obj);
           a_mediafile.push(mediafile_obj);
         }
-
+        const placeDetail = getRandom(placeDetails);
         var postObject;
         if (!groupId)
           postObject = {
-            user: a_members[i],
+            user: currentUser,
             hashtags: a_ht,
-            isPublic: true,
             description: description,
             mediaFiles: a_post_media,
             likes: 0,
             comments: 0,
             createdAt: date,
             updatedAt: date,
+            place: placeDetail.placeId,
             __v: 0,
           };
-        // else
-        //   postObject = {
-        //   'user':a_members[i],
-        //   'group': groupId,
-        //   'hashtags': a_ht,
-        //   'isPublic':true,
-        //   'description':'bài đăng ' + a_ht.join(' '),
-        //   'mediaFiles':a_post_media,
-        //   'reactions':{'loves':0,'likes':0,'hahas':0,'wows':0,'sads':0,'angrys':0},
-        //   'comments':0,
-        //   'createdAt':date,
-        //   'updatedAt':date,
-        //   '__v':0
-        //   };
+
         var p_result = await dbo.collection('posts').insertOne(postObject);
         a_posts.push(p_result.insertedId);
-
-        await insertMediaFile(a_members[i], a_mediafile, dbo, date, groupId);
-        await insertHagtash(a_ht, date, dbo);
-        await insertComment(
-          a_users,
-          p_result.insertedId,
-          post_comment,
-          child_comment,
-          date,
-          dbo,
-        );
-        await insertLike(a_users, p_result.insertedId, post_react, date, dbo);
+        userPlaces.push({
+          place: placeDetail.placeId,
+          user: currentUser,
+          __v: 0,
+          lastVisitedDate: date,
+          lastestPost: p_result.insertedId,
+        });
+        await Promise.all([
+          insertMediaFile(currentUser, a_mediafile, dbo, date, groupId),
+          insertHagtash(a_ht, date, dbo),
+          insertComment(
+            a_users,
+            p_result.insertedId,
+            post_comment,
+            child_comment,
+            date,
+            dbo,
+          ),
+          insertLike(a_users, p_result.insertedId, post_react, date, dbo),
+        ]);
       }
+    }
     resolve('insert posts done.');
   });
   console.log(await postPromise);
 }
+async function insertPlace(userPlaces, dbo) {
+  let placePromise = new Promise(async function (resolve) {
+    console.log('insert places');
+    userPlaces.sort((a, b) => {
+      if (a.lastVisitedDate > b.lastVisitedDate) return -1;
+      else if (a.lastVisitedDate === b.lastVisitedDate) return 0;
+      else return 1;
+    });
+    const filtered = userPlaces.filter((value, index, self) => {
+      const firstElemIndex = self.findIndex((t) => {
+        return (
+          t.user.toString() === value.user.toString() &&
+          t.placeId === value.placeId
+        );
+      });
+      return index === firstElemIndex;
+    });
+    const places = placeDetails.filter((i) => {
+      return filtered.findIndex((t) => t.place === i.placeId) >= 0;
+    });
 
+    const placesToInsert = places.map((i) => {
+      const visitors = filtered.filter((e) => e.place === i.placeId);
+      return {
+        _id: i.placeId,
+        name: i.name,
+        formattedAddress: i.formattedAddress,
+        coordinate: i.coordinate,
+        visits: visitors.length,
+        __v: 0,
+      };
+    });
+
+    await Promise.all([
+      dbo.collection('userplaces').insertMany(filtered),
+      dbo.collection('places').insertMany(placesToInsert),
+    ]);
+    resolve('insert places done');
+  });
+  console.log(await placePromise);
+}
 async function insertMediaFile(
   userId,
   a_media,
@@ -474,17 +446,6 @@ async function insertMediaFile(
           __v: 0,
         };
       }
-      // } else {
-      //   mediaFileObj = {
-      //     'user':userId,
-      //     'group':groupId,
-      //     'type':media.type,
-      //     'des':media.des,
-      //     'url':media.url,
-      //     'createdAt':date,
-      //     'updatedAt':date,
-      //     '__v':0};
-      // }
       promises.push(dbo.collection('mediafiles').insertOne(mediaFileObj));
     }
     await Promise.all(promises);
@@ -510,12 +471,6 @@ MongoClient.connect(url, async function (err, db) {
     var create_posts = await dbo.createCollection('posts');
     if (create_posts) console.log('Collection posts created!');
 
-    // //reset groups data
-    // var drop_groups = await dbo.collection('groups').drop();
-    // if (drop_groups) console.log('Collection groups deleted!');
-    // var create_groups = await dbo.createCollection('groups');
-    // if (create_groups) console.log('Collection groups created!');
-
     var create_hashtags = await dbo.createCollection('hashtags');
     if (create_hashtags) console.log('Collection hashtags created!');
 
@@ -528,23 +483,27 @@ MongoClient.connect(url, async function (err, db) {
     var create_reactions = await dbo.createCollection('likes');
     if (create_reactions) console.log('Collection likes created!');
 
+    var create_userplaces = await dbo.createCollection('userplaces');
+    if (create_userplaces) console.log('Collection userplaces created!');
+
+    var create_places = await dbo.createCollection('places');
+    if (create_places) console.log('Collection places created!');
+
     resolve('reset data done');
   });
   console.log(await startPromise);
 
   //insert data
-  var num_user = 20;
+  var num_user = 10000;
   var num_follow = 5;
-  var num_post_private = 200;
+  var num_post_private = 20;
   var num_post_image = 3;
   var num_post_video = 1;
   var num_post_hashtag = 5;
-  var num_post_reaction = 20;
+  var num_post_reaction = 10;
   var num_post_comment = 10;
   var num_post_child_comment = 2;
-  var num_group = 10;
-  var num_member = 10;
-  var num_post_member = 5;
+
   await insertUser(a_users, num_user, dbo);
   await insertFollowing(a_users, num_follow, dbo);
   await insertPost(
@@ -559,14 +518,7 @@ MongoClient.connect(url, async function (err, db) {
     num_post_child_comment,
     dbo,
   );
-  // await insertGroup(
-  //   a_groups,
-  //   a_users,
-  //   a_posts,
-  //   num_group,num_member,num_post_member,
-  //   num_post_image,num_post_video,
-  //   num_post_hashtag,num_post_reaction,num_post_comment,num_post_child_comment,dbo);
-
+  await insertPlace(userPlaces, dbo);
   db.close();
 
   console.log('db close');

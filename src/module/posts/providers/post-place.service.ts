@@ -56,4 +56,15 @@ export class PostPlaceService {
       throw new InternalServerErrorException(error);
     }
   }
+  public async getMostLikesPost(placeId: string): Promise<PostDocument> {
+    try {
+      const posts = await this.postModel
+        .find({ place: placeId })
+        .sort('-likes')
+        .limit(1);
+      return posts[0];
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
 }

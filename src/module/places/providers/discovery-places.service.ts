@@ -27,12 +27,16 @@ export class DiscoveryPlacesService {
     try {
       const places = await this.placeModel
         .find({})
-        .sort('-visiteds')
+        .sort('-visits')
         .limit(DISCOVERY_LENGTH)
         .select('-__v');
       const promises: Promise<[VisitorsPlace, number]>[] = [];
+      const mostLikesPostPromises = [];
       for (const place of places) {
         const placeId = place._id.toString();
+        mostLikesPostPromises.push(
+          this.postPlaceService.getMostLikesPost(placeId),
+        );
         const visitorsAndRelatedPosts = async () => {
           return await Promise.all([
             this.userPlacesService.getUserVisiteds(placeId, 5),
@@ -41,6 +45,7 @@ export class DiscoveryPlacesService {
         };
         promises.push(visitorsAndRelatedPosts());
       }
+      const mostLikesPosts = await Promise.all(mostLikesPostPromises);
       const visitorsAndRelatedPosts = await Promise.all(promises);
       return places.map((i) => {
         const [visitorsPlace, relatedPosts] = visitorsAndRelatedPosts.find(
@@ -49,6 +54,7 @@ export class DiscoveryPlacesService {
             return visitorsPlace.placeId === i._id;
           },
         );
+        const mostLikesPost = mostLikesPosts.find((t) => t.place === i._id);
         return {
           _id: i._id,
           name: i.name,
@@ -57,6 +63,10 @@ export class DiscoveryPlacesService {
           visits: i.visits,
           suggestedVisitors: visitorsPlace.visitors,
           relatedPosts: relatedPosts,
+          post: {
+            _id: mostLikesPost._id.toString(),
+            mediaFiles: mostLikesPost.mediaFiles,
+          },
         };
       });
     } catch (error) {
