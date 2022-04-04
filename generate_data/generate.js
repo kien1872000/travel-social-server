@@ -4,7 +4,10 @@ const fs = require('fs');
 
 faker.locale = 'vi';
 var url = 'mongodb://localhost:27017/';
-let placeDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
+let placeDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8')).slice(
+  0,
+  40,
+);
 let placeUrls = JSON.parse(fs.readFileSync('./places_url.json', 'utf-8'));
 let userAddressDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
 let userAvatarUrls = JSON.parse(
@@ -25,7 +28,7 @@ const a_video = [
   'https://stream.mux.com/mmpRcMlCgVPsGJgideQ6X1ttPASzbyQS/high.mp4?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InQ5UHZucm9ZY0hQNjhYSmlRQnRHTEVVSkVSSXJ0UXhKIn0.eyJleHAiOjE2NDg5ODU3NzEsImF1ZCI6InYiLCJzdWIiOiJtbXBSY01sQ2dWUHNHSmdpZGVRNlgxdHRQQVN6YnlRUyJ9.EEnnQX4-hi1-YUUj_FJaK0uDJbHYh0ljlKlcXClro46bAv03JhH2TqNf4xCa5x3uGI30lMPTTTsIcM9A8N2_YR9gxT2CZvtYrTjo45Xlohssof1tjxeXr3qGmhsscZFjRI8xEbptvW2grZz5uAqlHsAk2lhyB-LToo2ZKJ_66O4hx69HrsHCmC8LP9g-wXCdYK93d5bqP68JB7mA0-4k1oR77ig14bVyRrH6PwbN7kJwdwxTFSi_bZCFCEL7ulONGF9MMOXSrrCwuK9KXmZQQhpbN83Gz7ne9crDUWYGPd4NvAyMK5YMEO_xq2zRo2UPPHNrYGe2JW54JD7q4_0iHw',
   'https://stream.mux.com/hFhdWkgUQ7Y8N8Xj01SfZGdOlB2DiWD2u/high.mp4?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InQ5UHZucm9ZY0hQNjhYSmlRQnRHTEVVSkVSSXJ0UXhKIn0.eyJleHAiOjE2NDg5ODU4NDMsImF1ZCI6InYiLCJzdWIiOiJoRmhkV2tnVVE3WThOOFhqMDFTZlpHZE9sQjJEaVdEMnUifQ.eZiLxIpkR-cj7x2YtWd0TP114ijUnvn916VIpUnYmB2D7w-gr6VTUoA3ukfk1cbfy1_gC47vnvCQKDIDgwLM3xH7ef591eOU4cjHvs7JHBUBsecAzkyliYLdnST0rVGo_4jVdNIzpYeHNjUMqE-EXdN4_z2ZEUZxl735DFKIbGQN_oz_b0DNjFS3qjGfBXK87P7k9OK-irrVbq_XL6OQDccIPDOXcp3_x9HO_-r8eTN9JgxYm7VlY0fI8uGXYvWFeUywGuYbu1EG1eBFXDmc7HxXuAQcqUI6sRrP3bcA44SpBJabIxj6n9YsQAY7lGoJv_M5uNlLz1SXrs1yTxAmng',
 ];
-var hashtagRange = 10;
+var hashtagRange = 50;
 var a_users = [];
 var a_posts = [];
 let userPlaces = [];
@@ -295,7 +298,7 @@ async function insertPost(
     console.log('generate posts');
     for (let i = 0; i < a_users.length; i++) {
       const currentUser = a_users[i];
-      for (let j = 0; j < getRandomInRange(num_post); j++) {
+      for (let j = 0; j < num_post; j++) {
         var a_ht = randomHashtagArray(
           hashtagRange,
           getRandomInRange(post_hashtag + 1),
@@ -392,8 +395,7 @@ async function insertPlace(userPlaces, dbo) {
     const filtered = userPlaces.filter((value, index, self) => {
       const firstElemIndex = self.findIndex((t) => {
         return (
-          t.user.toString() === value.user.toString() &&
-          t.placeId === value.placeId
+          t.user.toString() === value.user.toString() && t.place === value.place
         );
       });
       return index === firstElemIndex;
@@ -494,14 +496,14 @@ MongoClient.connect(url, async function (err, db) {
   console.log(await startPromise);
 
   //insert data
-  var num_user = 10000;
-  var num_follow = 5;
-  var num_post_private = 20;
+  var num_user = 1000;
+  var num_follow = 100;
+  var num_post_private = 100;
   var num_post_image = 3;
   var num_post_video = 1;
   var num_post_hashtag = 5;
-  var num_post_reaction = 10;
-  var num_post_comment = 10;
+  var num_post_reaction = 5;
+  var num_post_comment = 5;
   var num_post_child_comment = 2;
 
   await insertUser(a_users, num_user, dbo);

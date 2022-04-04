@@ -91,8 +91,7 @@ export class MediaFilesService {
       const query = this.fileModel
         .find({ type: File.Video })
         .select(['-__v', '-updatedAt', '-_id'])
-        .populate('user', ['displayName', 'avatar'])
-        .sort('-createdAt');
+        .populate('user', ['displayName', 'avatar']);
       const videos = await paginate(query, { page: page, perPage });
       return {
         items: videos.items.map((i) =>

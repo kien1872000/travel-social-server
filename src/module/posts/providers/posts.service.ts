@@ -246,7 +246,12 @@ export class PostsService {
         rmwp = rmwp.replace(ht, '');
       });
       if (hashtagsInsearch?.length > 0 && rmwp.length === 0) {
-        return this.searchPostByHashtags(hashtagsInsearch, limit, skip, userId);
+        return await this.searchPostByHashtags(
+          hashtagsInsearch,
+          limit,
+          skip,
+          userId,
+        );
       } else {
         console.log(search);
         const posts = await this.postModel
