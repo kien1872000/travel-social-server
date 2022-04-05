@@ -30,3 +30,4 @@ export class Post {
 export type PostDocument = Post & Document;
 export const PostSchema = SchemaFactory.createForClass(Post);
 PostSchema.index({ description: 'text' });
+PostSchema.index({ hashtags: 1 });

@@ -20,6 +20,7 @@ import { UsersService } from './providers/users.service';
 import { UsersAddressService } from './providers/users-address.service';
 import { UsersAddressController } from './controllers/users-address.controller';
 import { GoongMapModule } from 'src/goong-map/goong-map.module';
+import { UsersSearchService } from './providers/users-search.service';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { GoongMapModule } from 'src/goong-map/goong-map.module';
   providers: [
     UsersService,
     UsersAuthService,
+    UsersSearchService,
     StringHandlersHelper,
     MapsHelper,
     UsersAddressService,

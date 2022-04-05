@@ -49,3 +49,17 @@ export async function paginate<T = any>(
     },
   };
 }
+export function noResultPaginate<T = any>({
+  page,
+  perPage,
+}: PaginateOptions): PaginationRes<T> {
+  return {
+    items: [],
+    meta: {
+      perPage: perPage,
+      currentPage: page,
+      totalItems: 0,
+      totalPages: 0,
+    },
+  };
+}

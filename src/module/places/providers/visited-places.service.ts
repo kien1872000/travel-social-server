@@ -1,4 +1,5 @@
 import { Place } from '@entity/place.entity';
+import { Post } from '@entity/post.entity';
 import { UserPlace, UserPlaceDocument } from '@entity/user-place.entity';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
@@ -48,8 +49,8 @@ export class VisitedPlacesService {
           ['name', 'formattedAddress', 'coordinate'],
           Place.name,
         )
-        .populate('post', ['mediaFiles'])
-        .select(['-_id', 'lastVisitedDate'])
+        .populate('lastestPost', ['mediaFiles'], Post.name)
+        .select(['-_id'])
         .sort('-lastVisitedDate');
       return await paginate(query, { perPage: perPage, page: page });
     } catch (error) {

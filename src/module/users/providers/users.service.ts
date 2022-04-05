@@ -266,55 +266,7 @@ export class UsersService {
       throw new InternalServerErrorException(error);
     }
   }
-  public async getUserSearchList(
-    userId: string,
-    search: string,
-    pageNumber: number,
-  ): Promise<FollowingsOutput[]> {
-    search = this.stringHandlers.removeAccent(search.trim());
-    if (!search) return [];
-    let limit = SEARCH_USER_PER_PAGE;
-    let skip = !pageNumber || pageNumber <= 0 ? 0 : pageNumber * limit;
-    const globalRegex = new RegExp(
-      '(^' + search + ')' + '|' + '( +' + search + '[a-zA-z]*' + ')',
-      'i',
-    );
-    const followingIds = await this.followingsService.getFollowingIds(userId);
-    let followings: UserDocument[] = [];
-    if (skip < followingIds.length) {
-      followings = await this.userModel
-        .find({
-          displayNameNoAccent: { $regex: globalRegex },
-          _id: { $in: followingIds },
-        })
-        .sort({ displayNameNoAccent: 1 })
-        .select(['displayName', 'avatar'])
-        .skip(skip)
-        .limit(limit);
-
-      if (followings.length < limit) {
-        skip = 0;
-        limit = limit - followings.length;
-      } else {
-        return this.mapsHelper.mapToFollowingsOuput(
-          followings,
-          followingIds,
-          userId,
-        );
-      }
-    }
-    const rest = await this.userModel
-      .find({
-        displayNameNoAccent: { $regex: globalRegex },
-        _id: { $nin: followingIds },
-      })
-      .sort({ displayNameNoAccent: 1 })
-      .select(['displayName', 'avatar'])
-      .skip(skip)
-      .limit(limit);
-    const result = followings.concat(rest);
-    return this.mapsHelper.mapToFollowingsOuput(result, followingIds, userId);
-  }
+ 
   public async updateFollowers(
     userId: Types.ObjectId,
     update: number,

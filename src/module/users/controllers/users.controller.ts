@@ -27,13 +27,20 @@ import { ChangePasswordInput } from '@dto/user/changePassword.dto';
 import { ProfileImageInput, UserInfoInput } from '@dto/user/userProfile.dto';
 import { imageFileFilter, storage } from '@helper/storage.helper';
 import { UsersService } from '../providers/users.service';
+import { UsersSearchService } from '@user/providers/users-search.service';
+import { PaginateOptions } from '@util/types';
+import { PaginateQuery } from '@decorator/pagination.decorator';
+import { SEARCH_USER_PER_PAGE } from '@util/constants';
 
 @ApiTags('User')
 @ApiBearerAuth()
 @Controller('user')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private readonly usersSearchService: UsersSearchService,
+  ) {}
   @Get('profile')
   @ApiQuery({
     type: String,
@@ -110,16 +117,18 @@ export class UsersController {
     description: 'Nhập chuỗi tìm kiếm, nếu chuỗi rỗng sẽ không trả về gì',
   })
   @ApiQuery({
-    type: Number,
-    name: 'page',
-    description:
-      'Nhập số tự nhiên bắt đầu từ 0 tương ứng từng page, nếu nhập page <= 0 thì auto là page đầu tiên',
+    type: PaginateOptions,
   })
   async searchUsers(
     @Query('search') search: string,
-    @Query('page', ParseIntPipe) page,
+    @PaginateQuery(SEARCH_USER_PER_PAGE) { page, perPage }: PaginateOptions,
     @User() user,
   ) {
-    return this.usersService.getUserSearchList(user._id, search, page);
+    return this.usersSearchService.getUserSearchList(
+      search,
+      page,
+      perPage,
+      user._id,
+    );
   }
 }

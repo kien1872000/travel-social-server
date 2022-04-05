@@ -3,6 +3,8 @@ import { SearchPlaceInput, UpdatePlaceDto } from '@dto/place/place.dto';
 import { Coordinate, Place, PlaceDocument } from '@entity/place.entity';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { paginate } from '@util/paginate';
+import { PaginationRes } from '@util/types';
 import { Model } from 'mongoose';
 import { GoongMapService } from 'src/goong-map/goong-map.service';
 import { UserPlacesService } from './user-places.service';
@@ -80,6 +82,22 @@ export class PlacesService {
       return await this.placeModel.findOne({ _id: placeId });
     } catch (error) {
       console.log('find');
+
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async searchExistingPlaces(
+    input: string,
+    page: number,
+    perPage: number,
+  ): Promise<PaginationRes<PlaceDocument>> {
+    try {
+      const query = this.placeModel
+        .find({ $text: { $search: input } })
+        .select('-__v');
+      return await paginate(query, { page: page, perPage });
+    } catch (error) {
+      console.log(error);
 
       throw new InternalServerErrorException(error);
     }

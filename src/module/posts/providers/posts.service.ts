@@ -25,12 +25,12 @@ import {
 } from 'src/util/constants';
 import { Interaction, PostLimit, Privacy, Time } from 'src/util/enums';
 import { PaginationRes } from '@util/types';
-import { paginate } from '@util/paginate';
 import { LikesService } from '@like/providers/likes.service';
 import { Address } from '@entity/user.entity';
 import { Place } from '@entity/place.entity';
 import { PlacesService } from 'src/module/places/providers/places.service';
 import { UpdatePlaceDto } from '@dto/place/place.dto';
+import { noResultPaginate, paginate } from '@util/paginate';
 @Injectable()
 export class PostsService {
   constructor(
@@ -233,115 +233,103 @@ export class PostsService {
     };
   }
 
-  public async searchPosts(userId: string, search: string, pageNumber: number) {
+  public async searchPosts(
+    currentUser: string,
+    search: string,
+    page: number,
+    perPage: number,
+  ): Promise<PaginationRes<PostOutput>> {
     try {
-      if (!search) return [];
-      const limit = POSTS_PER_PAGE;
-      const skip = !pageNumber || pageNumber <= 0 ? 0 : pageNumber * limit;
-      search = search.trim();
+      search = search?.trim();
+      if (!search || search.length <= 0) {
+        return noResultPaginate({ page, perPage });
+      }
       const hashtagsInsearch =
         this.stringHandlersHelper.getHashtagFromString(search);
       let rmwp = search.split(' ').join('');
       hashtagsInsearch.forEach((ht) => {
         rmwp = rmwp.replace(ht, '');
       });
+      console.log(rmwp);
+
       if (hashtagsInsearch?.length > 0 && rmwp.length === 0) {
         return await this.searchPostByHashtags(
           hashtagsInsearch,
-          limit,
-          skip,
-          userId,
+          page,
+          perPage,
+          currentUser,
         );
       } else {
         console.log(search);
-        const posts = await this.postModel
-          .find({ description: { $regex: search } })
-          // .find({ $text: { $search: search } })
+        const query = this.postModel
+          .find({ $text: { $search: search } })
           .populate('user', ['avatar', 'displayName'])
-          .sort([['date', 1]])
-          .select(['-__v'])
-          .skip(skip)
-          .limit(limit);
+          .select(['-__v']);
+        const posts = await paginate(query, { page: page, perPage: perPage });
 
-        const postsResult = await Promise.all([
-          posts.map(async (post) => {
-            const liked = await this.likesService.isUserLikedPost(
-              userId,
-              (post as any)._id.toString(),
-            );
-            return this.mapsHelper.mapToPostOutPut(post, userId, liked);
-          }),
-        ]);
         return {
-          searchResults: posts.length,
-          postsResult,
+          items: await Promise.all(
+            posts.items.map(async (i) => {
+              const liked = await this.likesService.isUserLikedPost(
+                currentUser,
+                (i as any)._id.toString(),
+              );
+              return this.mapsHelper.mapToPostOutPut(i, currentUser, liked);
+            }),
+          ),
+          meta: posts.meta,
         };
       }
-    } catch (err) {
-      throw new InternalServerErrorException(err);
+    } catch (error) {
+      console.log(error);
+
+      throw new InternalServerErrorException(error);
     }
   }
 
   public async searchPostByHashtags(
     hashtagsArr: string[],
-    limit: number,
-    skip: number,
-    userId: string,
-  ) {
+    page: number,
+    perPage: number,
+    currentUser: string,
+  ): Promise<PaginationRes<PostOutput>> {
     try {
+      let query;
       if (hashtagsArr?.length === 1) {
         const hashtagInfo = await this.hashtagsService.getHashtag(
           hashtagsArr[0],
         );
         if (hashtagInfo) {
-          const postByHashtag = await this.postModel
+          console.log(hashtagInfo);
+
+          query = this.postModel
             .find({
               hashtags: hashtagsArr[0],
             })
             .populate('user', ['avatar', 'displayName'])
-            .sort([['date', 1]])
-            .select(['-__v'])
-            .skip(skip)
-            .limit(limit);
-
-          const postsResult = postByHashtag.map(async (post) => {
-            const liked = await this.likesService.isUserLikedPost(
-              userId,
-              (post as any)._id.toString(),
-            );
-            return this.mapsHelper.mapToPostOutPut(post, userId, liked);
-          });
-          return {
-            hashtagInfo,
-            postByHashtag: postsResult,
-          };
+            .select(['-__v']);
         }
       } else {
-        const postByHashtags = await this.postModel
+        query = this.postModel
           .find({
             hashtags: { $all: hashtagsArr },
           })
           .populate('user', ['avatar', 'displayName'])
-          .sort([['date', 1]])
-          .select(['-__v'])
-          .skip(skip)
-          .limit(limit);
-        const postsResult = postByHashtags.map(async (post) => {
-          const liked = await this.likesService.isUserLikedPost(
-            userId,
-            (post as any)._id.toString(),
-          );
-          return this.mapsHelper.mapToPostOutPut(post, userId, liked);
-        });
-        return {
-          searchReults: postByHashtags.length,
-          postByHashtags: postsResult,
-        };
-        // return {
-        //   searchReults: postByHashtags.length,
-        //   postByHashtags,
-        // };
+          .select(['-__v']);
       }
+      const posts = await paginate(query, { page, perPage });
+      return {
+        items: await Promise.all(
+          posts.items.map(async (i) => {
+            const liked = await this.likesService.isUserLikedPost(
+              currentUser,
+              (i as any)._id.toString(),
+            );
+            return this.mapsHelper.mapToPostOutPut(i, currentUser, liked);
+          }),
+        ),
+        meta: posts.meta,
+      };
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
