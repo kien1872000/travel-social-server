@@ -266,7 +266,7 @@ export class UsersService {
       throw new InternalServerErrorException(error);
     }
   }
- 
+
   public async updateFollowers(
     userId: Types.ObjectId,
     update: number,
@@ -327,7 +327,7 @@ export class UsersService {
         .find({
           _id: { $in: users.map((i) => Types.ObjectId(i)) },
         })
-        .select('name');
+        .select('displayName');
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

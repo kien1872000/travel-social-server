@@ -1,15 +1,18 @@
 import { AuthService } from '@auth/auth.service';
 import { ChatRoomsService } from '@chat/providers/chat-rooms.service';
+import { UserDocument } from '@entity/user.entity';
 import {
   forwardRef,
   Inject,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { corsOptions } from '@util/constants';
 import { Server, Socket } from 'socket.io';
@@ -33,30 +36,37 @@ export class ConnectedSocketsGateWay
     try {
       const token = client.handshake.auth.token;
       const payload = this.authService.getPayloadFromAccessToken(token);
-      const userId = payload._id.toString();
+
       if (payload && payload.isActive) {
+        const userId = payload._id.toString();
+
         console.log(`client ${client.id} connected`);
-        const [rooms, _] = await Promise.all([
+        const [rooms] = await Promise.all([
           this.chatRoomsService.getRoomsUserHasJoined(payload._id.toString()),
           this.connectedSocketsService.saveSocket(client.id, userId),
+          this.chatRoomsService.returnRooms(userId),
         ]);
-        await this.chatRoomsService.returnRooms(userId);
         client.join(rooms);
       } else {
         client.disconnect();
       }
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      client.disconnect();
     }
   }
   async handleDisconnect(client: Socket) {
-    const token = client.handshake.auth.token;
-    const payload = this.authService.getPayloadFromAccessToken(token);
-    const userId = payload._id.toString();
-    await Promise.all([
-      this.chatRoomsService.leaveRooms(userId),
-      this.connectedSocketsService.deleteSocket(client.id),
-    ]);
-    console.log(`client ${client.id} disconnected`);
+    try {
+      const socket = await this.connectedSocketsService.getSocketBySocketId(
+        client.id,
+      );
+
+      await Promise.all([
+        this.chatRoomsService.leaveRooms((socket.user as any)._id.toString()),
+        this.connectedSocketsService.deleteSocket(client.id),
+      ]);
+      console.log(`client ${client.id} disconnected`);
+    } catch (error) {
+      throw new WsException(error);
+    }
   }
 }

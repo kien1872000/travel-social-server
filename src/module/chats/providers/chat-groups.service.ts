@@ -1,6 +1,10 @@
 import { CreateChatGroupDto } from '@dto/chat/chat-group.dto';
 import { ChatGroup, ChatGroupDocument } from '@entity/chat-group.entity';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsersService } from '@user/providers/users.service';
 import { Model, Types } from 'mongoose';
@@ -14,36 +18,48 @@ export class ChatGroupsService {
   ) {}
   public async createChatGroup(
     currentUser: string,
-    createChatGroupDto: CreateChatGroupDto,
+    { name, participants, isPrivate }: CreateChatGroupDto,
   ): Promise<void> {
     let image;
-    if (createChatGroupDto.participants.length < 1) return;
-    if (createChatGroupDto.isPrivate) {
-      if (createChatGroupDto.name || createChatGroupDto.participants.length > 1)
-        return;
+    console.log(participants);
+
+    const allParticipants = [...new Set(participants), currentUser].map((i) =>
+      Types.ObjectId(i),
+    );
+
+    if (allParticipants.length <= 1) return;
+    if (isPrivate) {
+      if (name || participants.length > 2) return;
       const query = {
-        participants: createChatGroupDto.participants.map((i) =>
-          Types.ObjectId(i),
-        ),
-        isPrivate: true,
+        $and: [
+          {
+            participants: { $all: allParticipants },
+          },
+          { participants: { $size: allParticipants.length } },
+          { isPrivate: true },
+        ],
       };
-      const isChatGroupExist = (await this.chatGroupModel.findOne(query))
-        ? true
-        : false;
-      if (isChatGroupExist) return;
+      const isChatGroupExist = await this.chatGroupModel.findOne(query);
+
+      if (isChatGroupExist)
+        throw new BadRequestException('Chat group already exists');
+      const userIds = participants.slice(0, 3);
+      image = await this.usersService.getUserAvatars(userIds);
     } else {
-      if (!createChatGroupDto.name) return;
-      const userIds = createChatGroupDto.participants.slice(0, 3);
+      if (!name) return;
+      const isChatGroupExist = await this.chatGroupModel.findOne({
+        name: name.trim(),
+      });
+      if (isChatGroupExist)
+        throw new BadRequestException('Chat group already exists');
+      const userIds = [...new Set(participants), currentUser].slice(0, 3);
       image = await this.usersService.getUserAvatars(userIds);
     }
     const chatGroup = {
       image: image,
-      name: createChatGroupDto.name,
-      participants: [
-        ...new Set(createChatGroupDto.participants),
-        currentUser,
-      ].map((i) => Types.ObjectId(i)),
-      isPrivate: createChatGroupDto.isPrivate,
+      name: name,
+      participants: allParticipants,
+      isPrivate: isPrivate,
     };
     await new this.chatGroupModel(chatGroup).save();
     try {
@@ -68,10 +84,11 @@ export class ChatGroupsService {
         .map((i) => i.toString())
         .slice(0, 3);
       const image = await this.usersService.getUserAvatars(participants);
-      await this.chatGroupModel.findByIdAndUpdate(
-        { chatGroupId },
-        { image: image },
-      );
+
+      //update image for chat group
+      await this.chatGroupModel.findByIdAndUpdate(chatGroupId, {
+        image: image,
+      });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -79,7 +96,7 @@ export class ChatGroupsService {
   public async getParticipants(chatGroupId: string): Promise<string[]> {
     try {
       const chatGroup = await this.chatGroupModel.findById(chatGroupId);
-      return chatGroup.participants.map((i) => i.toString());
+      return chatGroup?.participants.map((i) => i.toString());
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -122,6 +139,17 @@ export class ChatGroupsService {
           image: image,
         });
       }
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async getJoinedChatGroups(user: string): Promise<Types.ObjectId[]> {
+    try {
+      return (
+        await this.chatGroupModel
+          .find({ participants: Types.ObjectId(user) })
+          .select('_id')
+      ).map((i) => i._id);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

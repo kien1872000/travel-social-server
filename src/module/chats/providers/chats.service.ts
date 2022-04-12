@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsersService } from '@user/providers/users.service';
-import { paginate } from '@util/paginate';
+import { noResultPaginate, paginate } from '@util/paginate';
 import { PaginationRes } from '@util/types';
 import { Model, Types } from 'mongoose';
 import { ChatGroupsService } from './chat-groups.service';
@@ -42,38 +42,38 @@ export class ChatsService {
         seen: false,
       }).save();
 
-      const recentChat = await this.recentChatModel.findOneAndUpdate(
-        { chatGroup: chatGroup },
-        { chatGroup: chatGroup, chat: chat._id },
+      await this.recentChatModel.findOneAndUpdate(
+        { chatGroup: Types.ObjectId(chatGroup) },
+        { chatGroup: Types.ObjectId(chatGroup), chat: chat._id },
         {
           upsert: true,
           new: true,
         },
       );
-      console.log('recent chat', recentChat);
 
       return chat;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  public async getRecentChats(
-    user: string,
-    page: number,
-    perPage: number,
-  ): Promise<PaginationRes<RecentChatOutput>> {
+  public async getRecentChats(user: string, page: number, perPage: number) {
     try {
+      const joinedChatGroups = await this.chatGroupsService.getJoinedChatGroups(
+        user,
+      );
       const query = this.recentChatModel
         .find({
-          participants: Types.ObjectId(user),
+          chatGroup: { $in: joinedChatGroups },
         })
-        .populate('chat', ['owner', 'createdAt', 'message', 'seen'])
+        .populate('chat', ['owner', 'createdAt', 'message', 'seenUsers'])
         .populate('chatGroup', ['name', 'image'])
         .sort('-updatedAt');
+
       const recentChats = await paginate(query, {
         page: page,
         perPage: perPage,
       });
+
       return {
         items: recentChats.items.map((i) =>
           this.mapsHelper.mapToRecentChatOutput(user, i),
@@ -81,6 +81,8 @@ export class ChatsService {
         meta: recentChats.meta,
       };
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException(error);
     }
   }
@@ -97,6 +99,8 @@ export class ChatsService {
           chatGroup: Types.ObjectId(chatGroupId),
         }),
       ]);
+
+      if (!recentChat) return noResultPaginate({ page, perPage });
       const participants = chatGroup.participants.map((i) => i.toString());
       if (!participants.includes(currentUser)) {
         throw new BadRequestException('you have not joined the chat group');
@@ -111,7 +115,7 @@ export class ChatsService {
       const [inbox, _] = await Promise.all([
         paginate(query, { page: page, perPage: perPage }),
         this.chatModel.findByIdAndUpdate(chatId, {
-          $addtoSet: { seenUsers: Types.ObjectId(currentUser) },
+          $addToSet: { seenUsers: Types.ObjectId(currentUser) },
         }),
       ]);
       return {
@@ -121,6 +125,8 @@ export class ChatsService {
         meta: inbox.meta,
       };
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException(error);
     }
   }

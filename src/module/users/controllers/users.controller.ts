@@ -31,6 +31,7 @@ import { UsersSearchService } from '@user/providers/users-search.service';
 import { PaginateOptions } from '@util/types';
 import { PaginateQuery } from '@decorator/pagination.decorator';
 import { SEARCH_USER_PER_PAGE } from '@util/constants';
+import { SearchUserFilter } from '@util/enums';
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -129,6 +130,10 @@ export class UsersController {
       page,
       perPage,
       user._id,
+      SearchUserFilter.ChatGroup,
+      user._id,
+      '625502892c7d8812c03dd16d',
     );
+    //return this.usersSearchService.test(user._id, page, perPage);
   }
 }

@@ -124,17 +124,17 @@ export class FollowingsService {
         })
         .populate('user', ['displayName', 'avatar'])
         .select(['-_id', '-__v']);
-      const [followings, followingIds] = await Promise.all([
+      const [followers, followingIds] = await Promise.all([
         paginate(query, { perPage: perPage, page: page }),
         this.getFollowingIds(currentUser),
       ]);
       return {
         items: this.mapsHelper.mapToFollowingsOuput(
-          followings.items,
+          followers.items,
           followingIds,
           currentUser,
         ),
-        meta: followings.meta,
+        meta: followers.meta,
       };
     } catch (error) {
       throw new InternalServerErrorException(error);

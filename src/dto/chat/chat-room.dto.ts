@@ -1,11 +1,11 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { ArrayNotEmpty, IsNotEmpty, IsString } from 'class-validator';
 
 export class AddUsersToRoomDto {
   @IsString()
   @IsNotEmpty()
-  chatGoupId: string;
-  @IsArray()
-  @IsNotEmpty()
+  chatGroupId: string;
+  @IsString({ each: true })
+  @ArrayNotEmpty()
   userIds: string[];
 }
 export interface AddUsersToRoomOutput {
@@ -14,4 +14,10 @@ export interface AddUsersToRoomOutput {
     displayName: string;
   };
   addedUsers: { _id: string; displayName: string }[];
+}
+
+export class JoinRoomDto {
+  @IsString()
+  @IsNotEmpty()
+  chatGroupId: string;
 }

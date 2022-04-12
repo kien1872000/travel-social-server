@@ -48,7 +48,7 @@ import { ChatsService } from './providers/chats.service';
     ChatRoomsService,
     ChatRoomsGateWay,
   ],
-  exports: [ChatRoomsService],
+  exports: [ChatRoomsService, ChatGroupsService],
   controllers: [ChatsController],
 })
 export class ChatsModule {}

@@ -20,7 +20,7 @@ export async function paginate<T = any>(
   } else {
     const pagination = {
       $facet: {
-        items: [{ $skip: offset }, { $limit: perPage }, project],
+        items: [{ $skip: offset }, { $limit: perPage }, { $project: project }],
         meta: [
           { $count: 'totalItems' },
           { $addFields: { currentPage: Number(page) } },
@@ -36,8 +36,9 @@ export async function paginate<T = any>(
       },
     };
     const result = (await query.append(pagination))[0];
+
     items = result.items;
-    count = result.meta[0].totalItems;
+    count = result.meta[0] ? result.meta[0].totalItems : 0;
   }
   return {
     items: items,

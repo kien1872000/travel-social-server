@@ -137,10 +137,9 @@ export class ChatRoomsService {
         await this.chatRoomModel.findOne({
           chatGroup: Types.ObjectId(chatGroupId),
         })
-      )._id.toString();
+      )?._id.toString();
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  
 }

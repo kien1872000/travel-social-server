@@ -69,3 +69,10 @@ export enum Interaction {
   Like = 'like',
   Comment = 'comment',
 }
+
+export enum SearchUserFilter {
+  ChatGroup = 'chatGroup',
+  Following = 'following',
+  Follower = 'follower',
+  All = 'all'
+}

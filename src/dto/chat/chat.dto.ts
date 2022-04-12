@@ -1,5 +1,11 @@
-export interface ChatMessageInput {
+import { IsNotEmpty, IsString } from 'class-validator';
+
+export class ChatMessageInput {
+  @IsString()
+  @IsNotEmpty()
   message: string;
+  @IsString()
+  @IsNotEmpty()
   chatGroupId: string;
 }
 export interface ChatMessageOutput {

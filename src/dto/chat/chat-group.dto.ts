@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateChatGroupDto {
   @ApiProperty({
@@ -15,8 +21,8 @@ export class CreateChatGroupDto {
     required: true,
     description: 'Các thành viên tham gia, không bao gồm user hiện tại',
   })
-  @IsArray()
-  @IsNotEmpty()
+  @IsString({ each: true })
+  @ArrayNotEmpty()
   participants: string[];
   @ApiProperty({
     type: Boolean,

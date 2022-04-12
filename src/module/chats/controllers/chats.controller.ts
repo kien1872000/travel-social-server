@@ -1,9 +1,18 @@
 import { JwtAuthGuard } from '@auth/jwt-auth.guard';
+import { ChatGroupsService } from '@chat/providers/chat-groups.service';
 import { ChatsService } from '@chat/providers/chats.service';
 import { PaginateQuery } from '@decorator/pagination.decorator';
 import { User } from '@decorator/user.decorator';
 import { CreateChatGroupDto } from '@dto/chat/chat-group.dto';
-import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -21,7 +30,10 @@ import { userInfo } from 'os';
 @ApiTags('Chat')
 @UseGuards(JwtAuthGuard)
 export class ChatsController {
-  constructor(private chatsService: ChatsService) {}
+  constructor(
+    private chatsService: ChatsService,
+    private chatGroupsService: ChatGroupsService,
+  ) {}
   @Get('recent-chats')
   @ApiQuery({ type: PaginateOptions })
   @ApiOperation({ description: 'Lấy danh sách chat với người khác' })
@@ -48,7 +60,10 @@ export class ChatsController {
   }
   @Post('create/chat-group')
   @ApiBody({ type: CreateChatGroupDto })
-  async createChatGroup(@User() user, createChatGroupDto: CreateChatGroupDto) {
-    // return this.chatsService.createChatGroup()
+  async createChatGroup(
+    @User() user,
+    @Body() createChatGroupDto: CreateChatGroupDto,
+  ) {
+    return this.chatGroupsService.createChatGroup(user._id, createChatGroupDto);
   }
 }
