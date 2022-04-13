@@ -19,10 +19,8 @@ export class ChatGroupsService {
   public async createChatGroup(
     currentUser: string,
     { name, participants, isPrivate }: CreateChatGroupDto,
-  ): Promise<void> {
+  ): Promise<ChatGroupDocument> {
     let image;
-    console.log(participants);
-
     const allParticipants = [...new Set(participants), currentUser].map((i) =>
       Types.ObjectId(i),
     );
@@ -39,10 +37,9 @@ export class ChatGroupsService {
           { isPrivate: true },
         ],
       };
-      const isChatGroupExist = await this.chatGroupModel.findOne(query);
+      const chatGroup = await this.chatGroupModel.findOne(query);
 
-      if (isChatGroupExist)
-        throw new BadRequestException('Chat group already exists');
+      if (chatGroup) return chatGroup;
       const userIds = participants.slice(0, 3);
       image = await this.usersService.getUserAvatars(userIds);
     } else {
@@ -61,11 +58,7 @@ export class ChatGroupsService {
       participants: allParticipants,
       isPrivate: isPrivate,
     };
-    await new this.chatGroupModel(chatGroup).save();
-    try {
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+    return await new this.chatGroupModel(chatGroup).save();
   }
   public async addUsersToChatGroup(
     userIds: string[],

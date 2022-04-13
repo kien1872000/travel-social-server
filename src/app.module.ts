@@ -10,6 +10,7 @@ import { ConfigService } from './config/config.service';
 import { NotificationsModule } from './module/notifications/notifications.module';
 import { PlacesModule } from './module/places/places.module';
 import { PostsModule } from './module/posts/posts.module';
+import { SearchsModule } from './module/searchs/searchs.module';
 import { UsersModule } from './module/users/users.module';
 
 @Module({
@@ -28,6 +29,7 @@ import { UsersModule } from './module/users/users.module';
     NotificationsModule,
     ChatsModule,
     PlacesModule,
+    SearchsModule
   ],
   controllers: [AppController],
   providers: [AppService],

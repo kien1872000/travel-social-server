@@ -55,6 +55,6 @@ import { ChatsModule } from '@chat/chat.module';
     MapsHelper,
     UsersAddressService,
   ],
-  exports: [UsersService, UsersAuthService],
+  exports: [UsersService, UsersAuthService, UsersSearchService],
 })
 export class UsersModule {}

@@ -42,8 +42,10 @@ export class SearchsController {
   })
   @ApiQuery({
     type: String,
+    required: false,
     name: 'target',
-    description: 'mục tiêu muốn search, có thể là user nào đó hoặc chat group',
+    description:
+      'mục tiêu muốn search, có thể là user nào đó hoặc chat group, search all hoặc trong profile của current user thì không cần truyền',
   })
   async searchUsers(
     @Query('search') search: string,

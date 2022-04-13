@@ -160,7 +160,6 @@ export class UsersSearchService {
       };
       return await paginate(query, { page, perPage }, project);
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }
