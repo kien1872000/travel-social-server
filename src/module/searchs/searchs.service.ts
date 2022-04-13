@@ -9,16 +9,16 @@ export class SearchsService {
     private readonly hashtagsService: HashtagsService,
     private readonly placesService: PlacesService,
   ) {}
-  //   public async search(
-  //     input: string,
-  //     currentUser: string,
-  //     page: number,
-  //     perPage: number,
-  //   ): Promise<SearchDto> {
-  //     try {
-
-  //     } catch (error) {
-  //       throw new InternalServerErrorException(error);
-  //     }
-  //   }
+  public async searchAll(
+    input: string,
+    page: number,
+    perPage: number,
+    currentUser: string,
+  ) {
+    return null;
+    try {
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
 }

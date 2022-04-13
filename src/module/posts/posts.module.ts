@@ -14,6 +14,7 @@ import { CommentsModule } from '@comment/comments.module';
 import { PlacesService } from '../places/providers/places.service';
 import { PlacesModule } from '../places/places.module';
 import { PostPlaceService } from './providers/post-place.service';
+import { PostsSearchService } from './providers/posts-search.service';
 
 @Module({
   imports: [
@@ -37,7 +38,13 @@ import { PostPlaceService } from './providers/post-place.service';
     StringHandlersHelper,
     MapsHelper,
     PostDetailService,
+    PostsSearchService,
   ],
-  exports: [PostsService, PostDetailService, PostPlaceService],
+  exports: [
+    PostsService,
+    PostDetailService,
+    PostPlaceService,
+    PostsSearchService,
+  ],
 })
 export class PostsModule {}

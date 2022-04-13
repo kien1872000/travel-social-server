@@ -4,6 +4,8 @@ import { FollowingsService } from '@following/providers/followings.service';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import {
+  BadGatewayException,
+  BadRequestException,
   ForbiddenException,
   forwardRef,
   Inject,
@@ -31,8 +33,7 @@ export class UsersSearchService {
     perPage: number,
     currentUser: string,
     filter: string,
-    otherUser?: string,
-    chatGroupId?: string,
+    target: string,
   ) {
     try {
       search = this.stringHandlersHelper.removeAccent(search.trim());
@@ -41,7 +42,7 @@ export class UsersSearchService {
         '(^' + search + ')' + '|' + '( +' + search + '[a-zA-z]*' + ')',
         'i',
       );
-      let target = otherUser ? otherUser : currentUser;
+      target = target ? target : currentUser;
       let collection: string;
       let matchField: string;
       let selectField: any;
@@ -56,15 +57,15 @@ export class UsersSearchService {
       ];
       switch (filter) {
         case SearchUserFilter.ChatGroup:
-          if (!chatGroupId) return;
+          if (!target) return;
           const chatGroup = await this.chatGroupService.getChatGroupById(
-            chatGroupId,
+            target,
           );
-          if (!chatGroup) return;
+          if (!chatGroup)
+            throw new BadRequestException('This chat group does not exist');
           if (!chatGroup.participants.includes(Types.ObjectId(currentUser))) {
             throw new ForbiddenException('you have not joined the chat group');
           }
-          target = chatGroupId;
           collection = 'chatgroups';
           matchField = '$_id';
           selectField = { participants: 1, _id: 0 };

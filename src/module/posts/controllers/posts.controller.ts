@@ -70,25 +70,6 @@ export class PostsController {
     return this.postsService.createNewPost(user._id, postPrivateInput);
   }
 
-  @Get('search/posts')
-  @ApiOperation({ description: 'Tìm kiếm post' })
-  @ApiQuery({
-    type: String,
-    name: 'search',
-    required: false,
-    description:
-      'Nhập chuỗi tìm kiếm, chuỗi có thể bao gồm nhiều hashtag và string',
-  })
-  @ApiQuery({
-    type: PaginateOptions,
-  })
-  async searchPosts(
-    @User() user,
-    @Query('search') search: string,
-    @PaginateQuery(POSTS_PER_PAGE) { page, perPage }: PaginateOptions,
-  ) {
-    return this.postsService.searchPosts(user._id, search, page, perPage);
-  }
   @Get('posts')
   @ApiQuery({
     type: String,

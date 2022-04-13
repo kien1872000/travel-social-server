@@ -5,6 +5,9 @@ import { Model } from 'mongoose';
 import { Hashtag, HashtagDocument } from '@entity/hastag.entity';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { TimeCheck } from '@util/enums';
+import { HashtagOutput } from '@dto/hashtag/hashtag.dto';
+import { paginate } from '@util/paginate';
+import { PaginationRes } from '@util/types';
 
 @Injectable()
 export class HashtagsService {
@@ -53,6 +56,25 @@ export class HashtagsService {
       return hashtagInfo;
     } catch (err) {
       throw new InternalServerErrorException(err);
+    }
+  }
+  public async searchHashtags(
+    input: string,
+    page: number,
+    perPage,
+  ): Promise<PaginationRes<HashtagOutput>> {
+    try {
+      const query = this.hashtagModel
+        .find({ hashtag: { $regex: input } })
+        .select(['popular', 'hashtag', '-_id'])
+        .sort('-popular');
+      const hashtags = await paginate(query, { page, perPage });
+      return {
+        items: hashtags.items as unknown as HashtagOutput[],
+        meta: hashtags.meta,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
   }
 }

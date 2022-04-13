@@ -1,6 +1,17 @@
 import { JwtAuthGuard } from '@auth/jwt-auth.guard';
-import { Controller, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { PaginateQuery } from '@decorator/pagination.decorator';
+import { User } from '@decorator/user.decorator';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+import { UsersSearchService } from '@user/providers/users-search.service';
+import { SEARCH_USER_PER_PAGE } from '@util/constants';
+import { SearchUserFilter } from '@util/enums';
+import { PaginateOptions } from '@util/types';
 import { SearchsService } from './searchs.service';
 
 @Controller('searchs')
@@ -8,5 +19,46 @@ import { SearchsService } from './searchs.service';
 @ApiBearerAuth()
 @ApiTags('Search')
 export class SearchsController {
-  constructor(private searchsService: SearchsService) {}
+  constructor(
+    private searchsService: SearchsService,
+    private readonly usersSearchService: UsersSearchService,
+  ) {}
+  @Get('users')
+  @ApiOperation({
+    description:
+      'search tất cả user theo tên, search trong danh sách following, follower và search user để mời trong chat group (danh sách những user không có trong chat group)',
+  })
+  @ApiQuery({
+    type: String,
+    name: 'search',
+    description: 'input để search',
+  })
+  @ApiQuery({ type: PaginateOptions })
+  @ApiQuery({
+    type: String,
+    name: 'filter',
+    enum: SearchUserFilter,
+    description: 'Lọc danh sách search',
+  })
+  @ApiQuery({
+    type: String,
+    name: 'target',
+    description: 'mục tiêu muốn search, có thể là user nào đó hoặc chat group',
+  })
+  async searchUsers(
+    @Query('search') search: string,
+    @User() user,
+    @Query('filter') filter: string,
+    @Query('target') target: string,
+    @PaginateQuery(SEARCH_USER_PER_PAGE) { page, perPage }: PaginateOptions,
+  ) {
+    return this.usersSearchService.getUserSearchList(
+      search,
+      page,
+      perPage,
+      user._id,
+      filter,
+      target,
+    );
+  }
 }

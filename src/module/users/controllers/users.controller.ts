@@ -110,30 +110,4 @@ export class UsersController {
       files?.coverPhoto ? files.coverPhoto[0] : null,
     );
   }
-  @Get('search/users')
-  @ApiOperation({ description: 'Tìm kiếm người dùng theo tên' })
-  @ApiQuery({
-    type: String,
-    name: 'search',
-    description: 'Nhập chuỗi tìm kiếm, nếu chuỗi rỗng sẽ không trả về gì',
-  })
-  @ApiQuery({
-    type: PaginateOptions,
-  })
-  async searchUsers(
-    @Query('search') search: string,
-    @PaginateQuery(SEARCH_USER_PER_PAGE) { page, perPage }: PaginateOptions,
-    @User() user,
-  ) {
-    return this.usersSearchService.getUserSearchList(
-      search,
-      page,
-      perPage,
-      user._id,
-      SearchUserFilter.ChatGroup,
-      user._id,
-      '625502892c7d8812c03dd16d',
-    );
-    //return this.usersSearchService.test(user._id, page, perPage);
-  }
 }
