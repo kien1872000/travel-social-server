@@ -14,4 +14,4 @@ export class Hashtag {
 export type HashtagDocument = Hashtag & Document;
 export const HashtagSchema = SchemaFactory.createForClass(Hashtag);
 HashtagSchema.index({ hashtag: 1 });
-HashtagSchema.index({ popular: 1 });
+HashtagSchema.index({ popular: -1 });

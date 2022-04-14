@@ -15,6 +15,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { SearchUserFilter } from '@util/enums';
 import { noResultPaginate, paginate } from '@util/paginate';
+import { PaginationRes } from '@util/types';
 import { Aggregate, Model, Types } from 'mongoose';
 
 @Injectable()
@@ -25,14 +26,15 @@ export class UsersSearchService {
     @Inject(forwardRef(() => ChatGroupsService))
     private readonly chatGroupService: ChatGroupsService,
   ) {}
-  public async getUserSearchList(
+  public async getUserSearchList<T>(
     search = '',
     page: number,
     perPage: number,
     currentUser: string,
-    filter: string,
-    target: string,
-  ) {
+    moreInFo = false,
+    filter?: string,
+    target?: string,
+  ): Promise<PaginationRes<T>> {
     try {
       search = this.stringHandlersHelper.removeAccent(search.trim());
       if (search.length <= 0) return noResultPaginate({ page, perPage });
@@ -81,6 +83,8 @@ export class UsersSearchService {
           break;
         case SearchUserFilter.All:
         default:
+          console.log(search);
+
           collection = 'followings';
           break;
       }
@@ -98,25 +102,23 @@ export class UsersSearchService {
           as: 'filterList',
         },
       };
-      const query = this.userModel.aggregate<UserDocument>([
-        searchMatch,
-        {
-          $lookup: {
-            from: 'followings',
-
-            pipeline: [
-              {
-                $match: {
-                  $expr: { $eq: ['$user', Types.ObjectId(currentUser)] },
-                },
+      const query = this.userModel.aggregate<UserDocument>([searchMatch]);
+      const followingList = {
+        $lookup: {
+          from: 'followings',
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$user', Types.ObjectId(currentUser)] },
               },
-              { $project: { following: 1, _id: 0 } },
-            ],
-            as: 'followingList',
-          },
+            },
+            { $project: { following: 1, _id: 0 } },
+          ],
+          as: 'followingList',
         },
-      ]);
-      if (filter !== SearchUserFilter.All) {
+      };
+
+      if (filter && filter !== SearchUserFilter.All) {
         query.append(filterList);
         if (filter === SearchUserFilter.ChatGroup) {
           query.append({
@@ -138,6 +140,7 @@ export class UsersSearchService {
       }
 
       query.append(
+        followingList,
         {
           $addFields: {
             followed: { $in: ['$_id', '$followingList.following'] },
@@ -145,15 +148,28 @@ export class UsersSearchService {
         },
         { $sort: { followed: -1 } },
       );
-      const project = {
+      let project = {
+        _id: 0,
         userId: '$_id',
         displayName: 1,
         avatar: 1,
         followed: 1,
         isCurrentUser: { $eq: ['$_id', Types.ObjectId(currentUser)] },
       };
-      return await paginate(query, { page, perPage }, project);
+      if (moreInFo) {
+        project = {
+          ...{ address: 1, followers: 1, followings: 1 },
+          ...project,
+        };
+      }
+      return (await paginate(
+        query,
+        { page, perPage },
+        project,
+      )) as unknown as PaginationRes<T>;
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException(error);
     }
   }

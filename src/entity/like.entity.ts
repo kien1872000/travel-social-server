@@ -10,3 +10,4 @@ export class Like {
 }
 export type LikeDocument = Like & Document;
 export const LikeSchema = SchemaFactory.createForClass(Like);
+LikeSchema.index({ user: 1, post: 1 });

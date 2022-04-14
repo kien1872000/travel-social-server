@@ -10,8 +10,9 @@ import {
 } from '@nestjs/swagger';
 import { UsersSearchService } from '@user/providers/users-search.service';
 import { SEARCH_USER_PER_PAGE } from '@util/constants';
-import { SearchUserFilter } from '@util/enums';
+import { SearchAllDetailFilter, SearchUserFilter } from '@util/enums';
 import { PaginateOptions } from '@util/types';
+import { filter } from 'rxjs';
 import { SearchsService } from './searchs.service';
 
 @Controller('searchs')
@@ -59,8 +60,50 @@ export class SearchsController {
       page,
       perPage,
       user._id,
+      false,
       filter,
       target,
+    );
+  }
+  @Get('all')
+  @ApiQuery({
+    type: String,
+    name: 'search',
+    description: 'input để search',
+  })
+  @ApiQuery({ type: PaginateOptions })
+  async searchAll(
+    @Query('search') search: string,
+    @User() user,
+    @PaginateQuery(SEARCH_USER_PER_PAGE) { page, perPage }: PaginateOptions,
+  ) {
+    return this.searchsService.searchAll(search, page, perPage, user._id);
+  }
+  @Get('all/detail')
+  @ApiQuery({
+    type: String,
+    name: 'search',
+    description: 'input để search',
+  })
+  @ApiQuery({
+    type: String,
+    name: 'filter',
+    enum: SearchAllDetailFilter,
+    description: 'Lọc danh sách search',
+  })
+  @ApiQuery({ type: PaginateOptions })
+  async searchAllDetail(
+    @Query('filter') filter: string,
+    @Query('search') search: string,
+    @User() user,
+    @PaginateQuery(SEARCH_USER_PER_PAGE) { page, perPage }: PaginateOptions,
+  ) {
+    return this.searchsService.searchAllDetail(
+      search,
+      filter,
+      page,
+      perPage,
+      user._id,
     );
   }
 }

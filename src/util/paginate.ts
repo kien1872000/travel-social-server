@@ -12,6 +12,7 @@ export async function paginate<T = any>(
   const offset = page * perPage;
   let items: T[], count: number;
   if (query instanceof Query) {
+
     const qc = query.toConstructor();
 
     const getQuery = new qc().skip(offset).limit(perPage);

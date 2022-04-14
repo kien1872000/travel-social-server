@@ -1,6 +1,8 @@
 import { FollowingsOutput } from '@dto/following/following.dto';
 import { Address } from '@entity/user.entity';
 
-export class SearchUserDto extends FollowingsOutput {
-  address: Address;
+export class SearchUserDetailDto extends FollowingsOutput {
+  followers: number;
+  followings: number;
+  address: Address
 }

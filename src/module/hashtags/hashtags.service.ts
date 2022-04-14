@@ -68,11 +68,7 @@ export class HashtagsService {
         .find({ hashtag: { $regex: input } })
         .select(['popular', 'hashtag', '-_id'])
         .sort('-popular');
-      const hashtags = await paginate(query, { page, perPage });
-      return {
-        items: hashtags.items as unknown as HashtagOutput[],
-        meta: hashtags.meta,
-      };
+      return await paginate(query, { page, perPage });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

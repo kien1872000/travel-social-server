@@ -101,33 +101,23 @@ export class PostsController {
     } else userId = user._id;
     return this.postsService.getPosts(page, perPage, userId, postLimit);
   }
-  @Get('posts/by-hashtag')
+  @Get('hashtag-detail')
   @ApiQuery({
     type: PaginateOptions,
-  })
-  @ApiQuery({
-    type: String,
-    enum: Time,
-    name: 'time',
-    description:
-      'Thời gian lọc hashtag: ngày, tháng, năm, all. Không chọn thì lấy all',
   })
   @ApiQuery({
     type: String,
     name: 'hashtag',
     description: 'Hashtag muốn lấy các posts',
   })
-  async getPostsByHahstag(
-    @Query('time') time: string,
+  async hashtagDetail(
     @Query('hashtag') hashtag: string,
     @PaginateQuery(POSTS_PER_PAGE) { page, perPage }: PaginateOptions,
     @User() user,
   ) {
-    if (!time) time = Time.All;
     return this.postsService.getPostsByHashtag(
       user._id,
-      time,
-      hashtag.trim(),
+      hashtag,
       page,
       perPage,
     );

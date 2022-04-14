@@ -26,21 +26,22 @@ export class PostsSearchService {
     currentUser: string,
   ): Promise<PaginationRes<PostOutput>> {
     try {
+      // eslint-disable-next-line @typescript-eslint/ban-types
       let query;
       if (hashtagsArr?.length === 1) {
-        const hashtagInfo = await this.hashtagsService.getHashtag(
+        const hashtagInfo = await this.hashtagsService.searchHashtags(
           hashtagsArr[0],
+          0,
+          1,
         );
-        if (hashtagInfo) {
-          console.log(hashtagInfo);
-
+        if (hashtagInfo.items[0]) {
           query = this.postModel
             .find({
-              hashtags: hashtagsArr[0],
+              hashtags: hashtagInfo.items[0].hashtag,
             })
             .populate('user', ['avatar', 'displayName'])
             .select(['-__v']);
-        }
+        } else return noResultPaginate({ page, perPage });
       } else {
         query = this.postModel
           .find({
@@ -73,19 +74,21 @@ export class PostsSearchService {
     perPage: number,
   ): Promise<PaginationRes<PostOutput>> {
     try {
-      search = search?.trim();
-      if (!search || search.length <= 0) {
-        return noResultPaginate({ page, perPage });
-      }
       const hashtagsInsearch =
         this.stringHandlersHelper.getHashtagFromString(search);
-      let rmwp = search.split(' ').join('');
-      hashtagsInsearch.forEach((ht) => {
-        rmwp = rmwp.replace(ht, '');
+      const tempHashtags = hashtagsInsearch.map((ht) => ht.replace('#', ''));
+      let removeNonHashtagCharacters = this.stringHandlersHelper
+        .removeAccent(search)
+        .split(/[^a-z0-9]/)
+        .join('');
+      tempHashtags.forEach((ht) => {
+        removeNonHashtagCharacters = removeNonHashtagCharacters.replace(ht, '');
       });
-      console.log(rmwp);
 
-      if (hashtagsInsearch?.length > 0 && rmwp.length === 0) {
+      if (
+        hashtagsInsearch?.length > 0 &&
+        removeNonHashtagCharacters.length <= 0
+      ) {
         return await this.searchPostByHashtags(
           hashtagsInsearch,
           page,
@@ -93,7 +96,6 @@ export class PostsSearchService {
           currentUser,
         );
       } else {
-        console.log(search);
         const query = this.postModel
           .find({ $text: { $search: search } })
           .populate('user', ['avatar', 'displayName'])

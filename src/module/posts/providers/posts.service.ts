@@ -7,11 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import {
-  PostInput,
-  PostOutput,
-  TrendingPostOutput,
-} from '@dto/post/post-new.dto';
+import { PostInput, PostOutput } from '@dto/post/post-new.dto';
 import { FileType, Post, PostDocument } from '@entity/post.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
@@ -31,6 +27,7 @@ import { Place } from '@entity/place.entity';
 import { PlacesService } from 'src/module/places/providers/places.service';
 import { UpdatePlaceDto } from '@dto/place/place.dto';
 import { noResultPaginate, paginate } from '@util/paginate';
+import { HashtagDetailDto } from '@dto/hashtag/hashtag.dto';
 @Injectable()
 export class PostsService {
   constructor(
@@ -46,43 +43,22 @@ export class PostsService {
     private readonly placesServive: PlacesService,
   ) {}
 
-  // Chỉ dùng cho trending
   public async getPostsByHashtag(
     currentUser: string,
-    time: string,
     hashtag: string,
     page: number,
     perPage: number,
-  ): Promise<TrendingPostOutput> {
+  ): Promise<HashtagDetailDto> {
     try {
-      let match;
-      if (time === Time.All) {
-        match = { hashtags: hashtag, isPublic: true };
-      } else {
-        const start = new Date(
-          this.stringHandlersHelper.getStartAndEndDateWithTime(time, true)[0],
-        );
-        const end = new Date(
-          this.stringHandlersHelper.getStartAndEndDateWithTime(time, true)[1],
-        );
-
-        match = {
-          hashtags: hashtag,
-          isPublic: true,
-          createdAt: { $gte: start, $lte: end },
-        };
-      }
       const query = this.postModel
-        .find(match)
-        .populate('user', ['displayName', 'avatar'])
-        .sort({ createdAt: -1 });
-      const [posts, poplular] = await Promise.all([
-        paginate(query, { page: page, perPage: perPage }),
-        this.postModel.countDocuments(match),
-      ]);
+        .find({ hashtags: hashtag })
+        .populate('user', ['displayName', 'avatar']);
+
+      const posts = await paginate(query, { page: page, perPage: perPage });
 
       return {
-        popular: poplular,
+        popular: posts.meta.totalItems,
+        hashtag: hashtag,
         posts: {
           items: await Promise.all(
             posts.items.map(async (i) => {

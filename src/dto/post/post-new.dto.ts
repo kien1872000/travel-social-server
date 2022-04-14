@@ -29,8 +29,3 @@ export class PostOutput {
   isCurrentUser: boolean;
   createdAt: string;
 }
-export class TrendingPostOutput {
-  popular: number;
-  posts: PaginationRes<PostOutput>;
-}
-

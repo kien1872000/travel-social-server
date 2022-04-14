@@ -8,7 +8,6 @@ export enum Privacy {
   Private = 'private',
 }
 
-
 export enum File {
   Image = 'image',
   Video = 'video',
@@ -74,5 +73,10 @@ export enum SearchUserFilter {
   ChatGroup = 'chatGroup',
   Following = 'following',
   Follower = 'follower',
-  All = 'all'
+  All = 'all',
+}
+
+export enum SearchAllDetailFilter {
+  Post = 'post',
+  User = 'user',
 }
