@@ -10,3 +10,5 @@ export class Following {
 }
 export const FollowingSchema = SchemaFactory.createForClass(Following);
 export type FollowingDocument = Following & Document;
+FollowingSchema.index({ following: 1 });
+FollowingSchema.index({ user: 1 });

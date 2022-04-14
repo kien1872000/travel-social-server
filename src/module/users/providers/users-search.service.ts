@@ -21,9 +21,7 @@ import { Aggregate, Model, Types } from 'mongoose';
 export class UsersSearchService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    private readonly mapsHelper: MapsHelper,
     private readonly stringHandlersHelper: StringHandlersHelper,
-    private readonly followingsService: FollowingsService,
     @Inject(forwardRef(() => ChatGroupsService))
     private readonly chatGroupService: ChatGroupsService,
   ) {}
@@ -46,15 +44,13 @@ export class UsersSearchService {
       let collection: string;
       let matchField: string;
       let selectField: any;
-      const match: any = [
-        { $eq: ['$isActive', true] },
-        {
-          $regexMatch: {
-            input: '$displayNameNoAccent',
-            regex: globalRegex,
-          },
+      const searchMatch = {
+        $match: {
+          displayNameNoAccent: { $regex: globalRegex },
+          isActive: true,
         },
-      ];
+      };
+      let targetMatch;
       switch (filter) {
         case SearchUserFilter.ChatGroup:
           if (!target) return;
@@ -69,23 +65,23 @@ export class UsersSearchService {
           collection = 'chatgroups';
           matchField = '$_id';
           selectField = { participants: 1, _id: 0 };
-          match.push({ $eq: ['$isInChatGroup', false] });
+          targetMatch = { $eq: ['$isInChatGroup', false] };
           break;
         case SearchUserFilter.Follower:
           collection = 'followings';
           matchField = '$following';
           selectField = { user: 1, _id: 0 };
-          match.push({ $in: ['$_id', '$filterList.user'] });
+          targetMatch = { $in: ['$_id', '$filterList.user'] };
           break;
         case SearchUserFilter.Following:
           collection = 'followings';
           matchField = '$user';
           selectField = { following: 1, _id: 0 };
-          match.push({ $in: ['$_id', '$filterList.following'] });
+          targetMatch = { $in: ['$_id', '$filterList.following'] };
           break;
         case SearchUserFilter.All:
-          collection = 'followings';
         default:
+          collection = 'followings';
           break;
       }
       const filterList = {
@@ -103,9 +99,11 @@ export class UsersSearchService {
         },
       };
       const query = this.userModel.aggregate<UserDocument>([
+        searchMatch,
         {
           $lookup: {
             from: 'followings',
+
             pipeline: [
               {
                 $match: {
@@ -120,21 +118,25 @@ export class UsersSearchService {
       ]);
       if (filter !== SearchUserFilter.All) {
         query.append(filterList);
-      }
-      if (filter === SearchUserFilter.ChatGroup) {
-        query.append({
-          $addFields: {
-            isInChatGroup: {
-              $let: {
-                vars: {
-                  filterList: { $arrayElemAt: ['$filterList', 0] },
+        if (filter === SearchUserFilter.ChatGroup) {
+          query.append({
+            $addFields: {
+              isInChatGroup: {
+                $let: {
+                  vars: {
+                    filterList: { $arrayElemAt: ['$filterList', 0] },
+                  },
+                  in: { $in: ['$_id', '$$filterList.participants'] },
                 },
-                in: { $in: ['$_id', '$$filterList.participants'] },
               },
             },
-          },
+          });
+        }
+        query.append({
+          $match: { $expr: targetMatch },
         });
       }
+
       query.append(
         {
           $addFields: {
@@ -142,14 +144,6 @@ export class UsersSearchService {
           },
         },
         { $sort: { followed: -1 } },
-
-        {
-          $match: {
-            $expr: {
-              $and: match,
-            },
-          },
-        },
       );
       const project = {
         userId: '$_id',

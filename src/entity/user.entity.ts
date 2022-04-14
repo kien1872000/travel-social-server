@@ -48,5 +48,4 @@ export class User {
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 export type UserDocument = Document & User;
-UserSchema.index({ displayNameNoAccent: 1, isActive: 1, _id: 1 });
-UserSchema.index({ displayName: 1 });
+UserSchema.index({ displayNameNoAccent: 1 });
