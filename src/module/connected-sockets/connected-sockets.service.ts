@@ -16,7 +16,7 @@ export class ConnectedSocketsService {
     try {
       await this.socketModel.deleteMany({ user: Types.ObjectId(userId) });
       const socket: Partial<ConnectedSocketDocument> = {
-        socketId: socketId,
+        _id: socketId,
         user: Types.ObjectId(userId),
       };
       await new this.socketModel(socket).save();
@@ -36,7 +36,7 @@ export class ConnectedSocketsService {
       const socket = await this.socketModel.findOne({
         user: Types.ObjectId(userId),
       });
-      return socket?.socketId;
+      return socket?._id;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

@@ -1,12 +1,9 @@
-import { CreateChatGroupDto } from '@dto/chat/chat-group.dto';
 import { InboxOutput } from '@dto/chat/chat.dto';
-import { RecentChatOutput } from '@dto/chat/recent-chat.dto';
-import { ChatGroup, ChatGroupDocument } from '@entity/chat-group.entity';
+
 import { Chat, ChatDocument } from '@entity/chat.entity';
 import { RecentChat, RecentChatDocument } from '@entity/recent-chat.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import {
-  BadGatewayException,
   BadRequestException,
   Injectable,
   InternalServerErrorException,

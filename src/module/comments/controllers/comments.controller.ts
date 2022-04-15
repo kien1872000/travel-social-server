@@ -2,12 +2,10 @@ import {
   Controller,
   Get,
   UseGuards,
-  Request,
   Post,
   Query,
   Delete,
   Body,
-  Put,
   Param,
 } from '@nestjs/common';
 import {

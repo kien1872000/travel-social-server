@@ -4,8 +4,6 @@ import { ChatsService } from '@chat/providers/chats.service';
 import { ConnectedSocketsService } from '@connected-socket/connected-sockets.service';
 import { ChatMessageInput, ChatMessageOutput } from '@dto/chat/chat.dto';
 import { UserDocument } from '@entity/user.entity';
-import { StringHandlersHelper } from '@helper/string-handler.helper';
-import { InternalServerErrorException, ValidationPipe } from '@nestjs/common';
 import {
   ConnectedSocket,
   SubscribeMessage,
@@ -14,7 +12,6 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { UsersService } from '@user/providers/users.service';
 import { corsOptions } from '@util/constants';
 import { Server, Socket } from 'socket.io';
 import { SocketValidationPipe } from 'src/pipes/socket-validation.pipe';

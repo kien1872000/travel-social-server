@@ -8,11 +8,6 @@ import {
 } from '@dto/chat/chat-room.dto';
 import { UserDocument } from '@entity/user.entity';
 import {
-  InternalServerErrorException,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
-import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
@@ -67,7 +62,7 @@ export class ChatRoomsGateWay {
         const connectedSockets = await this.connectedSocketsService.getSockets(
           participants,
         );
-        const participantSocketIds = connectedSockets.map((i) => i.socketId);
+        const participantSocketIds = connectedSockets.map((i) => i._id);
         const activeParticipants = connectedSockets.map((i) =>
           i.user.toString(),
         );
@@ -143,7 +138,7 @@ export class ChatRoomsGateWay {
       const connectedSockets = await this.connectedSocketsService.getSockets(
         usersToAdd,
       );
-      const userToAddSocketIds = connectedSockets.map((i) => i.socketId);
+      const userToAddSocketIds = connectedSockets.map((i) => i._id);
       const activeUsers = connectedSockets.map((i) => i.user.toString());
       const [usersToAddDetail] = await Promise.all([
         this.usersService.getUsers(usersToAdd),
