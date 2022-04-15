@@ -49,7 +49,7 @@ export class ConnectedSocketsService {
         .find({
           user: { $in: userIds.map((i) => Types.ObjectId(i)) },
         })
-        .select(['socketId', 'user']);
+        .select('user');
       return sockets;
     } catch (error) {
       throw new InternalServerErrorException(error);
