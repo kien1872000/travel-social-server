@@ -61,7 +61,7 @@ export class ConnectedSocketsService {
     try {
       return await this.socketModel
         .findOne({
-          socketId: socketId,
+          _id: socketId,
         })
         .populate('user', ['displayName', 'avatar']);
     } catch (error) {
