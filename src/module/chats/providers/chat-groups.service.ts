@@ -32,7 +32,7 @@ export class ChatGroupsService {
 
       let chatGroupName = [name];
       if (isPrivate) {
-        if (name || participants.length > 2) return;
+        if (name || allParticipants.length > 2) return;
         const query = {
           $and: [
             {
