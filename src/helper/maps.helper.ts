@@ -168,7 +168,10 @@ export class MapsHelper {
   ): ChatGroupOutput {
     let chatGroupName = chatGroup.name[0];
     if (chatGroup.isPrivate) {
-      chatGroupName = chatGroup.name[chatGroup.name.indexOf(currentUser) + 1];
+      chatGroupName =
+        chatGroup.name.indexOf(currentUser) === 0
+          ? chatGroup.name[3]
+          : chatGroup.name[1];
     }
     return {
       chatGroupId: (chatGroup as any)._id.toString(),
@@ -186,7 +189,10 @@ export class MapsHelper {
     let chatGroupName = chatGroup.name[0];
 
     if (chatGroup.isPrivate) {
-      chatGroupName = chatGroup.name[chatGroup.name.indexOf(currentUser) + 1];
+      chatGroupName =
+        chatGroup.name.indexOf(currentUser) === 0
+          ? chatGroup.name[3]
+          : chatGroup.name[1];
     }
     const seenUsers = chat.seenUsers.map((i) => i.toString());
     return {
