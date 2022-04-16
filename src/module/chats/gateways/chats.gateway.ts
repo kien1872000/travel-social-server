@@ -54,15 +54,19 @@ export class ChatGateway {
         chatGroupId,
         message,
       );
-      const messageToSend: ChatMessageOutput = {
+      const messageToSendOther: ChatMessageOutput = {
+        isCurrentUserMessage: false,
         message: message,
         userId: currentUserId,
         displayName: (socket.user as unknown as UserDocument).displayName,
         avatar: (socket.user as unknown as UserDocument).avatar,
         createdAt: (chat as any).createdAt,
       };
-      console.log('message', messageToSend);
-      this.server.to(room).emit(RECEIVE_MESSAGE, messageToSend);
+      const messageToSendOwner = JSON.parse(JSON.stringify(messageToSendOther));
+      messageToSendOwner.isCurrentUserMessage = true;
+      console.log('message', messageToSendOther);
+      this.server.to(client.id).emit(RECEIVE_MESSAGE, messageToSendOwner);
+      client.to(room).emit(RECEIVE_MESSAGE, messageToSendOther);
     } catch (error) {
       throw new WsException(error);
     }

@@ -14,6 +14,7 @@ export interface ChatMessageOutput {
   displayName: string;
   avatar: string;
   createdAt: Date;
+  isCurrentUserMessage: boolean;
 }
 export interface InboxOutput {
   userId: string;
