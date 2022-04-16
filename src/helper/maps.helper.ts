@@ -167,16 +167,21 @@ export class MapsHelper {
     chatGroup: ChatGroupDocument,
   ): ChatGroupOutput {
     let chatGroupName = chatGroup.name[0];
+    let image = chatGroup.image;
     if (chatGroup.isPrivate) {
       chatGroupName =
         chatGroup.name.indexOf(currentUser) === 0
           ? chatGroup.name[3]
           : chatGroup.name[1];
+      image =
+        chatGroup.image.indexOf(currentUser) === 0
+          ? [chatGroup.image[3]]
+          : [chatGroup.image[1]];
     }
     return {
       chatGroupId: (chatGroup as any)._id.toString(),
       chatGroupName: chatGroupName,
-      image: chatGroup.image,
+      image: image,
     };
   }
   public mapToRecentChatOutput(
@@ -187,19 +192,23 @@ export class MapsHelper {
     const chatGroup = recentChat.chatGroup as unknown as ChatGroupDocument;
 
     let chatGroupName = chatGroup.name[0];
-
+    let image = chatGroup.image;
     if (chatGroup.isPrivate) {
       chatGroupName =
         chatGroup.name.indexOf(currentUser) === 0
           ? chatGroup.name[3]
           : chatGroup.name[1];
+      image =
+        chatGroup.image.indexOf(currentUser) === 0
+          ? [chatGroup.image[3]]
+          : [chatGroup.image[1]];
     }
     const seenUsers = chat.seenUsers.map((i) => i.toString());
     return {
       chatId: (chat as any)._id.toString(),
       chatGroupId: (chatGroup as any)._id.toString(),
       chatGroupName: chatGroupName,
-      image: chatGroup.image,
+      image: image,
       isCurrentUserMessage: chat.owner.toString() === currentUser,
       message: chat.message,
       createdAt: (chat as any).createdAt,

@@ -46,19 +46,22 @@ export class ChatGroupsService {
 
         if (chatGroup)
           return this.mapsHelper.mapToChatGroupOutput(currentUser, chatGroup);
-        const userIds = participants.slice(0, 3);
-        const [user, partner, tempImage] = await Promise.all([
+        const [user, partner] = await Promise.all([
           this.usersService.findUserById(currentUser),
           this.usersService.findUserById(participants[0]),
-          await this.usersService.getUserAvatars(userIds),
         ]);
         chatGroupName = [
           currentUser,
           user.displayName,
-          participants[0],
+          (partner as any)._id.toString(),
           partner.displayName,
         ];
-        image = tempImage;
+        image = [
+          currentUser,
+          user.avatar,
+          (partner as any)._id.toString(),
+          partner.avatar,
+        ];
       } else {
         if (!name) return;
         const isChatGroupExist = await this.chatGroupModel.findOne({

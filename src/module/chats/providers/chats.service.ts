@@ -108,6 +108,7 @@ export class ChatsService {
         .find({
           chatGroup: Types.ObjectId(chatGroupId),
         })
+        .populate('owner', ['displayName', 'avatar'])
         .sort('-createdAt');
       const [inbox, _] = await Promise.all([
         paginate(query, { page: page, perPage: perPage }),
