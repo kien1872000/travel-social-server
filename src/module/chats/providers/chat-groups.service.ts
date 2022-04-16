@@ -1,5 +1,6 @@
-import { CreateChatGroupDto } from '@dto/chat/chat-group.dto';
+import { ChatGroupOutput, CreateChatGroupDto } from '@dto/chat/chat-group.dto';
 import { ChatGroup, ChatGroupDocument } from '@entity/chat-group.entity';
+import { MapsHelper } from '@helper/maps.helper';
 import {
   BadRequestException,
   Injectable,
@@ -15,50 +16,74 @@ export class ChatGroupsService {
     @InjectModel(ChatGroup.name)
     private readonly chatGroupModel: Model<ChatGroupDocument>,
     private readonly usersService: UsersService,
+    private readonly mapsHelper: MapsHelper,
   ) {}
   public async createChatGroup(
     currentUser: string,
     { name, participants, isPrivate }: CreateChatGroupDto,
-  ): Promise<ChatGroupDocument> {
-    let image;
-    const allParticipants = [...new Set(participants), currentUser].map((i) =>
-      Types.ObjectId(i),
-    );
+  ): Promise<ChatGroupOutput> {
+    try {
+      let image;
+      const allParticipants = [...new Set(participants), currentUser].map((i) =>
+        Types.ObjectId(i),
+      );
 
-    if (allParticipants.length <= 1) return;
-    if (isPrivate) {
-      if (name || participants.length > 2) return;
-      const query = {
-        $and: [
-          {
-            participants: { $all: allParticipants },
-          },
-          { participants: { $size: allParticipants.length } },
-          { isPrivate: true },
-        ],
+      if (allParticipants.length <= 1) return;
+
+      let chatGroupName = [name];
+      if (isPrivate) {
+        if (name || participants.length > 2) return;
+        const query = {
+          $and: [
+            {
+              participants: { $all: allParticipants },
+            },
+            { participants: { $size: allParticipants.length } },
+            { isPrivate: true },
+          ],
+        };
+        const chatGroup = await this.chatGroupModel.findOne(query);
+
+        if (chatGroup)
+          return this.mapsHelper.mapToChatGroupOutput(currentUser, chatGroup);
+        const userIds = participants.slice(0, 3);
+        const [user, partner, tempImage] = await Promise.all([
+          this.usersService.findUserById(currentUser),
+          this.usersService.findUserById(participants[0]),
+          await this.usersService.getUserAvatars(userIds),
+        ]);
+        chatGroupName = [
+          currentUser,
+          user.displayName,
+          participants[0],
+          partner.displayName,
+        ];
+        image = tempImage;
+      } else {
+        if (!name) return;
+        const isChatGroupExist = await this.chatGroupModel.findOne({
+          name: name.trim(),
+        });
+        if (isChatGroupExist)
+          throw new BadRequestException('Chat group name already exists');
+        const userIds = [...new Set(participants), currentUser].slice(0, 3);
+        image = await this.usersService.getUserAvatars(userIds);
+      }
+      const chatGroup = {
+        image: image,
+        name: chatGroupName,
+        participants: allParticipants,
+        isPrivate: isPrivate,
       };
-      const chatGroup = await this.chatGroupModel.findOne(query);
+      return this.mapsHelper.mapToChatGroupOutput(
+        currentUser,
+        await new this.chatGroupModel(chatGroup).save(),
+      );
+    } catch (error) {
+      console.log(error);
 
-      if (chatGroup) return chatGroup;
-      const userIds = participants.slice(0, 3);
-      image = await this.usersService.getUserAvatars(userIds);
-    } else {
-      if (!name) return;
-      const isChatGroupExist = await this.chatGroupModel.findOne({
-        name: name.trim(),
-      });
-      if (isChatGroupExist)
-        throw new BadRequestException('Chat group already exists');
-      const userIds = [...new Set(participants), currentUser].slice(0, 3);
-      image = await this.usersService.getUserAvatars(userIds);
+      throw new InternalServerErrorException(error);
     }
-    const chatGroup = {
-      image: image,
-      name: name,
-      participants: allParticipants,
-      isPrivate: isPrivate,
-    };
-    return await new this.chatGroupModel(chatGroup).save();
   }
   public async addUsersToChatGroup(
     userIds: string[],

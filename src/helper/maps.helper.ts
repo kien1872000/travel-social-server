@@ -20,6 +20,7 @@ import { ChatDocument } from '@entity/chat.entity';
 import { InboxOutput } from '@dto/chat/chat.dto';
 import { ChatGroupDocument } from '@entity/chat-group.entity';
 import { Place } from '@entity/place.entity';
+import { ChatGroupOutput } from '@dto/chat/chat-group.dto';
 export class MapsHelper {
   stringhandlersHelper: StringHandlersHelper;
   constructor() {
@@ -161,17 +162,37 @@ export class MapsHelper {
       createdAt: (cmt as any).createdAt,
     };
   }
+  public mapToChatGroupOutput(
+    currentUser: string,
+    chatGroup: ChatGroupDocument,
+  ): ChatGroupOutput {
+    let chatGroupName = chatGroup.name[0];
+    if (chatGroup.isPrivate) {
+      chatGroupName = chatGroup.name[chatGroup.name.indexOf(currentUser) + 1];
+    }
+    return {
+      chatGroupId: (chatGroup as any)._id.toString(),
+      chatGroupName: chatGroupName,
+      image: chatGroup.image,
+    };
+  }
   public mapToRecentChatOutput(
     currentUser: string,
     recentChat: RecentChatDocument,
   ): RecentChatOutput {
     const chat = recentChat.chat as unknown as ChatDocument;
     const chatGroup = recentChat.chatGroup as unknown as ChatGroupDocument;
+
+    let chatGroupName = chatGroup.name[0];
+
+    if (chatGroup.isPrivate) {
+      chatGroupName = chatGroup.name[chatGroup.name.indexOf(currentUser) + 1];
+    }
     const seenUsers = chat.seenUsers.map((i) => i.toString());
     return {
       chatId: (chat as any)._id.toString(),
       chatGroupId: (chatGroup as any)._id.toString(),
-      chatGroupName: chatGroup.name,
+      chatGroupName: chatGroupName,
       image: chatGroup.image,
       isCurrentUserMessage: chat.owner.toString() === currentUser,
       message: chat.message,

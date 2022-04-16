@@ -62,6 +62,7 @@ export class ChatRoomsGateWay {
         const connectedSockets = await this.connectedSocketsService.getSockets(
           participants,
         );
+
         const participantSocketIds = connectedSockets.map((i) => i._id);
         const activeParticipants = connectedSockets.map((i) =>
           i.user.toString(),

@@ -2,7 +2,7 @@ export interface RecentChatOutput {
   chatGroupId: string;
   chatId: string;
   chatGroupName: string;
-  image: string | string[];
+  image: string[];
   isCurrentUserMessage: boolean;
   message: string;
   createdAt: string;

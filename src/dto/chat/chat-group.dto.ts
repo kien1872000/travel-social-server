@@ -31,3 +31,8 @@ export class CreateChatGroupDto {
   })
   isPrivate: boolean;
 }
+export interface ChatGroupOutput {
+  chatGroupId: string;
+  chatGroupName: string;
+  image: string | string[];
+}

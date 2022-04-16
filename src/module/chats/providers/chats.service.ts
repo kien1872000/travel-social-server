@@ -63,7 +63,7 @@ export class ChatsService {
           chatGroup: { $in: joinedChatGroups },
         })
         .populate('chat', ['owner', 'createdAt', 'message', 'seenUsers'])
-        .populate('chatGroup', ['name', 'image'])
+        .populate('chatGroup', ['name', 'image', 'isPrivate'])
         .sort('-updatedAt');
 
       const recentChats = await paginate(query, {
