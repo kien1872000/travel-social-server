@@ -15,6 +15,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { corsOptions } from '@util/constants';
+import { ClientRequest } from 'http';
 import { Server, Socket } from 'socket.io';
 import { ConnectedSocketsService } from './connected-sockets.service';
 
@@ -36,21 +37,31 @@ export class ConnectedSocketsGateWay
     try {
       const token = client.handshake.auth.token;
       const payload = this.authService.getPayloadFromAccessToken(token);
-
       if (payload && payload.isActive) {
         const userId = payload._id.toString();
-
         console.log(`client ${client.id} connected`);
-        const [rooms] = await Promise.all([
+        const [rooms, oldSocketIds] = await Promise.all([
           this.chatRoomsService.getRoomsUserHasJoined(payload._id.toString()),
           this.connectedSocketsService.saveSocket(client.id, userId),
           this.chatRoomsService.returnRooms(userId),
         ]);
+        const promises = [];
+        for (const osk of oldSocketIds) {
+          promises.push(this.server.to(osk).fetchSockets());
+        }
+        const oldSockets = await Promise.all(promises);
+
+        for (const osk of oldSockets) {
+          osk[0]?.disconnect();
+        }
+
         client.join(rooms);
       } else {
         client.disconnect();
       }
     } catch (error) {
+      console.log(error);
+
       client.disconnect();
     }
   }

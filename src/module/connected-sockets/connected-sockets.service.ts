@@ -12,14 +12,24 @@ export class ConnectedSocketsService {
     @InjectModel(ConnectedSocket.name)
     private readonly socketModel: Model<ConnectedSocketDocument>,
   ) {}
-  public async saveSocket(socketId: string, userId: string): Promise<void> {
+  public async saveSocket(socketId: string, userId: string): Promise<string[]> {
     try {
+      const [oldSockets] = await Promise.all([
+        this.socketModel
+          .find({
+            _id: { $ne: socketId },
+            user: Types.ObjectId(userId),
+          })
+          .select('_id'),
+        this.socketModel.deleteMany({ user: Types.ObjectId(userId) }),
+      ]);
       await this.socketModel.deleteMany({ user: Types.ObjectId(userId) });
       const socket: Partial<ConnectedSocketDocument> = {
         _id: socketId,
         user: Types.ObjectId(userId),
       };
       await new this.socketModel(socket).save();
+      return oldSockets.map((i) => i._id);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
