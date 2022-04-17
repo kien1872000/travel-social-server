@@ -60,11 +60,13 @@ export class ConnectedSocketsGateWay
         client.id,
       );
 
-      await Promise.all([
-        this.chatRoomsService.leaveRooms((socket.user as any)._id.toString()),
-        this.connectedSocketsService.deleteSocket(client.id),
-      ]);
-      console.log(`client ${client.id} disconnected`);
+      if (socket) {
+        await Promise.all([
+          this.chatRoomsService.leaveRooms((socket.user as any)._id.toString()),
+          this.connectedSocketsService.deleteSocket(client.id),
+        ]);
+        console.log(`client ${client.id} disconnected`);
+      }
     } catch (error) {
       throw new WsException(error);
     }

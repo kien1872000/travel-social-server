@@ -26,7 +26,7 @@ export class ConnectedSocketsService {
   }
   public async deleteSocket(socketId: string): Promise<void> {
     try {
-      await this.socketModel.findOneAndDelete({ socketId: socketId });
+      await this.socketModel.findOneAndDelete({ _id: socketId });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

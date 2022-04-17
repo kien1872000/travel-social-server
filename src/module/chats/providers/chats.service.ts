@@ -36,7 +36,6 @@ export class ChatsService {
         chatGroup: Types.ObjectId(chatGroup),
         message: message,
         owner: Types.ObjectId(owner),
-        seen: false,
       }).save();
 
       await this.recentChatModel.findOneAndUpdate(
@@ -58,6 +57,8 @@ export class ChatsService {
       const joinedChatGroups = await this.chatGroupsService.getJoinedChatGroups(
         user,
       );
+      console.log(joinedChatGroups);
+
       const query = this.recentChatModel
         .find({
           chatGroup: { $in: joinedChatGroups },
@@ -110,7 +111,7 @@ export class ChatsService {
         })
         .populate('owner', ['displayName', 'avatar'])
         .sort('-createdAt');
-      const [inbox, _] = await Promise.all([
+      const [inbox] = await Promise.all([
         paginate(query, { page: page, perPage: perPage }),
         this.chatModel.findByIdAndUpdate(chatId, {
           $addToSet: { seenUsers: Types.ObjectId(currentUser) },
