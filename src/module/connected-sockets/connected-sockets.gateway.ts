@@ -59,7 +59,7 @@ export class ConnectedSocketsGateWay
       const socket = await this.connectedSocketsService.getSocketBySocketId(
         client.id,
       );
-
+      client.disconnect();
       if (socket) {
         await Promise.all([
           this.chatRoomsService.leaveRooms((socket.user as any)._id.toString()),
