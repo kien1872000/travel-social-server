@@ -17,7 +17,7 @@ import { ActivationInput } from '@dto/user/activation.dto';
 import {
   PasswordReset,
   PasswordResetDocument,
-} from 'src/entity/passwordReset.entity';
+} from '@entity/password-reset.entity';
 import { Activation, ActivationDocument } from 'src/entity/activation.entity';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
@@ -45,13 +45,19 @@ export class UsersAuthService {
     private readonly passwordResetModel: Model<PasswordResetDocument>,
   ) {}
   public async signUp(input: UserSignUp): Promise<void> {
-    if (await this.usersService.findUserByMail(input.email)) {
-      throw new ConflictException('Email đã tồn tại');
+    try {
+      const user = await this.usersService.findUserByMail(input.email);
+      console.log(user);
+      if (user) {
+        throw new ConflictException('Email đã tồn tại');
+      }
+      const salt = await bcrypt.genSalt();
+      input.password = await bcrypt.hash(input.password, salt);
+      await this.usersService.addNewUser(input);
+      //await this.sendActivationCode(input.email);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
     }
-    const salt = await bcrypt.genSalt();
-    input.password = await bcrypt.hash(input.password, salt);
-    await this.usersService.addNewUser(input);
-    await this.sendActivationCode(input.email);
   }
   public async login(payload: JwtPayLoad): Promise<LoginOutput> {
     if (!payload.isActive) {
@@ -63,7 +69,6 @@ export class UsersAuthService {
       payload._id.toString(),
     );
     const token = await this.authService.login(payload);
-    
 
     return this.mapsHelpler.mapToLoginOutput(
       token.accessToken,

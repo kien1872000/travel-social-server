@@ -8,7 +8,7 @@ import { VIET_NAM_TZ } from '@util/constants';
 import { LoginOutput } from '@dto/user/login.dto';
 import { StringHandlersHelper } from './string-handler.helper';
 import { PostDocument } from '@entity/post.entity';
-import { MediaFileDocument } from '@entity/mediaFile.entity';
+import { MediaFileDocument } from '@entity/media-file.entity';
 import { MediaFileDto } from '@dto/media-file/media-file.dto';
 import { FollowingDocument } from '@entity/following.entity';
 import { PostOutput } from '@dto/post/post-new.dto';

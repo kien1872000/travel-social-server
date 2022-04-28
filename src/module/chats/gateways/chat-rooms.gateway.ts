@@ -97,11 +97,14 @@ export class ChatRoomsGateWay {
     @ConnectedSocket() client: Socket,
   ) {
     try {
-      const [participants, room, socket] = await Promise.all([
-        this.chatGroupsService.getParticipants(chatGroupId),
+      const [chatGroup, room, socket] = await Promise.all([
+        this.chatGroupsService.getChatGroupById(chatGroupId),
         this.chatRoomsService.getRoom(chatGroupId),
         this.connectedSocketsService.getSocketBySocketId(client.id),
       ]);
+      if (chatGroup.isPrivate)
+        throw new WsException("Can't leave private chat group");
+      const participants = chatGroup.participants.map((i) => i.toString());
       const currentUserId = (socket.user as any)._id.toString();
       if (!participants.includes(currentUserId))
         throw new WsException('Forbidden');
@@ -126,11 +129,14 @@ export class ChatRoomsGateWay {
     @ConnectedSocket() client: Socket,
   ) {
     try {
-      const [participants, room, socket] = await Promise.all([
-        this.chatGroupsService.getParticipants(chatGroupId),
+      const [chatGroup, room, socket] = await Promise.all([
+        this.chatGroupsService.getChatGroupById(chatGroupId),
         this.chatRoomsService.getRoom(chatGroupId),
         this.connectedSocketsService.getSocketBySocketId(client.id),
       ]);
+      if (chatGroup.isPrivate)
+        throw new WsException("Can't add user to private chat group");
+      const participants = chatGroup.participants.map((i) => i.toString());
       const currentUserId = (socket.user as any)._id.toString();
       if (!participants.includes(currentUserId))
         throw new WsException('Forbidden');

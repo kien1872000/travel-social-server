@@ -25,8 +25,8 @@ const a_video = [
   'https://media.istockphoto.com/videos/the-sun-casts-its-beautiful-rays-into-the-fresh-green-forest-time-video-id1168431157',
   'https://media.istockphoto.com/videos/real-time-shot-of-sea-surf-aerial-top-down-view-video-id946257202',
   'https://media.istockphoto.com/videos/view-of-clouds-over-the-mountains-from-above-video-id1316701553',
-  'https://stream.mux.com/mmpRcMlCgVPsGJgideQ6X1ttPASzbyQS/high.mp4?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InQ5UHZucm9ZY0hQNjhYSmlRQnRHTEVVSkVSSXJ0UXhKIn0.eyJleHAiOjE2NDg5ODU3NzEsImF1ZCI6InYiLCJzdWIiOiJtbXBSY01sQ2dWUHNHSmdpZGVRNlgxdHRQQVN6YnlRUyJ9.EEnnQX4-hi1-YUUj_FJaK0uDJbHYh0ljlKlcXClro46bAv03JhH2TqNf4xCa5x3uGI30lMPTTTsIcM9A8N2_YR9gxT2CZvtYrTjo45Xlohssof1tjxeXr3qGmhsscZFjRI8xEbptvW2grZz5uAqlHsAk2lhyB-LToo2ZKJ_66O4hx69HrsHCmC8LP9g-wXCdYK93d5bqP68JB7mA0-4k1oR77ig14bVyRrH6PwbN7kJwdwxTFSi_bZCFCEL7ulONGF9MMOXSrrCwuK9KXmZQQhpbN83Gz7ne9crDUWYGPd4NvAyMK5YMEO_xq2zRo2UPPHNrYGe2JW54JD7q4_0iHw',
-  'https://stream.mux.com/hFhdWkgUQ7Y8N8Xj01SfZGdOlB2DiWD2u/high.mp4?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InQ5UHZucm9ZY0hQNjhYSmlRQnRHTEVVSkVSSXJ0UXhKIn0.eyJleHAiOjE2NDg5ODU4NDMsImF1ZCI6InYiLCJzdWIiOiJoRmhkV2tnVVE3WThOOFhqMDFTZlpHZE9sQjJEaVdEMnUifQ.eZiLxIpkR-cj7x2YtWd0TP114ijUnvn916VIpUnYmB2D7w-gr6VTUoA3ukfk1cbfy1_gC47vnvCQKDIDgwLM3xH7ef591eOU4cjHvs7JHBUBsecAzkyliYLdnST0rVGo_4jVdNIzpYeHNjUMqE-EXdN4_z2ZEUZxl735DFKIbGQN_oz_b0DNjFS3qjGfBXK87P7k9OK-irrVbq_XL6OQDccIPDOXcp3_x9HO_-r8eTN9JgxYm7VlY0fI8uGXYvWFeUywGuYbu1EG1eBFXDmc7HxXuAQcqUI6sRrP3bcA44SpBJabIxj6n9YsQAY7lGoJv_M5uNlLz1SXrs1yTxAmng',
+  'https://assets.mixkit.co/videos/preview/mixkit-very-close-shot-of-the-leaves-of-a-tree-wet-18310-large.mp4',
+  'https://assets.mixkit.co/videos/preview/mixkit-people-pouring-a-warm-drink-around-a-campfire-513-large.mp4',
 ];
 var hashtagRange = 50;
 var a_users = [];

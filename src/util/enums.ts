@@ -80,3 +80,9 @@ export enum SearchAllDetailFilter {
   Post = 'post',
   User = 'user',
 }
+
+export enum Vehicle {
+  Car = 'car',
+  Bike = 'bike',
+  Plane = 'plane',
+}

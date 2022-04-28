@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MediaFile, MediaFileSchema } from '@entity/mediaFile.entity';
+import { MediaFile, MediaFileSchema } from '@entity/media-file.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { UploadsModule } from '@upload/uploads.module';

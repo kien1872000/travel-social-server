@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Address } from './user.entity';
+
 export class FileType {
   @Prop({ type: String })
   url: string;

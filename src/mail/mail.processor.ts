@@ -8,7 +8,7 @@ import {
 } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { clientUrl } from '@util/constants';
+import { clientActivationUrl, clientResetPasswordUrl } from '@util/constants';
 import { Mail } from '@util/enums';
 
 @Processor('mail')
@@ -50,7 +50,7 @@ export class MailProcessor {
     this.logger.log(`Sending confirmation email to '${job.data.email}'`);
 
     try {
-      const activationLink = `${clientUrl}/${job.data.activationCode}`;
+      const activationLink = `${clientActivationUrl}/${job.data.activationCode}`;
       const result = await this.mailerService.sendMail({
         template: '/confirmation',
         context: {
@@ -74,7 +74,7 @@ export class MailProcessor {
     job: Job<{ email: string; token: string; displayName: string }>,
   ): Promise<any> {
     this.logger.log(`Sending password reset email to '${job.data.email}'`);
-    const resetLink = `${clientUrl}/${job.data.token}`;
+    const resetLink = `${clientResetPasswordUrl}/${job.data.token}`;
     try {
       const result = await this.mailerService.sendMail({
         template: '/password-reset',

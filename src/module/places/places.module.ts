@@ -11,6 +11,7 @@ import { UserPlacesService } from './providers/user-places.service';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { PostsModule } from '@post/posts.module';
 import { DiscoveryPlacesService } from './providers/discovery-places.service';
+import { VehicleSuggestionService } from './providers/vehicle-suggestion.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { DiscoveryPlacesService } from './providers/discovery-places.service';
     VisitedPlacesService,
     DiscoveryPlacesService,
     StringHandlersHelper,
+    VehicleSuggestionService,
   ],
   controllers: [PlacesController],
   exports: [PlacesService],

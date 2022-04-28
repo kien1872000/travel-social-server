@@ -21,3 +21,13 @@ export interface PlaceDetailDto {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GeoCodingDto extends Omit<PlaceDetailDto, 'compound'> {}
+
+export interface DistanceMaxtrixDto {
+  rows: {
+    elements: {
+      distance: { text: string; value: number };
+      duration: { text: string; value: number };
+      status: string;
+    }[];
+  }[];
+}

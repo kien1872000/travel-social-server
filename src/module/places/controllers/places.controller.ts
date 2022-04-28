@@ -3,9 +3,11 @@ import { PaginateQuery } from '@decorator/pagination.decorator';
 import { User } from '@decorator/user.decorator';
 import { SearchPlaceDto } from '@dto/place/goong-map.dto';
 import { SearchPlaceInput } from '@dto/place/place.dto';
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { VehicleDto } from '@dto/place/vehicle.dto';
+import { Body, Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -17,6 +19,7 @@ import { Time } from '@util/enums';
 import { PaginateOptions } from '@util/types';
 import { DiscoveryPlacesService } from '../providers/discovery-places.service';
 import { PlacesService } from '../providers/places.service';
+import { VehicleSuggestionService } from '../providers/vehicle-suggestion.service';
 import { VisitedPlacesService } from '../providers/visited-places.service';
 
 @Controller('places')
@@ -28,6 +31,7 @@ export class PlacesController {
     private readonly placesSerivce: PlacesService,
     private readonly visitedPlacesService: VisitedPlacesService,
     private readonly discoveryPlacesService: DiscoveryPlacesService,
+    private readonly vehicleSuggestionService: VehicleSuggestionService,
   ) {}
   @Get('search')
   @ApiOperation({ description: 'search địa điểm theo text nhập vào' })
@@ -96,6 +100,28 @@ export class PlacesController {
       user._id,
       page,
       perPage,
+    );
+  }
+  @Get('suggest/vehicle')
+  @ApiBody({ type: VehicleDto })
+  async suggestVehicle(
+    @Body()
+    {
+      depatureLat,
+      depatureLng,
+      destinationLat,
+      destinationLng,
+      nearDepartureAirports,
+      nearDestinationAirports,
+    }: VehicleDto,
+  ) {
+    return this.vehicleSuggestionService.suggestVehicle(
+      depatureLat,
+      depatureLng,
+      destinationLat,
+      destinationLng,
+      nearDepartureAirports,
+      nearDestinationAirports,
     );
   }
 }

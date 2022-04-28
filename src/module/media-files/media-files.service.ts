@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { MediaFile, MediaFileDocument } from '@entity/mediaFile.entity';
+import { MediaFile, MediaFileDocument } from '@entity/media-file.entity';
 import { FileType } from '@entity/post.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';

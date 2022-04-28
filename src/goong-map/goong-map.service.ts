@@ -3,7 +3,9 @@ import { Injectable } from '@nestjs/common';
 import * as goongClient from '@goongmaps/goong-sdk';
 import * as geocoding from '@goongmaps/goong-sdk/services/geocoding';
 import * as autocomplete from '@goongmaps/goong-sdk/services/autocomplete';
+import * as distancematrix from '@goongmaps/goong-sdk/services/distancematrix';
 import {
+  DistanceMaxtrixDto,
   GeoCodingDto,
   PlaceDetailDto,
   SearchPlaceDto,
@@ -96,6 +98,26 @@ export class GoongMapService {
             },
           };
         });
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+  public getMatrix(
+    origins: string,
+    destinations: string,
+    vehicle: string,
+  ): Promise<DistanceMaxtrixDto> {
+    return distancematrix(this.goongmapClient)
+      .getMatrix({
+        origins: origins,
+        destinations: destinations,
+        vehicle: vehicle,
+      })
+      .send()
+      .then((response) => {
+        const matrix = response.body;
+        return matrix;
       })
       .catch((error) => {
         throw new Error(error);

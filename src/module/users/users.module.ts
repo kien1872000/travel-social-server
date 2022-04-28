@@ -5,7 +5,7 @@ import { Activation, ActivationSchema } from 'src/entity/activation.entity';
 import {
   PasswordReset,
   PasswordResetSchema,
-} from 'src/entity/passwordReset.entity';
+} from '@entity/password-reset.entity';
 import { User, UserSchema } from '@entity/user.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
