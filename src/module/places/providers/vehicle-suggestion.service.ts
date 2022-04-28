@@ -50,7 +50,7 @@ export class VehicleSuggestionService {
             destinations = destinations + `${value.lat},${value.lng}`;
           },
         );
-        destinations = destinations.slice(0, destinations.length);
+        destinations = destinations.slice(0, destinations.length-1);
         const distanceMatrix = await this.goongmapService.getMatrix(
           origins,
           destinations,
