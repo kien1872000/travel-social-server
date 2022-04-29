@@ -44,6 +44,7 @@ export class SearchsService {
         input,
         page,
         perPage,
+        currentUser,
       );
       return { hashtags };
     }

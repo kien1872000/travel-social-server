@@ -36,6 +36,7 @@ export class ChatsService {
         chatGroup: Types.ObjectId(chatGroup),
         message: message,
         owner: Types.ObjectId(owner),
+        seenUsers: [Types.ObjectId(owner)],
       }).save();
 
       await this.recentChatModel.findOneAndUpdate(

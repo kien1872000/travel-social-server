@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { PostInput, PostOutput } from '@dto/post/post-new.dto';
@@ -14,20 +8,14 @@ import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { FollowingsService } from '@following/providers/followings.service';
 import { HashtagsService } from '@hashtag/hashtags.service';
 import { MediaFilesService } from 'src/module/media-files/media-files.service';
-import {
-  POSTS_PER_PAGE,
-  TRENDING_LENGTH,
-  VIET_NAM_TZ,
-} from 'src/util/constants';
-import { Interaction, PostLimit, Privacy, Time } from 'src/util/enums';
+
+import { PostLimit } from 'src/util/enums';
 import { PaginationRes } from '@util/types';
 import { LikesService } from '@like/providers/likes.service';
-import { Address } from '@entity/user.entity';
-import { Place } from '@entity/place.entity';
 import { PlacesService } from 'src/module/places/providers/places.service';
-import { UpdatePlaceDto } from '@dto/place/place.dto';
-import { noResultPaginate, paginate } from '@util/paginate';
+import { paginate } from '@util/paginate';
 import { HashtagDetailDto } from '@dto/hashtag/hashtag.dto';
+import { PostsResultService } from './posts-result.service';
 @Injectable()
 export class PostsService {
   constructor(
@@ -36,11 +24,11 @@ export class PostsService {
     private readonly stringHandlersHelper: StringHandlersHelper,
     private readonly likesService: LikesService,
     private readonly mapsHelper: MapsHelper,
-    @Inject(forwardRef(() => MediaFilesService))
     private readonly filesService: MediaFilesService,
     private readonly followingsService: FollowingsService,
     private readonly hashtagsService: HashtagsService,
     private readonly placesServive: PlacesService,
+    private readonly postResultService: PostsResultService,
   ) {}
 
   public async getPostsByHashtag(
@@ -132,81 +120,52 @@ export class PostsService {
     }
   }
 
-  public async updateTotalPostCommentsOrLikes(
-    postId: string,
-    interaction: Interaction,
-    count: number,
-  ): Promise<Post> {
-    try {
-      let update;
-      switch (interaction) {
-        case Interaction.Comment:
-          update = { $inc: { comments: count } };
-          break;
-        case Interaction.Like:
-        default:
-          update = { $inc: { likes: count } };
-          break;
-      }
-      return await this.postModel.findByIdAndUpdate(postId, update);
-    } catch (err) {
-      throw new InternalServerErrorException(err);
-    }
-  }
-
   public async getPosts(
     page: number,
     perPage: number,
     currentUser: string,
     option?: PostLimit,
   ): Promise<PaginationRes<PostOutput>> {
-    const followings = await this.followingsService.getFollowingIds(
-      currentUser,
-    );
-    followings.push(currentUser);
-    const userObjectIds = followings.map((i) => new Types.ObjectId(i));
-    let match = {};
-    switch (option) {
-      case PostLimit.Profile:
-        match = {
-          user: new Types.ObjectId(currentUser),
-        };
-        break;
-      case PostLimit.NewsFeed:
-      default:
-        match = {
-          $or: [
-            { user: { $in: userObjectIds } },
-            { user: new Types.ObjectId(currentUser) },
-          ],
-        };
-    }
-    const query = this.postModel
-      .find(match)
-      .populate('user', ['displayName', 'avatar'])
-      .populate(
-        'place',
-        ['name', 'formattedAddress', 'coordinate', 'visits'],
-        Place.name,
-      )
-      .select(['-mediaFiles._id'])
-      .sort({ createdAt: -1 });
-    const postsResult = await paginate<PostDocument>(query, {
-      perPage: perPage,
-      page: page,
-    });
-    return {
-      items: await Promise.all(
-        postsResult.items.map(async (i) => {
-          const liked = await this.likesService.isUserLikedPost(
+    try {
+      let match = {};
+      switch (option) {
+        case PostLimit.Profile:
+          match = {
+            user: new Types.ObjectId(currentUser),
+          };
+          break;
+        case PostLimit.Following:
+          const followings = await this.followingsService.getFollowingIds(
             currentUser,
-            (i as any)._id.toString(),
           );
-          return this.mapsHelper.mapToPostOutPut(i, currentUser, liked);
-        }),
-      ),
-      meta: postsResult.meta,
-    };
+          followings.push(currentUser);
+          const userObjectIds = followings.map((i) => new Types.ObjectId(i));
+          match = {
+            $or: [
+              { user: { $in: userObjectIds } },
+              { user: new Types.ObjectId(currentUser) },
+            ],
+          };
+          break;
+        case PostLimit.Interest:
+        default:
+          return await this.postResultService.getPostsResult(
+            currentUser,
+            page,
+            perPage,
+          );
+      }
+      return await this.postResultService.getPostsResult(
+        currentUser,
+        page,
+        perPage,
+        match,
+      );
+    } catch (error) {
+      console.log(error);
+
+      throw new InternalServerErrorException(error);
+    }
   }
 
   public async getPostById(

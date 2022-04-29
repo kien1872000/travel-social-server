@@ -64,11 +64,11 @@ export class ChatGroupsService {
         ];
       } else {
         if (!name) return;
-        const isChatGroupExist = await this.chatGroupModel.findOne({
-          name: name.trim(),
-        });
-        if (isChatGroupExist)
-          throw new BadRequestException('Chat group name already exists');
+        // const isChatGroupExist = await this.chatGroupModel.findOne({
+        //   name: name.trim(),
+        // });
+        // if (isChatGroupExist)
+        //   throw new BadRequestException('Chat group name already exists');
         const userIds = [...new Set(participants), currentUser].slice(0, 3);
         image = await this.usersService.getUserAvatars(userIds);
       }

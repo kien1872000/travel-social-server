@@ -30,7 +30,8 @@ export enum SearchTypes {
 }
 export enum PostLimit {
   Profile = 'profile',
-  NewsFeed = 'newsfeed',
+  Following = 'following',
+  Interest = 'interest',
 }
 
 export enum LocationType {
@@ -85,4 +86,10 @@ export enum Vehicle {
   Car = 'car',
   Bike = 'bike',
   Plane = 'plane',
+}
+
+export enum InterestType {
+  Hashtag = 'hashtag',
+  Place = 'place',
+  User = 'user',
 }

@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Hashtag, HashtagSchema } from '@entity/hastag.entity';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { HashtagsService } from './hashtags.service';
+import { UploadsModule } from '@upload/uploads.module';
+import { InterestsModule } from '../interests/interests.module';
 
 @Module({
   imports: [
@@ -12,6 +14,7 @@ import { HashtagsService } from './hashtags.service';
         schema: HashtagSchema,
       },
     ]),
+    InterestsModule,
   ],
   providers: [HashtagsService, StringHandlersHelper],
   exports: [HashtagsService],

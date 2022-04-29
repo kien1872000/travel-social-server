@@ -1,23 +1,17 @@
 import { PostOutput } from '@dto/post/post-new.dto';
-import { Post, PostDocument } from '@entity/post.entity';
 import { HashtagsService } from '@hashtag/hashtags.service';
-import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
-import { LikesService } from '@like/providers/likes.service';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { noResultPaginate, paginate } from '@util/paginate';
+import { noResultPaginate } from '@util/paginate';
 import { PaginationRes } from '@util/types';
-import { Model } from 'mongoose';
+import { PostsResultService } from './posts-result.service';
 
 @Injectable()
 export class PostsSearchService {
   constructor(
-    @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
     private readonly stringHandlersHelper: StringHandlersHelper,
+    private readonly postsResultService: PostsResultService,
     private readonly hashtagsService: HashtagsService,
-    private readonly likesService: LikesService,
-    private readonly mapsHelper: MapsHelper,
   ) {}
   public async searchPostByHashtags(
     hashtagsArr: string[],
@@ -26,43 +20,26 @@ export class PostsSearchService {
     currentUser: string,
   ): Promise<PaginationRes<PostOutput>> {
     try {
-      // eslint-disable-next-line @typescript-eslint/ban-types
-      let query;
+      let match;
       if (hashtagsArr?.length === 1) {
         const hashtagInfo = await this.hashtagsService.searchHashtags(
           hashtagsArr[0],
           0,
           1,
+          currentUser,
         );
         if (hashtagInfo.items[0]) {
-          query = this.postModel
-            .find({
-              hashtags: hashtagInfo.items[0].hashtag,
-            })
-            .populate('user', ['avatar', 'displayName'])
-            .select(['-__v']);
+          match = { hashtags: hashtagInfo.items[0].hashtag };
         } else return noResultPaginate({ page, perPage });
       } else {
-        query = this.postModel
-          .find({
-            hashtags: { $all: hashtagsArr },
-          })
-          .populate('user', ['avatar', 'displayName'])
-          .select(['-__v']);
+        match = { hashtags: { $all: hashtagsArr } };
       }
-      const posts = await paginate(query, { page, perPage });
-      return {
-        items: await Promise.all(
-          posts.items.map(async (i) => {
-            const liked = await this.likesService.isUserLikedPost(
-              currentUser,
-              (i as any)._id.toString(),
-            );
-            return this.mapsHelper.mapToPostOutPut(i, currentUser, liked);
-          }),
-        ),
-        meta: posts.meta,
-      };
+      return await this.postsResultService.getPostsResult(
+        currentUser,
+        page,
+        perPage,
+        match,
+      );
     } catch (err) {
       throw new InternalServerErrorException(err);
     }
@@ -96,24 +73,13 @@ export class PostsSearchService {
           currentUser,
         );
       } else {
-        const query = this.postModel
-          .find({ $text: { $search: search } })
-          .populate('user', ['avatar', 'displayName'])
-          .select(['-__v']);
-        const posts = await paginate(query, { page: page, perPage: perPage });
-
-        return {
-          items: await Promise.all(
-            posts.items.map(async (i) => {
-              const liked = await this.likesService.isUserLikedPost(
-                currentUser,
-                (i as any)._id.toString(),
-              );
-              return this.mapsHelper.mapToPostOutPut(i, currentUser, liked);
-            }),
-          ),
-          meta: posts.meta,
-        };
+        const match = { $text: { $search: search } };
+        return await this.postsResultService.getPostsResult(
+          currentUser,
+          page,
+          perPage,
+          match,
+        );
       }
     } catch (error) {
       console.log(error);

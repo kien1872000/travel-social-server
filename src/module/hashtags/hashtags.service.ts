@@ -3,26 +3,21 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Hashtag, HashtagDocument } from '@entity/hastag.entity';
-import { StringHandlersHelper } from '@helper/string-handler.helper';
-import { TimeCheck } from '@util/enums';
+
 import { HashtagOutput } from '@dto/hashtag/hashtag.dto';
 import { paginate } from '@util/paginate';
 import { PaginationRes } from '@util/types';
+import { InterestsService } from '../interests/interests.service';
+import { InterestType } from '@util/enums';
 
 @Injectable()
 export class HashtagsService {
   constructor(
     @InjectModel(Hashtag.name) private hashtagModel: Model<HashtagDocument>,
-    private stringHandlersHelper: StringHandlersHelper,
+    private readonly interestsService: InterestsService,
   ) {}
   public async addHastags(hashtags: string[]): Promise<void> {
     try {
-      const start = new Date(
-        this.stringHandlersHelper.getStartAndEndDateWithTime(TimeCheck.Day)[0],
-      );
-      const end = new Date(
-        this.stringHandlersHelper.getStartAndEndDateWithTime(TimeCheck.Day)[1],
-      );
       if (!hashtags || hashtags == []) return;
       const promises = [];
       for (const ht of hashtags) {
@@ -61,14 +56,34 @@ export class HashtagsService {
   public async searchHashtags(
     input: string,
     page: number,
-    perPage,
+    perPage: number,
+    user: string,
   ): Promise<PaginationRes<HashtagOutput>> {
     try {
-      const query = this.hashtagModel
-        .find({ hashtag: { $regex: input } })
-        .select(['popular', 'hashtag', '-_id'])
-        .sort('-popular');
-      return await paginate(query, { page, perPage });
+      const interestHashtags = await this.interestsService.getInterests(
+        user,
+        InterestType.Hashtag,
+      );
+
+      const query = this.hashtagModel.aggregate([
+        {
+          $match: { hashtag: { $regex: input } },
+        },
+        {
+          $addFields: {
+            interested: { $in: ['$hashtag', interestHashtags] },
+          },
+        },
+        {
+          $sort: { interested: -1, popular: -1 },
+        },
+      ]);
+      const project = { popular: 1, hashtag: 1, _id: 0 };
+      return (await paginate(
+        query,
+        { page, perPage },
+        project,
+      )) as unknown as PaginationRes<HashtagOutput>;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

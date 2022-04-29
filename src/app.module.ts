@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from './config/config.module';
 import { ConfigService } from './config/config.service';
+import { InterestsModule } from './module/interests/interests.module';
 import { NotificationsModule } from './module/notifications/notifications.module';
 import { PlacesModule } from './module/places/places.module';
 import { PostsModule } from './module/posts/posts.module';
@@ -29,7 +30,8 @@ import { UsersModule } from './module/users/users.module';
     NotificationsModule,
     ChatsModule,
     PlacesModule,
-    SearchsModule
+    SearchsModule,
+    InterestsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

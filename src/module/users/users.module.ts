@@ -22,6 +22,7 @@ import { UsersAddressController } from './controllers/users-address.controller';
 import { GoongMapModule } from 'src/goong-map/goong-map.module';
 import { UsersSearchService } from './providers/users-search.service';
 import { ChatsModule } from '@chat/chat.module';
+import { InterestsModule } from '../interests/interests.module';
 
 @Module({
   imports: [
@@ -42,9 +43,10 @@ import { ChatsModule } from '@chat/chat.module';
     forwardRef(() => AuthModule),
     MailModule,
     MediaFilesModule,
-    forwardRef(() => FollowingsModule),
+    FollowingsModule,
     GoongMapModule,
     forwardRef(() => ChatsModule),
+    InterestsModule,
   ],
   controllers: [UsersAuthController, UsersController, UsersAddressController],
   providers: [

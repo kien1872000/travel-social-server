@@ -11,10 +11,11 @@ import { PostsService } from './providers/posts.service';
 import { LikesModule } from '@like/likes.module';
 import { PostDetailService } from './providers/post-detail.service';
 import { CommentsModule } from '@comment/comments.module';
-import { PlacesService } from '../places/providers/places.service';
 import { PlacesModule } from '../places/places.module';
 import { PostPlaceService } from './providers/post-place.service';
 import { PostsSearchService } from './providers/posts-search.service';
+import { InterestsModule } from '../interests/interests.module';
+import { PostsResultService } from './providers/posts-result.service';
 
 @Module({
   imports: [
@@ -28,8 +29,9 @@ import { PostsSearchService } from './providers/posts-search.service';
     HashtagsModule,
     LikesModule,
     FollowingsModule,
-    forwardRef(() => CommentsModule),
+    CommentsModule,
     PlacesModule,
+    InterestsModule,
   ],
   controllers: [PostsController],
   providers: [
@@ -39,6 +41,7 @@ import { PostsSearchService } from './providers/posts-search.service';
     MapsHelper,
     PostDetailService,
     PostsSearchService,
+    PostsResultService,
   ],
   exports: [
     PostsService,

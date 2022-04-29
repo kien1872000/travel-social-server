@@ -6,7 +6,6 @@ import { PostsService } from './posts.service';
 @Injectable()
 export class PostDetailService {
   constructor(
-    @Inject(forwardRef(() => CommentsService))
     private readonly commentsService: CommentsService,
     private readonly postsService: PostsService,
   ) {}

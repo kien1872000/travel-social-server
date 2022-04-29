@@ -19,7 +19,6 @@ import { UserPlacesService } from './user-places.service';
 export class DiscoveryPlacesService {
   constructor(
     @InjectModel(Place.name) private readonly placeModel: Model<PlaceDocument>,
-    @Inject(forwardRef(() => PostPlaceService))
     private readonly postPlaceService: PostPlaceService,
     private readonly userPlacesService: UserPlacesService,
   ) {}

@@ -5,6 +5,7 @@ import { MapsHelper } from '@helper/maps.helper';
 import { UsersModule } from '../users/users.module';
 import { FollowingsController } from './controllers/followings.controller';
 import { FollowingsService } from './providers/followings.service';
+import { User, UserSchema } from '@entity/user.entity';
 
 @Module({
   imports: [
@@ -13,8 +14,11 @@ import { FollowingsService } from './providers/followings.service';
         name: Following.name,
         schema: FollowingSchema,
       },
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
     ]),
-    forwardRef(() => UsersModule),
   ],
   providers: [FollowingsService, MapsHelper],
   controllers: [FollowingsController],

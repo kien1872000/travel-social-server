@@ -14,14 +14,16 @@ import { UsersService } from '@user/providers/users.service';
 import { FOLLOWERS_PER_PAGE, FOLLOWINGS_PER_PAGE } from 'src/util/constants';
 import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
+import { User, UserDocument } from '@entity/user.entity';
 
 @Injectable()
 export class FollowingsService {
   constructor(
     @InjectModel(Following.name)
     private followingModel: Model<FollowingDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private mapsHelper: MapsHelper,
-    @Inject(forwardRef(() => UsersService)) private usersService: UsersService,
+  
   ) {}
   public async checkIfFollowed(userId, followingId) {
     try {
@@ -49,14 +51,35 @@ export class FollowingsService {
       }
       if (userId.toString() !== followingId) {
         await Promise.all([
-          this.usersService.updateFollowers(new Types.ObjectId(followingId), 1),
-          this.usersService.updateFollowings(new Types.ObjectId(userId), 1),
+          this.updateFollowers(followingId, 1),
+          this.updateFollowings(userId, 1),
           new this.followingModel({
             user: new Types.ObjectId(userId),
             following: new Types.ObjectId(followingId),
           }).save(),
         ]);
       }
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  private async updateFollowings(
+    userId: string,
+    update: number,
+  ): Promise<void> {
+    try {
+      await this.userModel.findByIdAndUpdate(userId, {
+        $inc: { followings: update },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  private async updateFollowers(userId: string, update: number): Promise<void> {
+    try {
+      await this.userModel.findByIdAndUpdate(userId, {
+        $inc: { followers: update },
+      });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -74,8 +97,8 @@ export class FollowingsService {
       }
 
       await Promise.all([
-        this.usersService.updateFollowers(new Types.ObjectId(followingId), -1),
-        this.usersService.updateFollowings(new Types.ObjectId(userId), -1),
+        this.updateFollowers(followingId, -1),
+        this.updateFollowings(userId, -1),
       ]);
     } catch (error) {
       throw new InternalServerErrorException(error);

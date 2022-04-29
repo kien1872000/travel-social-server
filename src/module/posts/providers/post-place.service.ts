@@ -1,20 +1,18 @@
 import { PostOutput } from '@dto/post/post-new.dto';
-import { Place } from '@entity/place.entity';
 import { Post, PostDocument } from '@entity/post.entity';
-import { MapsHelper } from '@helper/maps.helper';
-import { LikesService } from '@like/providers/likes.service';
+
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { paginate } from '@util/paginate';
+
 import { PaginationRes } from '@util/types';
 import { Model } from 'mongoose';
+import { PostsResultService } from './posts-result.service';
 
 @Injectable()
 export class PostPlaceService {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
-    private readonly mapsHelper: MapsHelper,
-    private readonly likesService: LikesService,
+    private readonly postsResultService: PostsResultService,
   ) {}
   public async getNumberOfRelatedPosts(placeId: string): Promise<number> {
     try {
@@ -30,28 +28,14 @@ export class PostPlaceService {
     currentUser: string,
   ): Promise<PaginationRes<PostOutput>> {
     try {
-      const query = this.postModel
-        .find({ place: placeId })
-        .populate('user', ['displayName', 'avatar'])
-        .populate(
-          'place',
-          ['name', 'formattedAddress', 'coordinate', 'visits'],
-          Place.name,
-        )
-        .select(['-mediaFiles._id']);
-      const posts = await paginate(query, { page: page, perPage: perPage });
-      return {
-        items: await Promise.all(
-          posts.items.map(async (i) => {
-            const liked = await this.likesService.isUserLikedPost(
-              currentUser,
-              (i as any)._id.toString(),
-            );
-            return this.mapsHelper.mapToPostOutPut(i, currentUser, liked);
-          }),
-        ),
-        meta: posts.meta,
-      };
+      const match = { place: placeId };
+
+      return await this.postsResultService.getPostsResult(
+        currentUser,
+        page,
+        perPage,
+        match,
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

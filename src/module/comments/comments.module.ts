@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module';
 import { CommentsController } from './controllers/comments.controller';
 import { CommentsService } from './providers/comments.service';
 import { MapsHelper } from '@helper/maps.helper';
+import { Post, PostSchema } from '@entity/post.entity';
 
 @Module({
   imports: [
@@ -15,9 +16,11 @@ import { MapsHelper } from '@helper/maps.helper';
         name: Comment.name,
         schema: CommentSchema,
       },
+      {
+        name: Post.name,
+        schema: PostSchema,
+      },
     ]),
-    forwardRef(() => UsersModule),
-    PostsModule,
   ],
   providers: [CommentsService, StringHandlersHelper, MapsHelper],
   controllers: [CommentsController],

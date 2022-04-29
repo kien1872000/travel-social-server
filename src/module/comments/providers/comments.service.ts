@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  Post,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -15,14 +14,14 @@ import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
 import { UserCommentDto } from '@dto/comment/user-comment.dto';
 import { MapsHelper } from '@helper/maps.helper';
+import { Post, PostDocument } from '@entity/post.entity';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
+    @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
     private readonly mapsHelper: MapsHelper,
-    private stringHandlersHelper: StringHandlersHelper,
-    private postService: PostsService,
   ) {}
   public async addComment(
     userId: string,
@@ -30,16 +29,12 @@ export class CommentsService {
     comment: string,
   ): Promise<Comment> {
     try {
-      const checkPost = await this.postService.getPost(postId);
+      const checkPost = await this.postModel.findById(postId);
       if (!checkPost) {
         throw new BadRequestException('Post không tồn tại');
       }
 
-      await this.postService.updateTotalPostCommentsOrLikes(
-        postId,
-        Interaction.Comment,
-        1,
-      );
+      await this.updateTotalPostComments(postId.toString(), 1);
       const addComment = new this.commentModel({
         postId: Types.ObjectId(postId),
         userId: Types.ObjectId(userId),
@@ -77,11 +72,7 @@ export class CommentsService {
             replys: 1,
           },
         }),
-        this.postService.updateTotalPostCommentsOrLikes(
-          cmt.postId.toString(),
-          Interaction.Comment,
-          1,
-        ),
+        await this.updateTotalPostComments(cmt.postId.toString(), 1),
       ]);
       return result;
     } catch (err) {
@@ -100,11 +91,7 @@ export class CommentsService {
         throw new BadRequestException(
           'bạn không có quyền xóa comment không phải của bạn',
         );
-      await this.postService.updateTotalPostCommentsOrLikes(
-        cmt.postId.toString(),
-        Interaction.Comment,
-        -1,
-      );
+      await this.updateTotalPostComments(cmt.postId.toString(), -1);
       if (cmt.parentId != null) {
         await this.commentModel.findByIdAndUpdate(cmt.parentId, {
           $inc: {
@@ -127,7 +114,7 @@ export class CommentsService {
     perPage: number,
   ): Promise<PaginationRes<UserCommentDto>> {
     try {
-      const post = await this.postService.getPost(postId);
+      const post = await this.postModel.findById(postId);
       if (!post) throw new BadRequestException('Post không tồn tại');
       const query = this.commentModel
         .find({
@@ -188,65 +175,17 @@ export class CommentsService {
       throw new InternalServerErrorException(err);
     }
   }
-  // public async getCommentsStatisticByTime(
-  //   userId: string,
-  //   time: string,
-  // ): Promise<StatisticOutPut[]> {
-  //   try {
-  //     const range = this.stringHandlersHelper.getStartAndEndDateWithTime(time);
-  //     const postsToSearch = (
-  //       await this.postService.getPostIdsInProfile(userId)
-  //     ).map((postId) => Types.ObjectId(postId));
-  //     const reactionsStatistic = await this.commentModel.aggregate([
-  //       {
-  //         $match: {
-  //           createdAt: { $gte: new Date(range[0]), $lte: new Date(range[1]) },
-  //           postId: { $in: postsToSearch },
-  //         },
-  //       },
-  //       {
-  //         $group: {
-  //           _id: {
-  //             year: { $year: { date: '$createdAt', timezone: VIET_NAM_TZ } },
-  //             month: { $month: { date: '$createdAt', timezone: VIET_NAM_TZ } },
-  //             day: {
-  //               $dayOfMonth: { date: '$createdAt', timezone: VIET_NAM_TZ },
-  //             },
-  //           },
-  //           date: { $first: '$createdAt' },
-  //           scales: { $sum: 1 },
-  //         },
-  //       },
-  //       {
-  //         $sort: { date: 1 },
-  //       },
-  //       {
-  //         $project: {
-  //           date: 1,
-  //           scales: 1,
-  //           _id: 0,
-  //         },
-  //       },
-  //     ]);
-  //     const format = 'YYYY-MM-DD';
-  //     return reactionsStatistic.map((i) => {
-  //       const scales = (i as any).scales;
-  //       const date = this.stringHandlersHelper.getDateWithTimezone(
-  //         (i as any).date,
-  //         VIET_NAM_TZ,
-  //         format,
-  //       );
-  //       return {
-  //         scales: scales,
-  //         date: date,
-  //       };
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-
-  //     throw new InternalServerErrorException(error);
-  //   }
-  // }
+  private async updateTotalPostComments(
+    postId: string,
+    count: number,
+  ): Promise<void> {
+    try {
+      const update = { $inc: { comments: count } };
+      await this.postModel.findByIdAndUpdate(postId, update);
+    } catch (err) {
+      throw new InternalServerErrorException(err);
+    }
+  }
   public async getComments(
     postId: string,
     commentId: string,
@@ -284,7 +223,7 @@ export class CommentsService {
     perPage: number,
   ): Promise<PaginationRes<UserCommentDto>> {
     try {
-      const post = await this.postService.getPost(postId);
+      const post = await this.postModel.findById(postId);
       if (!post) throw new BadRequestException('Post không tồn tại');
       const query = this.commentModel.aggregate<CommentDocument>([
         {

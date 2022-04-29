@@ -1,11 +1,10 @@
 import { Like, LikeSchema } from '@entity/like.entity';
 import { FollowingsModule } from '@following/followings.module';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { Post, PostSchema } from '@entity/post.entity';
 
-import { PostsModule } from '../posts/posts.module';
-import { UsersModule } from '../users/users.module';
 import { LikesController } from './controllers/likes.controller';
 import { LikesService } from './providers/likes.service';
 
@@ -16,9 +15,12 @@ import { LikesService } from './providers/likes.service';
         name: Like.name,
         schema: LikeSchema,
       },
+      {
+        name: Post.name,
+        schema: PostSchema,
+      },
     ]),
-    forwardRef(() => UsersModule),
-    forwardRef(() => PostsModule),
+
     FollowingsModule,
   ],
   providers: [LikesService, StringHandlersHelper],

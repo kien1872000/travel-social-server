@@ -1,30 +1,26 @@
 import { ChatGroupsService } from '@chat/providers/chat-groups.service';
 import { User, UserDocument } from '@entity/user.entity';
-import { FollowingsService } from '@following/providers/followings.service';
-import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import {
-  BadGatewayException,
   BadRequestException,
   ForbiddenException,
-  forwardRef,
-  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SearchUserFilter } from '@util/enums';
+import { InterestType, SearchUserFilter } from '@util/enums';
 import { noResultPaginate, paginate } from '@util/paginate';
 import { PaginationRes } from '@util/types';
-import { Aggregate, Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import { InterestsService } from 'src/module/interests/interests.service';
 
 @Injectable()
 export class UsersSearchService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private readonly stringHandlersHelper: StringHandlersHelper,
-    @Inject(forwardRef(() => ChatGroupsService))
     private readonly chatGroupService: ChatGroupsService,
+    private readonly interestsService: InterestsService,
   ) {}
   public async getUserSearchList<T>(
     search = '',
@@ -88,6 +84,9 @@ export class UsersSearchService {
           collection = 'followings';
           break;
       }
+      const interestUsers = (
+        await this.interestsService.getInterests(currentUser, InterestType.User)
+      ).map((i) => Types.ObjectId(i));
       const filterList = {
         $lookup: {
           from: collection,
@@ -146,7 +145,12 @@ export class UsersSearchService {
             followed: { $in: ['$_id', '$followingList.following'] },
           },
         },
-        { $sort: { followed: -1 } },
+        {
+          $addFields: {
+            interested: { $in: ['$_id', interestUsers] },
+          },
+        },
+        { $sort: { interested: -1, followed: -1 } },
       );
       let project = {
         _id: 0,

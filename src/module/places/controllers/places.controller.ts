@@ -4,7 +4,15 @@ import { User } from '@decorator/user.decorator';
 import { SearchPlaceDto } from '@dto/place/goong-map.dto';
 import { SearchPlaceInput } from '@dto/place/place.dto';
 import { VehicleDto } from '@dto/place/vehicle.dto';
-import { Body, Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -102,7 +110,7 @@ export class PlacesController {
       perPage,
     );
   }
-  @Get('suggest/vehicle')
+  @Post('suggest/vehicle')
   @ApiBody({ type: VehicleDto })
   async suggestVehicle(
     @Body()
