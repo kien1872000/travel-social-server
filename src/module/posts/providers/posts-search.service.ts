@@ -78,6 +78,7 @@ export class PostsSearchService {
           currentUser,
           page,
           perPage,
+          true,
           match,
         );
       }

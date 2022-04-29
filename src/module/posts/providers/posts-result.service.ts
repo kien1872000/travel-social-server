@@ -22,13 +22,18 @@ export class PostsResultService {
     currentUser: string,
     page: number,
     perPage: number,
+    interested = true,
     filter = {},
   ): Promise<PaginationRes<PostOutput>> {
-    const [interestHastags, interestPlaces, interestUsers] = await Promise.all([
-      this.interestsService.getInterests(currentUser, InterestType.Hashtag),
-      this.interestsService.getInterests(currentUser, InterestType.Place),
-      this.interestsService.getInterests(currentUser, InterestType.User),
-    ]);
+    let [interestHastags, interestPlaces, interestUsers] = [[], [], []];
+    if (interested) {
+      [interestHastags, interestPlaces, interestUsers] = await Promise.all([
+        this.interestsService.getInterests(currentUser, InterestType.Hashtag),
+        this.interestsService.getInterests(currentUser, InterestType.Place),
+        this.interestsService.getInterests(currentUser, InterestType.User),
+      ]);
+    }
+
     let match = filter;
     if (
       !(

@@ -34,6 +34,7 @@ export class PostPlaceService {
         currentUser,
         page,
         perPage,
+        false,
         match,
       );
     } catch (error) {

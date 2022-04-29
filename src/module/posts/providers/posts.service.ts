@@ -16,6 +16,7 @@ import { PlacesService } from 'src/module/places/providers/places.service';
 import { paginate } from '@util/paginate';
 import { HashtagDetailDto } from '@dto/hashtag/hashtag.dto';
 import { PostsResultService } from './posts-result.service';
+import { Place } from '@entity/place.entity';
 @Injectable()
 export class PostsService {
   constructor(
@@ -40,8 +41,12 @@ export class PostsService {
     try {
       const query = this.postModel
         .find({ hashtags: hashtag })
-        .populate('user', ['displayName', 'avatar']);
-
+        .populate('user', ['displayName', 'avatar'])
+        .populate(
+          'place',
+          ['name', 'formattedAddress', 'coordinate', 'visits'],
+          Place.name,
+        );
       const posts = await paginate(query, { page: page, perPage: perPage });
 
       return {
@@ -159,6 +164,7 @@ export class PostsService {
         currentUser,
         page,
         perPage,
+        false,
         match,
       );
     } catch (error) {

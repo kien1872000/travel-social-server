@@ -13,7 +13,6 @@ import { PlacesService } from '../places/providers/places.service';
 export class SearchsService {
   constructor(
     private readonly hashtagsService: HashtagsService,
-    private readonly placesService: PlacesService,
     private readonly postsSearchService: PostsSearchService,
     private readonly usersSearchService: UsersSearchService,
   ) {}

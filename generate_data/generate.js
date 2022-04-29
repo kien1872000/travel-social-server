@@ -6,13 +6,17 @@ const fs = require('fs');
 
 faker.locale = 'vi';
 var url = 'mongodb://localhost:27017/';
+let placeUrls = JSON.parse(fs.readFileSync('./places_url.json', 'utf-8'));
 let placeDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8')).slice(
   0,
   40,
 );
-
+let userAvatarUrls = JSON.parse(
+  fs.readFileSync('./user_avatar_urls.json', 'utf-8'),
+);
 let userAddressDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
-
+const avatarImages = userAvatarUrls.map((i) => i.url);
+const a_image = placeUrls.map((i) => i.url);
 const a_video = [
   'https://media.istockphoto.com/videos/picture-post-card-perfect-landscape-scenery-of-llyn-padarn-lake-with-video-id1324947942',
   'https://media.istockphoto.com/videos/aerial-drone-video-over-river-tay-scotland-video-id1273093103',
@@ -86,8 +90,8 @@ async function insertUser(a_users, number, dbo) {
       const name = faker.name.findName(null, null, sex);
       const nameSplit = name.split(' ');
       const noAccent = removeAccent(name);
-      const avt = faker.image.people(null, null, true);
-      const bg = faker.image.nature(null, null, true);
+      const avt = getRandom(avatarImages);
+      const bg = getRandom(a_image);
       const date = faker.date.between(
         '1980-01-01T00:00:00.000Z',
         '2012-01-01T00:00:00.000Z',
@@ -320,7 +324,7 @@ async function insertPost(
         const description =
           faker.lorem.paragraphs().toString() + a_ht.join(' ');
         for (let k = 0; k < getRandomInRange(post_image + 1) + 1; k++) {
-          const imgUrl = faker.image.nature(null, null, true);
+          const imgUrl = getRandom(a_image);
           var post_media_obj = {
             type: 'image',
             url: imgUrl,
