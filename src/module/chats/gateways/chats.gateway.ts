@@ -14,7 +14,7 @@ import {
 } from '@nestjs/websockets';
 import { corsOptions } from '@util/constants';
 import { Server, Socket } from 'socket.io';
-import { SocketValidationPipe } from 'src/pipes/socket-validation.pipe';
+import { SocketValidationPipe } from 'src/pipe/socket-validation.pipe';
 
 const SEND_MESSAGE = 'sendMessage';
 const RECEIVE_MESSAGE = 'receiveMessage';

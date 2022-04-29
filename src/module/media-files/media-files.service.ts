@@ -6,20 +6,13 @@ import { FileType } from '@entity/post.entity';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { UploadsService } from '@upload/uploads.service';
-import {
-  MEDIA_FILES_PER_PAGE,
-  VIDEOS_PERPAGE,
-  VIET_NAM_TZ,
-} from 'src/util/constants';
-import { File, Privacy } from 'src/util/enums';
+
+import { File } from 'src/util/enums';
 import { PaginationRes } from '@util/types';
 import { MediaFileDto } from '@dto/media-file/media-file.dto';
 import { User } from '@entity/user.entity';
 import { paginate } from '@util/paginate';
-import { INSTANCE_METADATA_SYMBOL } from '@nestjs/core/injector/instance-wrapper';
-import { query } from 'express';
 
-@Injectable()
 export class MediaFilesService {
   constructor(
     @InjectModel(MediaFile.name) private fileModel: Model<MediaFileDocument>,

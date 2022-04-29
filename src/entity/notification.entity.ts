@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { NotificationAction } from '@util/enums';
 import { Types } from 'mongoose';
 
 @Schema({ timestamps: true })

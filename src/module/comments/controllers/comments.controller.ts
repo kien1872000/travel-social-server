@@ -121,24 +121,4 @@ export class CommentsController {
       paginateOptions.perPage,
     );
   }
-  // @Get('/statistic')
-  // @ApiOperation({
-  //   description: 'Thống kê comments trong profile theo thời gian',
-  // })
-  // @ApiQuery({
-  //   type: String,
-  //   name: 'userId',
-  //   description:
-  //     'id của user muốn lấy thống kê, nếu là user hiện tại thì không cần truyền',
-  //   required: false,
-  // })
-  // @ApiQuery({ type: String, enum: Time, name: 'time' })
-  // async getCommentsSatistic(
-  //   @Query('time') time: string,
-  //   @Query('userId') userId: string,
-  //   @Request() req,
-  // ) {
-  //   if (!userId) userId = req.user.userId;
-  //   return this.commentService.getCommentsStatisticByTime(userId, time);
-  // }
 }

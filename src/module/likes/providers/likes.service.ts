@@ -1,24 +1,17 @@
 import { UserLike } from '@dto/like/like.dto';
 import { Like, LikeDocument } from '@entity/like.entity';
 import { Post, PostDocument } from '@entity/post.entity';
-import { UserDocument } from '@entity/user.entity';
 import { FollowingsService } from '@following/providers/followings.service';
-import { StringHandlersHelper } from '@helper/string-handler.helper';
 import {
   BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { INSTANCE_METADATA_SYMBOL } from '@nestjs/core/injector/instance-wrapper';
+
 import { InjectModel } from '@nestjs/mongoose';
-import { PostsService } from '@post/providers/posts.service';
-import { UsersService } from '@user/providers/users.service';
-import { FOLLOWINGS_PER_PAGE } from '@util/constants';
-import { Interaction } from '@util/enums';
+
 import { paginate } from '@util/paginate';
-import { PaginateOptions, PaginationRes } from '@util/types';
+import { PaginationRes } from '@util/types';
 import { Model, Types } from 'mongoose';
 
 @Injectable()

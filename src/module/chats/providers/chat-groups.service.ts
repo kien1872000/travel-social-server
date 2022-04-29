@@ -1,11 +1,7 @@
 import { ChatGroupOutput, CreateChatGroupDto } from '@dto/chat/chat-group.dto';
 import { ChatGroup, ChatGroupDocument } from '@entity/chat-group.entity';
 import { MapsHelper } from '@helper/maps.helper';
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsersService } from '@user/providers/users.service';
 import { Model, Types } from 'mongoose';

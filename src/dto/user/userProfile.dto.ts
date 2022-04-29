@@ -1,18 +1,7 @@
 import { Address } from '@entity/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsIn,
-  IsInt,
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+
+import { IsDateString, IsIn, IsInt } from 'class-validator';
 import { Express } from 'express';
 export class UserInfoInput {
   @ApiProperty({
@@ -79,4 +68,3 @@ export class ProfileImageOutPut {
   avatar: string;
   coverPhoto: string;
 }
-

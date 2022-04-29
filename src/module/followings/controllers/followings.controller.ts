@@ -3,17 +3,14 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Post,
   Query,
-  Request,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';

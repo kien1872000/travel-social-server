@@ -6,10 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Comment, CommentDocument } from '@entity/comment.entity';
-import { StringHandlersHelper } from '@helper/string-handler.helper';
-import { PostsService } from '@post/providers/posts.service';
-import { Interaction } from '@util/enums';
-import { FOLLOWINGS_PER_PAGE, POSTS_PER_PAGE } from '@util/constants';
+
 import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
 import { UserCommentDto } from '@dto/comment/user-comment.dto';

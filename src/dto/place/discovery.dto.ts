@@ -1,5 +1,4 @@
 import { Place } from '@entity/place.entity';
-import { PostDocument } from '@entity/post.entity';
 
 export class DiscoveryPlacesDto extends Place {
   suggestedVisitors: Visitor[];

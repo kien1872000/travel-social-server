@@ -1,12 +1,6 @@
 import { AuthService } from '@auth/auth.service';
 import { ChatRoomsService } from '@chat/providers/chat-rooms.service';
-import { UserDocument } from '@entity/user.entity';
-import {
-  forwardRef,
-  Inject,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { forwardRef, Inject } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,

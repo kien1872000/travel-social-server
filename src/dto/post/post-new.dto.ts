@@ -1,11 +1,8 @@
 import { UpdatePlaceDto } from '@dto/place/place.dto';
 import { Place } from '@entity/place.entity';
 import { FileType } from '@entity/post.entity';
-import { Address } from '@entity/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { PaginationRes } from '@util/types';
-import { IsNumber, IsString } from 'class-validator';
-import { Types } from 'mongoose';
+import { IsString } from 'class-validator';
 
 export class PostInput extends UpdatePlaceDto {
   @ApiProperty({ type: String, description: 'description nếu có' })

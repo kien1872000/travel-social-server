@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsArray, IsInt, IsNumber } from 'class-validator';
+import { IsArray, IsNumber } from 'class-validator';
 
 export class Airport {
   @ApiProperty({ type: String, description: 'tên sân bay' })

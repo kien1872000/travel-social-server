@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  forwardRef,
-  Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -10,8 +8,7 @@ import { Model, Types } from 'mongoose';
 import { FollowingsOutput } from '@dto/following/following.dto';
 import { Following, FollowingDocument } from '@entity/following.entity';
 import { MapsHelper } from '@helper/maps.helper';
-import { UsersService } from '@user/providers/users.service';
-import { FOLLOWERS_PER_PAGE, FOLLOWINGS_PER_PAGE } from 'src/util/constants';
+
 import { PaginationRes } from '@util/types';
 import { paginate } from '@util/paginate';
 import { User, UserDocument } from '@entity/user.entity';
@@ -23,7 +20,6 @@ export class FollowingsService {
     private followingModel: Model<FollowingDocument>,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     private mapsHelper: MapsHelper,
-  
   ) {}
   public async checkIfFollowed(userId, followingId) {
     try {

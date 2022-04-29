@@ -18,7 +18,7 @@ import {
 import { UsersService } from '@user/providers/users.service';
 import { corsOptions } from '@util/constants';
 import { Server, Socket } from 'socket.io';
-import { SocketValidationPipe } from 'src/pipes/socket-validation.pipe';
+import { SocketValidationPipe } from 'src/pipe/socket-validation.pipe';
 
 const JOIN_ROOM = 'joinRoom';
 const JOIN_ROOM_SUCCESS = 'joinRoomSuccess';

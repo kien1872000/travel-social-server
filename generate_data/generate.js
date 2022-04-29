@@ -1,10 +1,8 @@
 var MongoClient = require('mongodb').MongoClient;
 const { faker } = require('@faker-js/faker');
-const { rejects } = require('assert');
-faker.setLocale('vi');
 const fs = require('fs');
+faker.setLocale('vi');
 
-faker.locale = 'vi';
 var url = 'mongodb://localhost:27017/';
 let placeUrls = JSON.parse(fs.readFileSync('./places_url.json', 'utf-8'));
 let placeDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8')).slice(

@@ -10,7 +10,6 @@ import {
   NotificationDocument,
 } from '@entity/notification.entity';
 import { UserDocument } from '@entity/user.entity';
-import { MediaFilesService } from '@mediaFile/media-files.service';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PostDetailService } from '@post/providers/post-detail.service';
