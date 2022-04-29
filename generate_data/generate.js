@@ -1,5 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
-var faker = require('faker');
+const { faker } = require('@faker-js/faker');
+const { rejects } = require('assert');
+faker.setLocale('vi');
 const fs = require('fs');
 
 faker.locale = 'vi';
@@ -8,14 +10,9 @@ let placeDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8')).slice(
   0,
   40,
 );
-let placeUrls = JSON.parse(fs.readFileSync('./places_url.json', 'utf-8'));
-let userAddressDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
-let userAvatarUrls = JSON.parse(
-  fs.readFileSync('./user_avatar_urls.json', 'utf-8'),
-);
 
-const avatarImages = userAvatarUrls.map((i) => i.url);
-const a_image = placeUrls.map((i) => i.url);
+let userAddressDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8'));
+
 const a_video = [
   'https://media.istockphoto.com/videos/picture-post-card-perfect-landscape-scenery-of-llyn-padarn-lake-with-video-id1324947942',
   'https://media.istockphoto.com/videos/aerial-drone-video-over-river-tay-scotland-video-id1273093103',
@@ -28,7 +25,7 @@ const a_video = [
   'https://assets.mixkit.co/videos/preview/mixkit-very-close-shot-of-the-leaves-of-a-tree-wet-18310-large.mp4',
   'https://assets.mixkit.co/videos/preview/mixkit-people-pouring-a-warm-drink-around-a-campfire-513-large.mp4',
 ];
-var hashtagRange = 50;
+let randomHashtags = [];
 var a_users = [];
 var a_posts = [];
 let userPlaces = [];
@@ -54,10 +51,17 @@ function getTimeAfterTime(times, days) {
   result.setMinutes(result.getMinutes() + getRandomInRange(40));
   return result;
 }
-function randomHashtagArray(range, count) {
+function randomHashtagArray(count) {
   var a_ht = [];
   for (let i = 0; i < count; i++) {
-    a_ht.push('#hashtag' + getRandomInRange(range).toString());
+    switch (getRandomInRange(2)) {
+      case 0:
+        a_ht.push('#' + faker.word.noun());
+        break;
+      case 1:
+      default:
+        a_ht.push('#' + faker.word.verb());
+    }
   }
   return a_ht;
 }
@@ -66,14 +70,36 @@ async function insertUser(a_users, number, dbo) {
   let userPromise = new Promise(async function (resolve) {
     console.log('generate users');
     for (let i = 0; i < number; i++) {
-      var name = faker.name.findName();
-      var noAccent = removeAccent(name);
-      var avt = getRandom(avatarImages);
-      var bg = getRandom(a_image);
-      var date = new Date(2000, 1, 1, 0, 0, 0, 0);
+      const sexNumber = getRandomInRange(3);
+      let sex;
+      switch (sexNumber) {
+        case 0:
+          sex = 'female';
+          break;
+        case 1:
+          sex = 'male';
+          break;
+        default:
+          sex = null;
+          break;
+      }
+      const name = faker.name.findName(null, null, sex);
+      const nameSplit = name.split(' ');
+      const noAccent = removeAccent(name);
+      const avt = faker.image.people(null, null, true);
+      const bg = faker.image.nature(null, null, true);
+      const date = faker.date.between(
+        '1980-01-01T00:00:00.000Z',
+        '2012-01-01T00:00:00.000Z',
+      );
       const userAddress = getRandom(userAddressDetails);
-      var userObject = {
-        email: changeToGmail(faker.internet.email().toString()),
+      const userObject = {
+        email: changeToGmail(
+          faker.internet.email(
+            removeAccent(getRandom(nameSplit)),
+            removeAccent(getRandom(nameSplit)),
+          ),
+        ),
         password:
           '$2b$10$ENOX9H2CmatQBLTjMSiXJec.7NknF8r2kVhK4BHV9/G3cMxC2AT9.',
         displayName: name,
@@ -83,7 +109,7 @@ async function insertUser(a_users, number, dbo) {
         avatar: avt,
         coverPhoto: bg,
         bio: faker.lorem.sentences(),
-        sex: getRandomInRange(3),
+        sex: sexNumber,
         address: {
           name: userAddress.name,
           coordinate: userAddress.coordinate,
@@ -157,25 +183,6 @@ async function insertFollowing(a_users, follow_number, dbo) {
 }
 async function insertHagtash(a_ht, post_date, dbo) {
   let hashtagPromise = new Promise(async function (resolve) {
-    var start = new Date(
-      post_date.getFullYear(),
-      post_date.getMonth(),
-      post_date.getDate(),
-      -1,
-      23,
-      59,
-      59,
-      999,
-    );
-    var end = new Date(
-      post_date.getFullYear(),
-      post_date.getMonth(),
-      post_date.getDate(),
-      24,
-      0,
-      0,
-      0,
-    );
     const promises = [];
     for (let h = 0; h < a_ht.length; h++) {
       var ht = a_ht[h];
@@ -211,7 +218,7 @@ async function insertComment(
     var comment_count = getRandomInRange(post_comment + 1);
     for (var r = 0; r < comment_count; r++) {
       var child_comment_count = getRandomInRange(child_comment + 1);
-      var comment_time = getTimeAfterTime(post_date, 0);
+      var comment_time = faker.date.between(post_date, new Date());
       var commentObject = {
         postId: postId,
         userId: getRandom(a_users),
@@ -228,7 +235,7 @@ async function insertComment(
         .updateOne({ _id: postId }, { $inc: { comments: 1 } });
 
       for (var c = 0; c < child_comment_count; c++) {
-        var child_time = getTimeAfterTime(comment_time, 0);
+        var child_time = faker.date.between(comment_time, new Date());
         var childObject = {
           postId: postId,
           userId: getRandom(a_users),
@@ -256,7 +263,7 @@ async function insertLike(a_users, postId, post_like, post_date, dbo) {
     var like_count = getRandomInRange(post_like + 1);
     const promises = [];
     for (var r = 0; r < like_count; r++) {
-      var likeTime = getTimeAfterTime(post_date, 0);
+      var likeTime = faker.date.between(post_date, new Date());
       var likeItem = {
         post: postId,
         user: getRandom(a_users),
@@ -296,23 +303,24 @@ async function insertPost(
 ) {
   let postPromise = new Promise(async function (resolve) {
     console.log('generate posts');
+
     for (let i = 0; i < a_users.length; i++) {
       const currentUser = a_users[i];
       for (let j = 0; j < num_post; j++) {
-        var a_ht = randomHashtagArray(
-          hashtagRange,
-          getRandomInRange(post_hashtag + 1),
-        );
+        var a_ht = [];
+        for (let i = 0; i < post_hashtag; i++) {
+          a_ht.push(getRandom(randomHashtags));
+        }
         a_ht = [...new Set(a_ht)];
 
-        let date = getTimePreviousTime(new Date(), getRandomInRange(180));
+        let date = faker.date.between('2021-01-01T00:00:00.000Z', new Date());
 
         var a_post_media = [];
         var a_mediafile = [];
         const description =
           faker.lorem.paragraphs().toString() + a_ht.join(' ');
         for (let k = 0; k < getRandomInRange(post_image + 1) + 1; k++) {
-          const imgUrl = getRandom(a_image);
+          const imgUrl = faker.image.nature(null, null, true);
           var post_media_obj = {
             type: 'image',
             url: imgUrl,
@@ -355,7 +363,6 @@ async function insertPost(
             place: placeDetail.placeId,
             __v: 0,
           };
-
         var p_result = await dbo.collection('posts').insertOne(postObject);
         a_posts.push(p_result.insertedId);
         userPlaces.push({
@@ -365,6 +372,7 @@ async function insertPost(
           lastVisitedDate: date,
           lastestPost: p_result.insertedId,
         });
+
         await Promise.all([
           insertMediaFile(currentUser, a_mediafile, dbo, date, groupId),
           insertHagtash(a_ht, date, dbo),
@@ -499,13 +507,14 @@ MongoClient.connect(url, async function (err, db) {
   var num_user = 1000;
   var num_follow = 100;
   var num_post_private = 100;
-  var num_post_image = 3;
-  var num_post_video = 1;
+  var num_post_image = 4;
+  var num_post_video = 2;
   var num_post_hashtag = 5;
   var num_post_reaction = 5;
   var num_post_comment = 5;
   var num_post_child_comment = 2;
-
+  const num_hashtag = 500;
+  randomHashtags = randomHashtagArray(num_hashtag);
   await insertUser(a_users, num_user, dbo);
   await insertFollowing(a_users, num_follow, dbo);
   await insertPost(

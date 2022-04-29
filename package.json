@@ -39,7 +39,6 @@
     "class-validator": "^0.13.2",
     "dayjs": "^1.10.8",
     "dotenv": "^16.0.0",
-    "faker": "^5.5.3",
     "firebase": "^9.6.8",
     "firebase-admin": "^10.0.2",
     "handlebars": "^4.7.7",

@@ -41,16 +41,20 @@ export class VehicleSuggestionService {
           destinationLng,
         ) * 1000;
       let airport;
-      if (crowFilesDistance > 400000) {
+      const haveAirport =
+        crowFilesDistance > 400000 &&
+        nearDepartureAirports.length > 0 &&
+        nearDestinationAirports.length > 0;
+      if (haveAirport) {
         const timeByPlane = (crowFilesDistance / PLANE_VELOCITY) * 3600;
         const origins = `${depatureLat},${depatureLng}|${destinationLat},${destinationLng}`;
         let destinations = '';
         [...nearDepartureAirports, ...nearDestinationAirports].forEach(
           (value) => {
-            destinations = destinations + `${value.lat},${value.lng}`;
+            destinations = destinations + `${value.lat},${value.lng}|`;
           },
         );
-        destinations = destinations.slice(0, destinations.length-1);
+        destinations = destinations.slice(0, destinations.length - 1);
         const distanceMatrix = await this.goongmapService.getMatrix(
           origins,
           destinations,
@@ -94,12 +98,12 @@ export class VehicleSuggestionService {
       const [carMatrix, bikeMatrix] = await Promise.all([
         this.goongmapService.getMatrix(
           `${depatureLat},${depatureLng}`,
-          `${destinationLat},${destinationLng}}`,
+          `${destinationLat},${destinationLng}`,
           Vehicle.Car,
         ),
         this.goongmapService.getMatrix(
           `${depatureLat},${depatureLng}`,
-          `${destinationLat},${destinationLng}}`,
+          `${destinationLat},${destinationLng}`,
           Vehicle.Bike,
         ),
       ]);
@@ -111,15 +115,16 @@ export class VehicleSuggestionService {
         distance: bikeMatrix.rows[0].elements[0].distance.value / 1000,
         duration: bikeMatrix.rows[0].elements[0].duration.value,
       };
-      if (crowFilesDistance > 400000)
-        return this.getRecommend(car, bike, airport);
+      if (haveAirport) return this.getRecommend(car, bike, airport);
       return this.getRecommendNoAirport(car, bike);
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException(error);
     }
   }
   private getRecommend(car, bike, airport) {
-    if (car.duration > bike.duration && car.duration > airport.duration) {
+    if (car.duration < bike.duration && car.duration < airport.duration) {
       return {
         recommend: {
           car,
@@ -130,8 +135,8 @@ export class VehicleSuggestionService {
         },
       };
     } else if (
-      bike.duration > car.duration &&
-      bike.duration > airport.duration
+      bike.duration < car.duration &&
+      bike.duration < airport.duration
     ) {
       return {
         recommend: {
@@ -154,7 +159,7 @@ export class VehicleSuggestionService {
     };
   }
   private getRecommendNoAirport(car, bike) {
-    if (car.duration > bike.duration) {
+    if (car.duration < bike.duration) {
       return {
         recommend: {
           car,

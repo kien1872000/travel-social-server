@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsInt, IsNumber } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsInt, IsNumber } from 'class-validator';
 
 export class Airport {
   @ApiProperty({ type: String, description: 'tên sân bay' })
@@ -24,10 +24,10 @@ export class VehicleDto {
   @IsNumber()
   @ApiProperty({ type: Number, description: 'kinh độ điểm đi' })
   destinationLng: number;
-  @ArrayNotEmpty()
+  @IsArray()
   @ApiProperty({ type: [Airport], description: 'Sân bay gần điểm đến' })
   nearDepartureAirports;
-  @ArrayNotEmpty()
+  @IsArray()
   @ApiProperty({ type: [Airport], description: 'Sân bay gần điểm đi' })
   nearDestinationAirports;
 }
