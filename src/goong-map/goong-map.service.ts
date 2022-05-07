@@ -108,8 +108,6 @@ export class GoongMapService {
     destinations: string,
     vehicle: string,
   ): Promise<DistanceMaxtrixDto> {
-    console.log(origins, 'des', destinations);
-
     return distancematrix(this.goongmapClient)
       .getMatrix({
         origins: origins,

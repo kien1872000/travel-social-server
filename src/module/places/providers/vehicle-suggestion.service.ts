@@ -60,10 +60,9 @@ export class VehicleSuggestionService {
           destinations,
           Vehicle.Car,
         );
-        const nearDepartureAirportsTemp = distanceMatrix.rows[0].elements.slice(
-          0,
-          nearDepartureAirports.length,
-        );
+
+        const nearDepartureAirportsTemp = distanceMatrix.rows[0].elements;
+
         const nearestDepartureAirport = nearDepartureAirportsTemp.reduce(
           (prev, curr, index) =>
             prev.duration.value < curr.duration.value
@@ -72,18 +71,25 @@ export class VehicleSuggestionService {
 
           nearDepartureAirportsTemp[0],
         );
+
         const nearDestinationAirportsTemp =
           distanceMatrix.rows[1].elements.slice(nearDepartureAirports.length);
         const nearestDestinationAirport = nearDestinationAirportsTemp.reduce(
           (prev, curr, index) =>
             prev.duration.value < curr.duration.value
-              ? { ...prev, ...nearDestinationAirports[index] }
-              : { ...curr, ...nearDepartureAirports[index] },
+              ? {
+                  ...prev,
+                  ...nearDestinationAirports[index],
+                }
+              : {
+                  ...curr,
+                  ...nearDestinationAirports[index],
+                },
           nearDestinationAirportsTemp[0],
         );
+
         airport = {
-          nearestDepartureAirport,
-          nearestDestinationAirport,
+          name: Vehicle.Plane,
           distance:
             (nearestDepartureAirport.distance.value +
               nearestDestinationAirport.distance.value +
@@ -93,6 +99,8 @@ export class VehicleSuggestionService {
             nearestDepartureAirport.duration.value +
             nearestDestinationAirport.duration.value +
             timeByPlane,
+          nearestDepartureAirport,
+          nearestDestinationAirport,
         };
       }
       const [carMatrix, bikeMatrix] = await Promise.all([
@@ -108,78 +116,30 @@ export class VehicleSuggestionService {
         ),
       ]);
       const car = {
+        name: Vehicle.Car,
         distance: carMatrix.rows[0].elements[0].distance.value / 1000,
         duration: carMatrix.rows[0].elements[0].duration.value,
       };
       const bike = {
+        name: Vehicle.Bike,
         distance: bikeMatrix.rows[0].elements[0].distance.value / 1000,
         duration: bikeMatrix.rows[0].elements[0].duration.value,
       };
-      if (haveAirport) return this.getRecommend(car, bike, airport);
-      return this.getRecommendNoAirport(car, bike);
+      return this.getRecommend(car, bike, airport);
     } catch (error) {
       console.log(error);
 
       throw new InternalServerErrorException(error);
     }
   }
-  private getRecommend(car, bike, airport) {
-    if (car.duration < bike.duration && car.duration < airport.duration) {
-      return {
-        recommend: {
-          car,
-        },
-        other: {
-          bike,
-          airport,
-        },
-      };
-    } else if (
-      bike.duration < car.duration &&
-      bike.duration < airport.duration
-    ) {
-      return {
-        recommend: {
-          bike,
-        },
-        other: {
-          car,
-          airport,
-        },
-      };
+  private getRecommend(...args) {
+    const result = [];
+    for (const arg of args) {
+      result.push({
+        recomment: arg.duration === Math.min(...args.map((i) => i.duration)),
+        ...arg,
+      });
     }
-    return {
-      recommend: {
-        airport,
-      },
-      other: {
-        car,
-        bike,
-      },
-    };
-  }
-  private getRecommendNoAirport(car, bike) {
-    if (car.duration < bike.duration) {
-      return {
-        recommend: {
-          car,
-        },
-        other: {
-          bike,
-        },
-      };
-    }
-    return {
-      recommend: { bike },
-      other: { car },
-    };
-  }
-  private getNearestAirport(lat, lng, airports) {
-    return airports.reduce((prev, curr) =>
-      this.haversine(lat, lng, prev.lat, prev.lng) <
-      this.haversine(lat, lng, curr.lat, curr.lng)
-        ? prev
-        : curr,
-    );
+    return result;
   }
 }

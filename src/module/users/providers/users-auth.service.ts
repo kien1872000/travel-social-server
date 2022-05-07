@@ -61,7 +61,6 @@ export class UsersAuthService {
   public async signUp(input: UserSignUp): Promise<void> {
     try {
       const user = await this.usersService.findUserByMail(input.email);
-      console.log(user);
       if (user) {
         throw new ConflictException('Email đã tồn tại');
       }

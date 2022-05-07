@@ -3,7 +3,8 @@ const { faker } = require('@faker-js/faker');
 const fs = require('fs');
 faker.setLocale('vi');
 
-var url = 'mongodb://localhost:27017/';
+var url =
+  'mongodb+srv://kiennt1807:y5uvUwQ8PsnulUnH@cluster0.orfpz.mongodb.net/travelsocial';
 let placeUrls = JSON.parse(fs.readFileSync('./places_url.json', 'utf-8'));
 let placeDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8')).slice(
   0,
@@ -506,16 +507,16 @@ MongoClient.connect(url, async function (err, db) {
   console.log(await startPromise);
 
   //insert data
-  var num_user = 1000;
-  var num_follow = 100;
-  var num_post_private = 100;
+  var num_user = 500;
+  var num_follow = 30;
+  var num_post_private = 10;
   var num_post_image = 4;
   var num_post_video = 2;
   var num_post_hashtag = 5;
   var num_post_reaction = 5;
   var num_post_comment = 5;
   var num_post_child_comment = 2;
-  const num_hashtag = 500;
+  const num_hashtag =100;
   randomHashtags = randomHashtagArray(num_hashtag);
   await insertUser(a_users, num_user, dbo);
   await insertFollowing(a_users, num_follow, dbo);

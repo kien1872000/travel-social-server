@@ -103,7 +103,7 @@ export class PostsService {
         comments: 0,
       };
 
-      const [post, _] = await Promise.all([
+      const [post] = await Promise.all([
         new this.postModel(newPost).save(),
         this.hashtagsService.addHastags(hashtags),
       ]);

@@ -56,7 +56,7 @@ export class CommentsService {
       const commentToUpdateReplys = cmt.parentId
         ? cmt.parentId
         : Types.ObjectId(commentId);
-      const [result, _, __] = await Promise.all([
+      const [result] = await Promise.all([
         new this.commentModel({
           postId: cmt.postId,
           userId: Types.ObjectId(userId),
@@ -69,7 +69,7 @@ export class CommentsService {
             replys: 1,
           },
         }),
-        await this.updateTotalPostComments(cmt.postId.toString(), 1),
+        this.updateTotalPostComments(cmt.postId.toString(), 1),
       ]);
       return result;
     } catch (err) {

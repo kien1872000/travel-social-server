@@ -45,6 +45,7 @@ import { ConfigService } from '@config/config.service';
         redis: {
           host: configService.get('REDIS_HOST'),
           port: Number(configService.get('REDIS_PORT')),
+          password: configService.get('REDIS_PASSWORD'),
         },
       }),
     }),
