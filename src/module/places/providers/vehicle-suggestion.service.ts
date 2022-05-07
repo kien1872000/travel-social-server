@@ -33,18 +33,19 @@ export class VehicleSuggestionService {
     nearDestinationAirports: Airport[],
   ) {
     try {
-      const crowFilesDistance =
-        this.haversine(
-          depatureLat,
-          depatureLng,
-          destinationLat,
-          destinationLng,
-        ) * 1000;
+      const crowFilesDistance = this.haversine(
+        depatureLat,
+        depatureLng,
+        destinationLat,
+        destinationLng,
+      );
       let airport;
+
       const haveAirport =
-        crowFilesDistance > 400000 &&
+        crowFilesDistance > 400 &&
         nearDepartureAirports.length > 0 &&
         nearDestinationAirports.length > 0;
+
       if (haveAirport) {
         const timeByPlane = (crowFilesDistance / PLANE_VELOCITY) * 3600;
         const origins = `${depatureLat},${depatureLng}|${destinationLat},${destinationLng}`;
@@ -93,7 +94,7 @@ export class VehicleSuggestionService {
           distance:
             (nearestDepartureAirport.distance.value +
               nearestDestinationAirport.distance.value +
-              crowFilesDistance) /
+              crowFilesDistance * 1000) /
             1000,
           duration:
             nearestDepartureAirport.duration.value +
@@ -135,10 +136,16 @@ export class VehicleSuggestionService {
   private getRecommend(...args) {
     const result = [];
     for (const arg of args) {
-      result.push({
-        recomment: arg.duration === Math.min(...args.map((i) => i.duration)),
-        ...arg,
-      });
+      if (arg) {
+        console.log(arg);
+
+        result.push({
+          recomment:
+            arg.duration ===
+            Math.min(...args.filter((i) => i).map((i) => i?.duration)),
+          ...arg,
+        });
+      }
     }
     return result;
   }
