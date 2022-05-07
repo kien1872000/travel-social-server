@@ -43,12 +43,9 @@ import { ConfigService } from '@config/config.service';
       name: 'mail',
       useFactory: (configService: ConfigService) => ({
         redis: {
-          path: 'redis://:p350729242e65614349d96bfdbf01ef99d5a072e2eb00a33f02be0b9a6fc01074@ec2-54-163-171-22.compute-1.amazonaws.com:25239',
-
-          // host: 'ec2-54-163-171-22.compute-1.amazonaws.com',
-          // port: 25240,
-          // password:
-          //   'p350729242e65614349d96bfdbf01ef99d5a072e2eb00a33f02be0b9a6fc01074',
+          host: configService.get('REDIS_HOST'),
+          port: Number(configService.get('REDIS_PORT')),
+          password: configService.get('REDIS_PASSWORD'),
         },
       }),
     }),

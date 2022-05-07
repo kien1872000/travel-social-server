@@ -19,7 +19,7 @@ import { JwtRefreshTokenAuthGuard } from './jwt.refreshtoken-auth.guard';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_KEY'),
-        signOptions: { expiresIn: '900s' },
+        signOptions: { expiresIn: '2 days' },
       }),
       inject: [ConfigService],
     }),
