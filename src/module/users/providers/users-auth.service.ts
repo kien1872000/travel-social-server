@@ -8,10 +8,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { UserSignUp } from '@dto/user/userSignup.dto';
+import { RegisterAddress, UserSignUp } from '@dto/user/userSignup.dto';
 import { UsersService } from './users.service';
 import { AuthService } from '@auth/auth.service';
-import { LoginOutput } from '@dto/user/login.dto';
+import { LoginAddressDto, LoginOutput } from '@dto/user/login.dto';
 import { JwtPayLoad } from '@util/types';
 import { ActivationInput } from '@dto/user/activation.dto';
 import {
@@ -43,7 +43,21 @@ export class UsersAuthService {
     private readonly activationModel: Model<ActivationDocument>,
     @InjectModel(PasswordReset.name)
     private readonly passwordResetModel: Model<PasswordResetDocument>,
-  ) {}
+  ) { }
+  public async addressRegister(input: RegisterAddress): Promise<void> {
+    try {
+      await this.authService.handleRegisterAddress(input)
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async addressLogin(input: LoginAddressDto): Promise<any> {
+    try {
+      return await this.authService.handleLoginAddress(input)
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
   public async signUp(input: UserSignUp): Promise<void> {
     try {
       const user = await this.usersService.findUserByMail(input.email);

@@ -7,6 +7,11 @@ export interface JwtPayLoad {
   isActive: boolean;
 }
 
+export interface JwtPayLoadWalletaddress {
+  _id: Types.ObjectId;
+  walletAddress: string;
+}
+
 export interface PaginationRes<T> {
   items: T[];
   meta: {

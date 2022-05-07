@@ -10,6 +10,7 @@ import { ConfigService } from './config/config.service';
 import { InterestsModule } from './module/interests/interests.module';
 import { NotificationsModule } from './module/notifications/notifications.module';
 import { PlacesModule } from './module/places/places.module';
+import { PoolModule } from './module/pool/pool.module';
 import { PostsModule } from './module/posts/posts.module';
 import { SearchsModule } from './module/searchs/searchs.module';
 import { UsersModule } from './module/users/users.module';
@@ -32,8 +33,9 @@ import { UsersModule } from './module/users/users.module';
     PlacesModule,
     SearchsModule,
     InterestsModule,
+    PoolModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
