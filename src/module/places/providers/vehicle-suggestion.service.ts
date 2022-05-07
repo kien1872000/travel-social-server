@@ -40,7 +40,7 @@ export class VehicleSuggestionService {
         destinationLng,
       );
       let airport;
-    
+
       const haveAirport =
         crowFilesDistance > 400 &&
         nearDepartureAirports.length > 0 &&
@@ -137,8 +137,12 @@ export class VehicleSuggestionService {
     const result = [];
     for (const arg of args) {
       if (arg) {
+        console.log(arg);
+
         result.push({
-          recomment: arg.duration === Math.min(...args.map((i) => i?.duration)),
+          recomment:
+            arg.duration ===
+            Math.min(...args.filter((i) => i).map((i) => i?.duration)),
           ...arg,
         });
       }
