@@ -28,8 +28,7 @@ export class StringHandlersHelper {
       ' ',
     );
     str = str.replace(/ + /g, ' ');
-    str = str.trim();
-    return str;
+    return str.trim();
   }
   public getHashtagFromString(description: string): string[] {
     let result = [];

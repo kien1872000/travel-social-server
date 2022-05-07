@@ -5,6 +5,7 @@ faker.setLocale('vi');
 
 var url =
   'mongodb+srv://kiennt1807:y5uvUwQ8PsnulUnH@cluster0.orfpz.mongodb.net/travelsocial';
+var url_local = 'mongodb://localhost:27017/travelsocial';
 let placeUrls = JSON.parse(fs.readFileSync('./places_url.json', 'utf-8'));
 let placeDetails = JSON.parse(fs.readFileSync('./data.json', 'utf-8')).slice(
   0,
@@ -516,7 +517,7 @@ MongoClient.connect(url, async function (err, db) {
   var num_post_reaction = 5;
   var num_post_comment = 5;
   var num_post_child_comment = 2;
-  const num_hashtag =100;
+  const num_hashtag = 100;
   randomHashtags = randomHashtagArray(num_hashtag);
   await insertUser(a_users, num_user, dbo);
   await insertFollowing(a_users, num_follow, dbo);
@@ -547,7 +548,7 @@ function removeAccent(alias) {
   str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o');
   str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u');
   str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y');
-  str = str.replace(/đ/g, 'd');
+  str = str.replace(/đ|ð/g, 'd');
   str = str.replace(
     /!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g,
     ' ',
