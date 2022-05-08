@@ -13,6 +13,7 @@ import { PlacesModule } from './module/places/places.module';
 import { PoolModule } from './module/pool/pool.module';
 import { PostsModule } from './module/posts/posts.module';
 import { SearchsModule } from './module/searchs/searchs.module';
+import { SuggestionsModule } from './module/suggestions/suggestions.module';
 import { UsersModule } from './module/users/users.module';
 
 @Module({
@@ -33,7 +34,8 @@ import { UsersModule } from './module/users/users.module';
     PlacesModule,
     SearchsModule,
     InterestsModule,
-    PoolModule
+    PoolModule,
+    SuggestionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
