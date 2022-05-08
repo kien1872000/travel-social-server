@@ -137,7 +137,6 @@ export class VehicleSuggestionService {
     const result = [];
     for (const arg of args) {
       if (arg) {
-        console.log(arg);
 
         result.push({
           recomment:

@@ -12,6 +12,7 @@ import { NotificationsModule } from './module/notifications/notifications.module
 import { PlacesModule } from './module/places/places.module';
 import { PostsModule } from './module/posts/posts.module';
 import { SearchsModule } from './module/searchs/searchs.module';
+import { SuggestionsModule } from './module/suggestions/suggestions.module';
 import { UsersModule } from './module/users/users.module';
 
 @Module({
@@ -32,6 +33,7 @@ import { UsersModule } from './module/users/users.module';
     PlacesModule,
     SearchsModule,
     InterestsModule,
+    SuggestionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
