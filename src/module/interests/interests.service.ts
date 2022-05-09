@@ -109,4 +109,5 @@ export class InterestsService {
       throw new InternalServerErrorException(error);
     }
   }
+  
 }

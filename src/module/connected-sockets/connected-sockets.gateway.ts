@@ -13,9 +13,7 @@ import { ClientRequest } from 'http';
 import { Server, Socket } from 'socket.io';
 import { ConnectedSocketsService } from './connected-sockets.service';
 
-@WebSocketGateway({
-  cors: corsOptions,
-})
+@WebSocketGateway()
 export class ConnectedSocketsGateWay
   implements OnGatewayConnection, OnGatewayDisconnect
 {

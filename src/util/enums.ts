@@ -93,3 +93,8 @@ export enum InterestType {
   Place = 'place',
   User = 'user',
 }
+
+export enum AdvertisementType {
+  Restaurant = 'restaurant',
+  Hotel = 'hotel'
+}

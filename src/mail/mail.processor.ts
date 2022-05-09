@@ -50,7 +50,7 @@ export class MailProcessor {
     this.logger.log(`Sending confirmation email to '${job.data.email}'`);
 
     try {
-      const activationLink = `${clientActivationUrl}/${job.data.activationCode}`;
+      const activationLink = `${process.env.CLIENT_BASE_URL}/activeAccount/${job.data.activationCode}`;
       const result = await this.mailerService.sendMail({
         template: '/confirmation',
         context: {
@@ -74,7 +74,7 @@ export class MailProcessor {
     job: Job<{ email: string; token: string; displayName: string }>,
   ): Promise<any> {
     this.logger.log(`Sending password reset email to '${job.data.email}'`);
-    const resetLink = `${clientResetPasswordUrl}/${job.data.token}`;
+    const resetLink = `${process.env.CLIENT_BASE_URL}/reset/${job.data.token}`;
     try {
       const result = await this.mailerService.sendMail({
         template: '/password-reset',

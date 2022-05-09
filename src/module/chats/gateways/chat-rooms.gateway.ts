@@ -26,7 +26,7 @@ const LEAVE_CHAT_GROUP = 'leaveChatGroup';
 const LEAVE_CHAT_GROUP_SUCCESS = 'leaveChatGroupSuccess';
 const ADD_USERS_TO_CHAT_GROUP = 'addUsersToChatGroup';
 const ADD_USERS_TO_CHAT_GROUP_SUCCESS = 'addUsersToRoomSuccess';
-@WebSocketGateway({ cors: corsOptions })
+@WebSocketGateway()
 export class ChatRoomsGateWay {
   constructor(
     private readonly chatGroupsService: ChatGroupsService,

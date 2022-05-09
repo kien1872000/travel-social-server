@@ -18,9 +18,7 @@ import { SocketValidationPipe } from 'src/pipe/socket-validation.pipe';
 
 const SEND_MESSAGE = 'sendMessage';
 const RECEIVE_MESSAGE = 'receiveMessage';
-@WebSocketGateway({
-  cors: corsOptions,
-})
+@WebSocketGateway()
 export class ChatGateway {
   constructor(
     private readonly chatsService: ChatsService,

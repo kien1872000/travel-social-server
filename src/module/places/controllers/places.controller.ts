@@ -132,4 +132,8 @@ export class PlacesController {
       nearDestinationAirports,
     );
   }
+  @Get('advertisements')
+  async getAdvertisements(@User() user) {
+    return this.placesSerivce.getAdvertisements(user._id);
+  }
 }
