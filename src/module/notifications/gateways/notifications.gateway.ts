@@ -24,7 +24,11 @@ import { NotificationsService } from '../providers/notifications.service';
 const SEND_NOTIFICATION = 'sendNotification';
 const RECEIVE_NOTIFICATION = 'receiveNotification';
 @WebSocketGateway({
-  cors: corsOptions,
+  cors: {
+    // origin: 'http://127.0.0.1:5500',
+    origin: process.env.CLIENT_BASE_URL,
+    credentials: true,
+  },
 })
 export class NotificationsGateway {
   constructor(

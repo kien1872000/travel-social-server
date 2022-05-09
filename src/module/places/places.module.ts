@@ -12,6 +12,10 @@ import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { PostsModule } from '@post/posts.module';
 import { DiscoveryPlacesService } from './providers/discovery-places.service';
 import { VehicleSuggestionService } from './providers/vehicle-suggestion.service';
+import { InterestsModule } from '../interests/interests.module';
+import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@config/config.module';
+import { ConfigService } from '@config/config.service';
 
 @Module({
   imports: [
@@ -27,6 +31,15 @@ import { VehicleSuggestionService } from './providers/vehicle-suggestion.service
     ]),
     GoongMapModule,
     forwardRef(() => PostsModule),
+    InterestsModule,
+    HttpModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        timeout: Number(configService.get('HTTP_TIMEOUT')),
+        maxRedirects: Number(configService.get('HTTP_MAX_REDIRECTS')),
+      }),
+      inject: [ConfigService],
+    }),
   ],
   providers: [
     PlacesService,

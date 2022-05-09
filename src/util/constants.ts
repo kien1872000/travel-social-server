@@ -29,3 +29,6 @@ export const corsOptions = {
   origin: 'http://localhost:3000',
   credentials: true,
 };
+
+export const hotelUrl =
+  'https://booking-com.p.rapidapi.com/v1/hotels/search-by-coordinates';
