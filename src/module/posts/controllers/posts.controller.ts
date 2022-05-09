@@ -133,4 +133,9 @@ export class PostsController {
   async getPostById(@Param('postId') postId: string, @User() user) {
     return this.postsService.getPostById(postId, user._id);
   }
+  @Get('userInterac')
+  @ApiOperation({ description: 'Lấy tương tác' })
+  async getUserInterac(@User() user) {
+    return this.postsService.getUsersInterac(user._id);
+  }
 }

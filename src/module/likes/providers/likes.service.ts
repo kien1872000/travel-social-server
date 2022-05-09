@@ -22,7 +22,7 @@ export class LikesService {
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
 
     private followingService: FollowingsService,
-  ) {}
+  ) { }
   public async addLikeToPost(
     userId: string,
     postId: string,
@@ -122,6 +122,17 @@ export class LikesService {
         post: Types.ObjectId(postId),
       });
       return like ? true : false;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async getUsersInteracLike(
+    currentUser: string,
+  ): Promise<number> {
+    try {
+      return await this.likeModel
+        .find({ user: Types.ObjectId(currentUser) })
+        .count()
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

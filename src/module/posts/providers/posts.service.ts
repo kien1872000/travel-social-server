@@ -17,6 +17,7 @@ import { paginate } from '@util/paginate';
 import { HashtagDetailDto } from '@dto/hashtag/hashtag.dto';
 import { PostsResultService } from './posts-result.service';
 import { Place } from '@entity/place.entity';
+import { CommentsService } from '@comment/providers/comments.service';
 @Injectable()
 export class PostsService {
   constructor(
@@ -30,7 +31,8 @@ export class PostsService {
     private readonly hashtagsService: HashtagsService,
     private readonly placesServive: PlacesService,
     private readonly postResultService: PostsResultService,
-  ) {}
+    private readonly commentsService: CommentsService,
+  ) { }
 
   public async getPostsByHashtag(
     currentUser: string,
@@ -198,6 +200,27 @@ export class PostsService {
         })
         .select(['_id']);
       return posts.map((post) => (post as any)._id.toString());
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  public async getUsersInterac(
+    currentUser: string,
+  ): Promise<any> {
+    try {
+      const postCount: number = await this.postModel
+        .find({ user: Types.ObjectId(currentUser) })
+        .count()
+      const likeCount: number = await this.likesService.getUsersInteracLike(currentUser)
+      const commentCount: number = await this.commentsService.getUsersInteracComment(currentUser)
+      const interac = Math.round(likeCount / 2) + Math.round(commentCount / 2) + postCount
+      return {
+        postCount,
+        likeCount,
+        commentCount,
+        interac
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

@@ -15,8 +15,8 @@ import { UsersSearchService } from '@user/providers/users-search.service';
 import { PoolService } from './pool.service';
 
 @Controller('pool')
-// @UseGuards(JwtAuthGuard)
-// @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @ApiTags('Pool')
 export class PoolController {
   constructor(
@@ -29,8 +29,8 @@ export class PoolController {
   @ApiBody({
     type: StakePoolDto,
   })
-  async stake(@Body() stakingDto: StakePoolDto) {
-    return this.poolService.verifyMaxStake(stakingDto)
+  async stake(@Body() stakingDto: StakePoolDto, @User() user) {
+    return this.poolService.verifyMaxStake(stakingDto, user._id)
   }
 
   @Post('createPool')
@@ -55,8 +55,9 @@ export class PoolController {
     type: getStakingDto
   })
   async getStakingData(
-    @Body() getStakingDto: getStakingDto
+    @Body() getStakingDto: getStakingDto,
+    @User() user
   ): Promise<any> {
-    return this.poolService.getStakingDataOfAddress(getStakingDto);
+    return this.poolService.getStakingDataOfAddress(getStakingDto, user._id);
   }
 }
