@@ -18,13 +18,7 @@ import { SocketValidationPipe } from 'src/pipe/socket-validation.pipe';
 
 const SEND_MESSAGE = 'sendMessage';
 const RECEIVE_MESSAGE = 'receiveMessage';
-@WebSocketGateway({
-  cors: {
-    // origin: 'http://127.0.0.1:5500',
-    origin: process.env.CLIENT_BASE_URL,
-    credentials: true,
-  }
-})
+@WebSocketGateway()
 export class ChatGateway {
   constructor(
     private readonly chatsService: ChatsService,

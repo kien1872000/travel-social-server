@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
+import { SocketIoAdapter } from './socket-io/socket-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -25,6 +26,7 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe());
+  app.useWebSocketAdapter(new SocketIoAdapter(app, configService));
   await app.listen(port);
 }
 bootstrap();

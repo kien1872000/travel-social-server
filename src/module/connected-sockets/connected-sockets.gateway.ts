@@ -13,13 +13,7 @@ import { ClientRequest } from 'http';
 import { Server, Socket } from 'socket.io';
 import { ConnectedSocketsService } from './connected-sockets.service';
 
-@WebSocketGateway({
-  cors: {
-    // origin: 'http://127.0.0.1:5500',
-    origin: process.env.CLIENT_BASE_URL,
-    credentials: true,
-  },
-})
+@WebSocketGateway()
 export class ConnectedSocketsGateWay
   implements OnGatewayConnection, OnGatewayDisconnect
 {
