@@ -13,6 +13,8 @@ export class Address {
 
 @Schema({ timestamps: true })
 export class User {
+  @Prop({ type: String, required: false })
+  walletAddress: string;
   @Prop({ type: String, required: true })
   email: string;
   @Prop({ type: String, required: true })

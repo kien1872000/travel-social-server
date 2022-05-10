@@ -19,7 +19,7 @@ export class CommentsService {
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
     private readonly mapsHelper: MapsHelper,
-  ) {}
+  ) { }
   public async addComment(
     userId: string,
     postId: string,
@@ -271,6 +271,17 @@ export class CommentsService {
       };
     } catch (error) {
       console.log(error);
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async getUsersInteracComment(
+    currentUser: string,
+  ): Promise<number> {
+    try {
+      return await this.commentModel
+        .find({ userId: Types.ObjectId(currentUser) })
+        .count()
+    } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }

@@ -42,7 +42,7 @@ export class PostsController {
   constructor(
     private postsService: PostsService,
     private hashtagsService: HashtagsService,
-  ) {}
+  ) { }
   @Post('new-post')
   @ApiOperation({ description: 'Tạo Post mới' })
   @ApiConsumes('multipart/form-data')
@@ -99,6 +99,7 @@ export class PostsController {
     if (userId) {
       if (postLimit !== PostLimit.Profile) return;
     } else userId = user._id;
+    console.log("=====", userId)
     return this.postsService.getPosts(page, perPage, userId, postLimit);
   }
   @Get('hashtag-detail')
@@ -131,5 +132,10 @@ export class PostsController {
   @ApiOperation({ description: 'Lấy thông tin của post theo id' })
   async getPostById(@Param('postId') postId: string, @User() user) {
     return this.postsService.getPostById(postId, user._id);
+  }
+  @Get('userInterac')
+  @ApiOperation({ description: 'Lấy tương tác' })
+  async getUserInterac(@User() user) {
+    return this.postsService.getUsersInterac(user._id);
   }
 }

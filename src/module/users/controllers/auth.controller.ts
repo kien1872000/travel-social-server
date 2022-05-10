@@ -15,17 +15,36 @@ import {
   ActivationInput,
   SendActivationCodeInput,
 } from '@dto/user/activation.dto';
-import { LoginInput } from '@dto/user/login.dto';
+import { LoginAddressDto, LoginInput } from '@dto/user/login.dto';
 import { PasswordResetInput } from '@dto/user/passwordReset.dto';
 import { RefreshTokenInput } from '@dto/user/refreshToken.dto';
-import { UserSignUp } from '@dto/user/userSignup.dto';
+import { RegisterAddress, UserSignUp } from '@dto/user/userSignup.dto';
 import { JwtPayLoad } from '@util/types';
 import { UsersAuthService } from '../providers/users-auth.service';
 
 @ApiTags('Auth')
 @Controller('user/auth')
 export class UsersAuthController {
-  constructor(private usersAuthService: UsersAuthService) {}
+  constructor(private usersAuthService: UsersAuthService) { }
+
+  @Post('loginWalletAddress')
+  @ApiOperation({ summary: 'Login' })
+  @ApiBody({
+    type: LoginAddressDto,
+  })
+  async loginAddress(@Body() loginDto: LoginAddressDto) {
+    return await this.usersAuthService.addressLogin(loginDto);
+  }
+
+  @Post('registerWalletAddress')
+  @ApiOperation({ summary: 'Register' })
+  @ApiBody({
+    type: RegisterAddress,
+  })
+  async register(@Body() registerDto: RegisterAddress) {
+    return await this.usersAuthService.addressRegister(registerDto);
+  }
+
   @Post('signup')
   @ApiOperation({ description: 'Đăng kí tài khoản mới' })
   @ApiBody({ type: UserSignUp })
