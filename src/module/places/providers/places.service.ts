@@ -122,9 +122,7 @@ export class PlacesService {
   ) {
     try {
       const interestPlaces = await this.getInterestPlace(user, 10);
-      const coordinates = (
-        await this.placeModel.find({}).select(['-_id', 'coordinate']).limit(5)
-      ).map((i) => i.coordinate);
+      const coordinates = interestPlaces.map((i) => i.coordinate);
       switch (type) {
         case AdvertisementType.Restaurant:
           for (const coordinate of coordinates) {

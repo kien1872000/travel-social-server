@@ -1,7 +1,10 @@
 import { Interest, InterestDocument } from '@entity/interest.entity';
 import { Post, PostDocument } from '@entity/post.entity';
+import { User, UserDocument } from '@entity/user.entity';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { VIET_NAM_TZ } from '@util/constants';
 
 import { InterestType } from '@util/enums';
 import { Model, Types } from 'mongoose';
@@ -12,6 +15,7 @@ export class InterestsService {
     @InjectModel(Interest.name)
     private readonly interestModel: Model<InterestDocument>,
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
   public async addInterest(postId: string, currentUser: string): Promise<void> {
     try {
@@ -95,19 +99,40 @@ export class InterestsService {
       throw new InternalServerErrorException(error);
     }
   }
-  public async deleteOldInterest(): Promise<void> {
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: VIET_NAM_TZ })
+  public async updateInterest(): Promise<void> {
     try {
       const timeToDelete = new Date(
         new Date().setDate(new Date().getDate() - 7),
       );
-      await this.interestModel.deleteMany({
-        createdAt: {
-          $lte: timeToDelete,
-        },
-      });
+      const [users] = await Promise.all([
+        this.userModel.find({}).select('_id'),
+        this.interestModel.deleteMany({
+          createdAt: {
+            $lte: timeToDelete,
+          },
+        }),
+      ]);
+      const promises = [];
+      for (const user of users) {
+        const userId = user._id.toString();
+        const [interestUsers, interestHashtags, interestPlaces] =
+          await Promise.all([
+            this.getInterests(userId, InterestType.User),
+            this.getInterests(userId, InterestType.Hashtag),
+            this.getInterests(userId, InterestType.Place),
+          ]);
+        promises.push(this.userModel.findByIdAndUpdate(userId), {
+          interests: {
+            users: interestUsers,
+            hashtags: interestHashtags,
+            place: interestPlaces,
+          },
+        });
+      }
+      await Promise.all(promises);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  
 }

@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 import { Coordinate } from './place.entity';
 
 @Schema()
@@ -47,6 +48,18 @@ export class User {
   followings: number;
   @Prop({ type: Number, required: true })
   followers: number;
+  @Prop({
+    type: {
+      users: { type: [String] },
+      hashtags: { type: [String] },
+      place: { type: [String] },
+    },
+  })
+  interests?: {
+    users: string[];
+    hashtags: string[];
+    places: string[];
+  };
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 export type UserDocument = Document & User;
