@@ -22,7 +22,7 @@ export class LikesService {
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
 
     private followingService: FollowingsService,
-  ) { }
+  ) {}
   public async addLikeToPost(
     userId: string,
     postId: string,
@@ -41,11 +41,11 @@ export class LikesService {
           post: Types.ObjectId(postId),
           user: Types.ObjectId(userId),
         };
-        const promises = await Promise.all([
+        const [newLike] = await Promise.all([
           new this.likeModel(like).save(),
           this.updateTotalPostLikes(postId, 1),
         ]);
-        return promises[0];
+        return newLike;
       }
     } catch (err) {
       throw new InternalServerErrorException(err);
@@ -106,7 +106,7 @@ export class LikesService {
     count: number,
   ): Promise<void> {
     try {
-      const update = { $inc: { comments: count } };
+      const update = { $inc: { likes: count } };
       await this.postModel.findByIdAndUpdate(postId, update);
     } catch (err) {
       throw new InternalServerErrorException(err);
@@ -126,13 +126,11 @@ export class LikesService {
       throw new InternalServerErrorException(error);
     }
   }
-  public async getUsersInteracLike(
-    currentUser: string,
-  ): Promise<number> {
+  public async getUsersInteracLike(currentUser: string): Promise<number> {
     try {
       return await this.likeModel
         .find({ user: Types.ObjectId(currentUser) })
-        .count()
+        .count();
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

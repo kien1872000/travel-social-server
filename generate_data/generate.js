@@ -268,24 +268,30 @@ async function insertLike(a_users, postId, post_like, post_date, dbo) {
     const promises = [];
     for (var r = 0; r < like_count; r++) {
       var likeTime = faker.date.between(post_date, new Date());
+      const user = getRandom(a_users);
       var likeItem = {
         post: postId,
-        user: getRandom(a_users),
+        user: user,
         createdAt: likeTime,
         updatedAt: likeTime,
         __v: 0,
       };
-      promises.push(
-        dbo.collection('likes').insertOne(likeItem),
-        dbo.collection('posts').updateOne(
-          {
-            _id: postId,
-          },
-          {
-            $inc: { likes: 1 },
-          },
-        ),
-      );
+      const like = await dbo
+        .collection('likes')
+        .find({ user: user, post: postId });
+      if (!like) {
+        promises.push(
+          dbo.collection('likes').insertOne(likeItem),
+          dbo.collection('posts').updateOne(
+            {
+              _id: postId,
+            },
+            {
+              $inc: { likes: 1 },
+            },
+          ),
+        );
+      }
     }
     await Promise.all(promises);
     resolve('insert like done.');
@@ -514,8 +520,8 @@ MongoClient.connect(url, async function (err, db) {
   var num_post_image = 4;
   var num_post_video = 2;
   var num_post_hashtag = 5;
-  var num_post_reaction = 5;
-  var num_post_comment = 5;
+  var num_post_reaction = 50;
+  var num_post_comment = 50;
   var num_post_child_comment = 2;
   const num_hashtag = 100;
   randomHashtags = randomHashtagArray(num_hashtag);
