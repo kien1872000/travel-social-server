@@ -43,6 +43,8 @@ export class NotificationsGateway {
       this.connectedSocketsService.getSocketId(noti.receiver),
     ]);
     if ((sender.user as any)._id.toString() === noti.receiver) return;
+    console.log('haha', noti);
+
     const notification = await this.notificationsService.create({
       sender: (sender.user as any)._id.toString(),
       receiver: noti.receiver,
@@ -61,11 +63,8 @@ export class NotificationsGateway {
       createdAt: (notification as any).createdAt,
       seen: false,
     };
-    console.log(notification);
 
     if (receiverSocketId) {
-      console.log('message', message, 'receiver socket Id', receiverSocketId);
-
       this.server.to(receiverSocketId).emit(RECEIVE_NOTIFICATION, message);
     }
   }

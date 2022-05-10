@@ -19,7 +19,7 @@ export class CommentsService {
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
     private readonly mapsHelper: MapsHelper,
-  ) { }
+  ) {}
   public async addComment(
     userId: string,
     postId: string,
@@ -251,12 +251,10 @@ export class CommentsService {
       ]);
 
       const project = {
-        $project: {
-          userId: { $arrayElemAt: ['$userId', 0] },
-          comment: 1,
-          replys: 1,
-          createdAt: 1,
-        },
+        userId: { $arrayElemAt: ['$userId', 0] },
+        comment: 1,
+        replys: 1,
+        createdAt: 1,
       };
       const comments = await paginate(
         query,
@@ -274,13 +272,11 @@ export class CommentsService {
       throw new InternalServerErrorException(error);
     }
   }
-  public async getUsersInteracComment(
-    currentUser: string,
-  ): Promise<number> {
+  public async getUsersInteracComment(currentUser: string): Promise<number> {
     try {
       return await this.commentModel
         .find({ userId: Types.ObjectId(currentUser) })
-        .count()
+        .count();
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

@@ -19,7 +19,7 @@ async function bootstrap() {
       bearerFormat: 'JWT',
       in: 'header',
     })
-    .setTitle('Social travel api docs')
+    .setTitle('Social travel api docs') 
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, openApiConfig);
