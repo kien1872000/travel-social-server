@@ -184,10 +184,9 @@ export class PlacesService {
         return {
           type: AdvertisementType.Hotel,
           coordinate: {
-            latitude: i.latitude,
-            longitude: i.longitude,
+            latitude: i.latitude ? i.latitude : null,
+            longitude: i.longitude ? i.longitude : null,
           },
-          price: i.min_total_price,
           image: i.max_photo_url,
           address: i.address,
           webUrl: i.url,
@@ -226,10 +225,9 @@ export class PlacesService {
         return {
           type: AdvertisementType.Restaurant,
           coordinate: {
-            latitude: i.latitude,
-            longitude: i.longitude,
+            latitude: i.latitude ? Number(i.latitude) : null,
+            longitude: i.longitude ? Number(i.longitude) : null,
           },
-          price: i.price,
           image: i.photo?.images.large.url,
           address: i.address,
           webUrl: i.web_url,
