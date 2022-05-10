@@ -45,6 +45,7 @@
     "class-validator": "^0.13.2",
     "dayjs": "^1.10.8",
     "dotenv": "^16.0.0",
+    "eth-sig-util": "^3.0.1",
     "firebase": "^9.6.8",
     "firebase-admin": "^10.0.2",
     "handlebars": "^4.7.7",
@@ -57,7 +58,8 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "socket.io": "^4.4.1",
-    "swagger-ui-express": "^4.3.0"
+    "swagger-ui-express": "^4.3.0",
+    "web3": "^1.7.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",

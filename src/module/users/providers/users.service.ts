@@ -27,7 +27,7 @@ export class UsersService {
     private readonly stringHandlers: StringHandlersHelper,
     private readonly mediaFilesService: MediaFilesService,
     private readonly followingsService: FollowingsService,
-  ) {}
+  ) { }
   public async findUserById(id: string): Promise<UserDocument> {
     try {
       return await this.userModel.findById(id);
@@ -51,6 +51,26 @@ export class UsersService {
   public async findUserByMail(email: string): Promise<UserDocument> {
     try {
       return await this.userModel.findOne({ email: email });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async findUserByWalletAddress(email: string, walletAddress: string): Promise<UserDocument> {
+    try {
+      return await this.userModel.findOne({
+        email: email,
+        walletAddress
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async findUserByMailAndUpdateAddress(email: string, walletAddress: string): Promise<UserDocument> {
+    try {
+      return await this.userModel.findOneAndUpdate(
+        { email: email },
+        { walletAddress }
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
