@@ -32,3 +32,9 @@ export const corsOptions = {
 
 export const hotelUrl =
   'https://booking-com.p.rapidapi.com/v1/hotels/search-by-coordinates';
+
+export const restaurantUrl =
+  'https://travel-advisor.p.rapidapi.com/restaurants/list-by-latlng';
+
+export const hotelHost = 'booking-com.p.rapidapi.com';
+export const restaurantHost = 'travel-advisor.p.rapidapi.com';

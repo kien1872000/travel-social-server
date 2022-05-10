@@ -4,7 +4,12 @@ import { Coordinate, Place, PlaceDocument } from '@entity/place.entity';
 import { HttpService } from '@nestjs/axios';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { hotelUrl } from '@util/constants';
+import {
+  hotelHost,
+  hotelUrl,
+  restaurantHost,
+  restaurantUrl,
+} from '@util/constants';
 import { AdvertisementType, InterestType } from '@util/enums';
 import { paginate } from '@util/paginate';
 import { PaginationRes } from '@util/types';
@@ -22,7 +27,7 @@ export class PlacesService {
     @InjectModel(Place.name) private readonly placeModel: Model<PlaceDocument>,
     private readonly userPlacesService: UserPlacesService,
     private readonly interestsService: InterestsService,
-    private readonly discoveryPlacesService: DiscoveryPlacesService,
+
     private readonly httpService: HttpService,
   ) {}
   public async searchPlace(
@@ -113,41 +118,39 @@ export class PlacesService {
   }
   public async getAdvertisements(
     user: string,
-    type: string = AdvertisementType.Hotel,
+    type: string = AdvertisementType.Restaurant,
   ) {
     try {
-      const interestPlaces = await this.interestsService.getInterests(
-        user,
-        InterestType.Place,
-      );
-      const url = hotelUrl;
+      const interestPlaces = await this.getInterestPlace(user, 10);
       const coordinates = (
-        await this.placeModel
-          .find({ _id: { $in: interestPlaces } })
-          .select(['-_id', 'coordinate'])
-          .limit(interestPlaces.length)
+        await this.placeModel.find({}).select(['-_id', 'coordinate']).limit(5)
       ).map((i) => i.coordinate);
-      for (const coordinate of coordinates) {
-        const hotels = await this.getAdvertisementRequest(coordinate, url);
-        if (hotels.length > 0) return hotels;
-      }
-
-      const discoveryCoordinates = (
-        await this.placeModel
-          .find({})
-          .sort('-visits')
-          .limit(10)
-          .select(['-_id', 'coordinate'])
-      ).map((i) => i.coordinate);
-      for (const coordinate of discoveryCoordinates) {
-        const hotels = await this.getAdvertisementRequest(coordinate, url);
-        return hotels;
+      switch (type) {
+        case AdvertisementType.Restaurant:
+          for (const coordinate of coordinates) {
+            const restaurants = await this.getRestaurantAdvertisement(
+              coordinate,
+              restaurantUrl,
+            );
+            if (restaurants.length > 0) return restaurants;
+          }
+          break;
+        case AdvertisementType.Hotel:
+        default:
+          for (const coordinate of coordinates) {
+            const hotels = await this.getHotelAdvertisement(
+              coordinate,
+              hotelUrl,
+            );
+            if (hotels.length > 0) return hotels;
+          }
+          break;
       }
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  private async getAdvertisementRequest(
+  private async getHotelAdvertisement(
     coordinate: Coordinate,
     url: string,
   ): Promise<any[]> {
@@ -157,28 +160,112 @@ export class PlacesService {
         adults_number: '2',
         units: 'metric',
         room_number: '1',
-        checkout_date: '2022-05-24',
+        checkout_date: new Date(new Date().setDate(new Date().getDate() + 8))
+          .toISOString()
+          .split('T')[0],
         filter_by_currency: 'VND',
         locale: 'vi',
-        checkin_date: '2022-05-08',
-        latitude: '21.856652564000058',
-        longitude: '103.34228308400009',
-        children_ages: '5,0',
-        categories_filter_ids: 'class::2,class::4,free_cancellation::1',
-        page_number: '0',
+        checkin_date: new Date(new Date().setDate(new Date().getDate() + 1))
+          .toISOString()
+          .split('T')[0],
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
         include_adjacency: 'true',
       };
       const config = {
         params: params,
         headers: {
-          'X-RapidAPI-Host': process.env.RAPIDAPI_HOTEL_HOST,
+          'X-RapidAPI-Host': hotelHost,
           'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
         },
       };
 
       return await (
         await lastValueFrom(this.httpService.get(url, config))
-      ).data;
+      ).data.result.map((i) => {
+        return {
+          type: AdvertisementType.Hotel,
+          coordinate: {
+            latitude: i.latitude,
+            longitude: i.longitude,
+          },
+          price: i.min_total_price,
+          image: i.max_photo_url,
+          address: i.address,
+          webUrl: i.url,
+          name: i.hotel_name,
+        };
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  private async getRestaurantAdvertisement(
+    coordinate: Coordinate,
+    url: string,
+  ): Promise<any[]> {
+    try {
+      const params = {
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        limit: '20',
+        currency: 'VND',
+        distance: '10',
+        lunit: 'km',
+        lang: 'vi_VN',
+      };
+      const config = {
+        params: params,
+        headers: {
+          'X-RapidAPI-Host': restaurantHost,
+          'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+        },
+      };
+
+      return await (
+        await lastValueFrom(this.httpService.get(url, config))
+      ).data.data.map((i) => {
+        return {
+          type: AdvertisementType.Restaurant,
+          coordinate: {
+            latitude: i.latitude,
+            longitude: i.longitude,
+          },
+          price: i.price,
+          image: i.photo?.images.large.url,
+          address: i.address,
+          webUrl: i.web_url,
+          name: i.name,
+        };
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+  public async getInterestPlace(
+    user: string,
+    limit: number,
+  ): Promise<PlaceDocument[]> {
+    try {
+      const interestPlaces = await this.interestsService.getInterests(
+        user,
+        InterestType.Place,
+      );
+      return await this.placeModel.aggregate([
+        {
+          $addFields: {
+            interested: {
+              $in: ['$_id', interestPlaces],
+            },
+          },
+        },
+        {
+          $sort: { interested: -1, visits: -1 },
+        },
+        {
+          $limit: limit,
+        },
+      ]);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

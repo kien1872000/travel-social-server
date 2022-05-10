@@ -23,7 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { POSTS_PER_PAGE, VISITED_PLACES_PERPAGE } from '@util/constants';
-import { Time } from '@util/enums';
+import { AdvertisementType, Time } from '@util/enums';
 import { PaginateOptions } from '@util/types';
 import { DiscoveryPlacesService } from '../providers/discovery-places.service';
 import { PlacesService } from '../providers/places.service';
@@ -41,6 +41,7 @@ export class PlacesController {
     private readonly discoveryPlacesService: DiscoveryPlacesService,
     private readonly vehicleSuggestionService: VehicleSuggestionService,
   ) {}
+
   @Get('search')
   @ApiOperation({ description: 'search địa điểm theo text nhập vào' })
   async search(@Query() searchPlaceInput: SearchPlaceInput) {
@@ -87,8 +88,8 @@ export class PlacesController {
   }
   @Get('discovery-places')
   @ApiOperation({ description: 'Danh  sách discovery' })
-  async getDiscoveryPlaces() {
-    return this.discoveryPlacesService.getDiscoveryPlaces();
+  async getDiscoveryPlaces(@User() user) {
+    return this.discoveryPlacesService.getDiscoveryPlaces(user._id);
   }
   @Get('discovery-detail/:placeId')
   @ApiOperation({ description: 'discovery detail' })
@@ -109,6 +110,11 @@ export class PlacesController {
       page,
       perPage,
     );
+  }
+  @Get('advertisements')
+  @ApiQuery({ type: String, name: 'type', enum: AdvertisementType })
+  async getAdvertisements(@User() user, @Query('type') type: string) {
+    return this.placesSerivce.getAdvertisements(user._id, type);
   }
   @Post('suggest/vehicle')
   @ApiBody({ type: VehicleDto })
@@ -131,9 +137,5 @@ export class PlacesController {
       nearDepartureAirports,
       nearDestinationAirports,
     );
-  }
-  @Get('advertisements')
-  async getAdvertisements(@User() user) {
-    return this.placesSerivce.getAdvertisements(user._id);
   }
 }

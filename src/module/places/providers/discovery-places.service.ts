@@ -13,6 +13,7 @@ import { PostPlaceService } from '@post/providers/post-place.service';
 import { DISCOVERY_LENGTH } from '@util/constants';
 import { PaginationRes } from '@util/types';
 import { Model } from 'mongoose';
+import { PlacesService } from './places.service';
 import { UserPlacesService } from './user-places.service';
 
 @Injectable()
@@ -21,14 +22,14 @@ export class DiscoveryPlacesService {
     @InjectModel(Place.name) private readonly placeModel: Model<PlaceDocument>,
     private readonly postPlaceService: PostPlaceService,
     private readonly userPlacesService: UserPlacesService,
+    private readonly placesService: PlacesService,
   ) {}
-  public async getDiscoveryPlaces(): Promise<DiscoveryPlacesDto[]> {
+  public async getDiscoveryPlaces(user: string): Promise<DiscoveryPlacesDto[]> {
     try {
-      const places = await this.placeModel
-        .find({})
-        .sort('-visits')
-        .limit(DISCOVERY_LENGTH)
-        .select('-__v');
+      const places = await this.placesService.getInterestPlace(
+        user,
+        DISCOVERY_LENGTH,
+      );
       const promises: Promise<[VisitorsPlace, number]>[] = [];
       const mostLikesPostPromises = [];
       for (const place of places) {
