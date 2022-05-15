@@ -17,7 +17,7 @@ import { Model, Types } from 'mongoose';
 @Injectable()
 export class LikesService {
   constructor(
-    @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
+    @InjectModel(Like.name) private readonly likeModel: Model<LikeDocument>,
 
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
 

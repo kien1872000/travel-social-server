@@ -1,4 +1,6 @@
+import { ChatGroupDocument } from '@entity/chat-group.entity';
 import { ArrayNotEmpty, IsNotEmpty, IsString } from 'class-validator';
+import { ChatGroupOutput } from './chat-group.dto';
 
 export class AddUsersToRoomDto {
   @IsString()
@@ -14,6 +16,7 @@ export interface AddUsersToRoomOutput {
     displayName: string;
   };
   addedUsers: { _id: string; displayName: string }[];
+  newChatGroup: ChatGroupOutput;
 }
 
 export class JoinRoomDto {

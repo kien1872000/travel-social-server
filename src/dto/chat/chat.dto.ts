@@ -9,6 +9,7 @@ export class ChatMessageInput {
   chatGroupId: string;
 }
 export interface ChatMessageOutput {
+  chatGroupId: string;
   message: string;
   userId: string;
   displayName: string;

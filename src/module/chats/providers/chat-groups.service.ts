@@ -87,7 +87,8 @@ export class ChatGroupsService {
   public async addUsersToChatGroup(
     userIds: string[],
     chatGroupId: string,
-  ): Promise<void> {
+    currentUser: string,
+  ): Promise<ChatGroupOutput> {
     try {
       const userObjectIds = userIds.map((i) => Types.ObjectId(i));
       const chatGroup = await this.chatGroupModel.findByIdAndUpdate(
@@ -101,11 +102,19 @@ export class ChatGroupsService {
         .map((i) => i.toString())
         .slice(0, 3);
       const image = await this.usersService.getUserAvatars(participants);
-
+      const name = [`you and ${participants.length - 1} more people`];
       //update image for chat group
-      await this.chatGroupModel.findByIdAndUpdate(chatGroupId, {
-        image: image,
-      });
+      const newChatGroup = await this.chatGroupModel
+        .findByIdAndUpdate(
+          chatGroupId,
+          {
+            image: image,
+            name: name,
+          },
+          { new: true },
+        )
+        .select('-participants');
+      return this.mapsHelper.mapToChatGroupOutput(currentUser, newChatGroup);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -139,7 +148,7 @@ export class ChatGroupsService {
   public async leaveChatGroup(
     userId: string,
     chatGroupId: string,
-  ): Promise<void> {
+  ): Promise<ChatGroupOutput> {
     try {
       const chatGroup = await this.chatGroupModel.findById(chatGroupId);
       const newParticipants = chatGroup.participants.filter(
@@ -150,11 +159,21 @@ export class ChatGroupsService {
       );
       if (chatGroup.participants.length <= 1) {
         await this.chatGroupModel.findByIdAndDelete(chatGroupId);
+        return null;
       } else {
-        await this.chatGroupModel.findByIdAndUpdate(chatGroupId, {
-          participants: newParticipants,
-          image: image,
-        });
+        const name = [`you and ${newParticipants.length - 1} more people`];
+        const newChatGroup = await this.chatGroupModel.findByIdAndUpdate(
+          chatGroupId,
+          {
+            name: name,
+            participants: newParticipants,
+            image: image,
+          },
+          {
+            new: true,
+          },
+        );
+        return this.mapsHelper.mapToChatGroupOutput(userId, newChatGroup);
       }
     } catch (error) {
       throw new InternalServerErrorException(error);

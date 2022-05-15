@@ -5,9 +5,7 @@ import {
   Controller,
   Get,
   UseGuards,
-  Request,
   Post,
-  Query,
   Delete,
   Param,
   Body,
@@ -23,7 +21,7 @@ import {
 import { LIKE_OF_POSTS_PERPAGE } from '@util/constants';
 import { PaginateOptions } from '@util/types';
 
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '@auth/jwt-auth.guard';
 import { LikesService } from '../providers/likes.service';
 
 @Controller('like')
@@ -59,7 +57,7 @@ export class LikesController {
   @ApiBody({
     type: LikeInput,
   })
-  async addLike(@User() user, @Body() { postId }: LikeInput) {
+  addLike(@User() user, @Body() { postId }: LikeInput) {
     return this.likesSerivce.addLikeToPost(user._id, postId);
   }
 

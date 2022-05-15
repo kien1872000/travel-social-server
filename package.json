@@ -65,7 +65,7 @@
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",
     "@nestjs/schematics": "^8.0.0",
-    "@nestjs/testing": "^8.0.0",
+    "@nestjs/testing": "^8.4.5",
     "@types/bcrypt": "^5.0.0",
     "@types/bull": "^3.15.8",
     "@types/cron": "^1.7.3",
@@ -103,6 +103,29 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "moduleNameMapper": {
+      "@decorator/(.*)": "<rootDir>/decorator/$1",
+      "@dto/(.*)": "<rootDir>/dto/$1",
+      "@util/(.*)": "<rootDir>/util/$1",
+      "@like/(.*)": "<rootDir>/module/likes/$1",
+      "@auth/(.*)": "<rootDir>/auth/$1",
+      "@upload/(.*)": "<rootDir>/upload/$1",
+      "@mail/(.*)": "<rootDir>/mail/$1,",
+      "@connected-socket/(.*)": "<rootDir>/module/connected-sockets/$1",
+      "@chat/(.*)": "<rootDir>/module/chats/$1",
+      "@notification/(.*)": "<rootDir>/module/notifications/$1",
+      "@hashtag/(.*)": "<rootDir>/module/hashtags/$1",
+      "@comment/(.*)": "<rootDir>/module/comments/$1",
+      "@following/(.*)": "<rootDir>/module/followings/$1",
+      "@config/(.*)": "<rootDir>/config/$1",
+      "@entity/(.*)": "<rootDir>/entity/$1",
+      "@helper/(.*)": "<rootDir>/helper/$1",
+      "@post/(.*)": "<rootDir>/module/posts/$1"
+    }
   }
 }

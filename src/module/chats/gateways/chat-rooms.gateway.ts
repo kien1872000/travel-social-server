@@ -111,11 +111,14 @@ export class ChatRoomsGateWay {
       client.leave(room);
 
       const user = socket.user as unknown as UserDocument;
-      await Promise.all([
-        this.chatRoomsService.leaveRoom(currentUserId, room),
+      const [newChatGroup] = await Promise.all([
         this.chatGroupsService.leaveChatGroup(currentUserId, chatGroupId),
+        this.chatRoomsService.leaveRoom(currentUserId, room),
       ]);
-      this.server.to(room).emit(LEAVE_CHAT_GROUP_SUCCESS, user);
+      this.server.to(room).emit(LEAVE_CHAT_GROUP_SUCCESS, {
+        ...user,
+        newChatGroup: newChatGroup,
+      });
     } catch (error) {
       console.log(error);
 
@@ -147,9 +150,13 @@ export class ChatRoomsGateWay {
       );
       const userToAddSocketIds = connectedSockets.map((i) => i._id);
       const activeUsers = connectedSockets.map((i) => i.user.toString());
-      const [usersToAddDetail] = await Promise.all([
+      const [usersToAddDetail, newChatGroup] = await Promise.all([
         this.usersService.getUsers(usersToAdd),
-        this.chatGroupsService.addUsersToChatGroup(usersToAdd, chatGroupId),
+        this.chatGroupsService.addUsersToChatGroup(
+          usersToAdd,
+          chatGroupId,
+          currentUserId,
+        ),
         this.chatRoomsService.addUsersToRoom(usersToAdd, room, activeUsers),
       ]);
 
@@ -173,6 +180,7 @@ export class ChatRoomsGateWay {
             displayName: i.displayName,
           };
         }),
+        newChatGroup: newChatGroup,
       };
       this.server.to(room).emit(ADD_USERS_TO_CHAT_GROUP_SUCCESS, message);
     } catch (error) {

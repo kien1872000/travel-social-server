@@ -53,6 +53,7 @@ export class ChatGateway {
         message,
       );
       const messageToSendOther: ChatMessageOutput = {
+        chatGroupId: chatGroupId,
         isCurrentUserMessage: false,
         message: message,
         userId: currentUserId,
