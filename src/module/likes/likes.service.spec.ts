@@ -4,7 +4,7 @@ import { FollowingsService } from '@following/providers/followings.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { LikesController } from './controllers/likes.controller';
+
 import { LikesService } from './providers/likes.service';
 describe('LikesService', () => {
   let service: LikesService;
@@ -20,10 +20,9 @@ describe('LikesService', () => {
         { provide: FollowingsService, useValue: mockFollowingsService },
       ],
     }).compile();
-
     service = module.get<LikesService>(LikesService);
   });
 
   it('should create a like of post', () => {});
-  expect(service.addLikeToPost).toBeDefined();
+  expect(service).toBeDefined();
 });
