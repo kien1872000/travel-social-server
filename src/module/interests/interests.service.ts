@@ -50,7 +50,9 @@ export class InterestsService {
       if (!interests) return [];
       switch (type) {
         case InterestType.User:
-          return interests.users ? interests.users : [];
+          return interests.users
+            ? interests.users.map((i) => i.toString())
+            : [];
         case InterestType.Place:
           return interests.places ? interests.places : [];
         case InterestType.Hashtag:
@@ -115,7 +117,7 @@ export class InterestsService {
         { $sort: { points: -1 } },
         { $limit: 5 },
       ]);
-      return result.map((i) => i.interestObject);
+      return result.map((i) => i.interestObject.toString());
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(error);

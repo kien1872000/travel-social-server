@@ -87,6 +87,9 @@ export class UsersSearchService {
       const interestUsers = (
         await this.interestsService.getInterests(currentUser, InterestType.User)
       ).map((i) => Types.ObjectId(i));
+      // const interestUsers = (
+      //   await this.interestsService.getInterestsOfUser(currentUser, InterestType.User)
+      // ).map((i) => Types.ObjectId(i));
       const filterList = {
         $lookup: {
           from: collection,

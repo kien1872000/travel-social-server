@@ -247,6 +247,10 @@ export class PlacesService {
         user,
         InterestType.Place,
       );
+      //   const interestPlaces = await this.interestsService.getInterestsOfUser(
+      //   user,
+      //   InterestType.Place,
+      // );
       return await this.placeModel.aggregate([
         {
           $addFields: {

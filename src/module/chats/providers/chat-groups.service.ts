@@ -102,7 +102,8 @@ export class ChatGroupsService {
         .map((i) => i.toString())
         .slice(0, 3);
       const image = await this.usersService.getUserAvatars(participants);
-      const name = [`you and ${participants.length - 1} more people`];
+      const name = [`you and ${chatGroup.participants.length - 1} more people`];
+
       //update image for chat group
       const newChatGroup = await this.chatGroupModel
         .findByIdAndUpdate(
@@ -162,6 +163,7 @@ export class ChatGroupsService {
         return null;
       } else {
         const name = [`you and ${newParticipants.length - 1} more people`];
+
         const newChatGroup = await this.chatGroupModel.findByIdAndUpdate(
           chatGroupId,
           {

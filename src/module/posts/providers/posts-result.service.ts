@@ -32,6 +32,11 @@ export class PostsResultService {
         this.interestsService.getInterests(currentUser, InterestType.Place),
         this.interestsService.getInterests(currentUser, InterestType.User),
       ]);
+      // [interestHastags, interestPlaces, interestUsers] = await Promise.all([
+      //   this.interestsService.getInterestsOfUser(currentUser, InterestType.Hashtag),
+      //   this.interestsService.getInterestsOfUser(currentUser, InterestType.Place),
+      //   this.interestsService.getInterestsOfUser(currentUser, InterestType.User),
+      // ]);
     }
 
     let match = filter;

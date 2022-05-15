@@ -115,10 +115,8 @@ export class ChatRoomsGateWay {
         this.chatGroupsService.leaveChatGroup(currentUserId, chatGroupId),
         this.chatRoomsService.leaveRoom(currentUserId, room),
       ]);
-      this.server.to(room).emit(LEAVE_CHAT_GROUP_SUCCESS, {
-        user,
-        newChatGroup,
-      });
+      const msg = { user, newChatGroup };
+      this.server.to(room).emit(LEAVE_CHAT_GROUP_SUCCESS, msg);
     } catch (error) {
       console.log(error);
 
