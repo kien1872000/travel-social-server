@@ -64,7 +64,10 @@ export class HashtagsService {
         user,
         InterestType.Hashtag,
       );
-
+      // const interestHashtags = await this.interestsService.getInterestsOfUser(
+      //   user,
+      //   InterestType.Hashtag,
+      // );
       const query = this.hashtagModel.aggregate([
         {
           $match: { hashtag: { $regex: input } },

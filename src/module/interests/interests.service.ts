@@ -39,6 +39,28 @@ export class InterestsService {
       throw new InternalServerErrorException(error);
     }
   }
+  public async getInterestsOfUser(
+    user: string,
+    type?: string,
+  ): Promise<string[]> {
+    try {
+      const interests = (
+        await this.userModel.findById(user).select('interests')
+      )?.interests;
+      if (!interests) return [];
+      switch (type) {
+        case InterestType.User:
+          return interests.users ? interests.users : [];
+        case InterestType.Place:
+          return interests.places ? interests.places : [];
+        case InterestType.Hashtag:
+        default:
+          return interests.hashtags ? interests.hashtags : [];
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
   public async getInterests(user: string, type?: string): Promise<string[]> {
     try {
       const groupField = { owner: '$owner', interestObject: '$hashtag' };
@@ -122,13 +144,15 @@ export class InterestsService {
             this.getInterests(userId, InterestType.Hashtag),
             this.getInterests(userId, InterestType.Place),
           ]);
-        promises.push(this.userModel.findByIdAndUpdate(userId), {
-          interests: {
-            users: interestUsers,
-            hashtags: interestHashtags,
-            place: interestPlaces,
-          },
-        });
+        promises.push(
+          this.userModel.findByIdAndUpdate(userId, {
+            interests: {
+              users: interestUsers,
+              hashtags: interestHashtags,
+              places: interestPlaces,
+            },
+          }),
+        );
       }
       await Promise.all(promises);
     } catch (error) {
