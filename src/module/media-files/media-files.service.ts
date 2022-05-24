@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { MediaFile, MediaFileDocument } from '@entity/media-file.entity';
@@ -7,7 +7,7 @@ import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
 import { UploadsService } from '@upload/uploads.service';
 
-import { File } from 'src/util/enums';
+import { File } from '@util/enums';
 import { PaginationRes } from '@util/types';
 import { MediaFileDto } from '@dto/media-file/media-file.dto';
 import { User } from '@entity/user.entity';

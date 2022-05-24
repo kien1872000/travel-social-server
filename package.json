@@ -125,7 +125,8 @@
       "@config/(.*)": "<rootDir>/config/$1",
       "@entity/(.*)": "<rootDir>/entity/$1",
       "@helper/(.*)": "<rootDir>/helper/$1",
-      "@post/(.*)": "<rootDir>/module/posts/$1"
+      "@post/(.*)": "<rootDir>/module/posts/$1",
+      "@mediaFile/(.*)": "<rootDir>/module/media-files/$1"
     }
   }
 }

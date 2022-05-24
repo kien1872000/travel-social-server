@@ -10,7 +10,7 @@ import {
   BadRequestException,
   UploadedFiles,
   Query,
-  ParseIntPipe,
+
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
@@ -27,21 +27,14 @@ import { ChangePasswordInput } from '@dto/user/changePassword.dto';
 import { ProfileImageInput, UserInfoInput } from '@dto/user/userProfile.dto';
 import { imageFileFilter, storage } from '@helper/storage.helper';
 import { UsersService } from '../providers/users.service';
-import { UsersSearchService } from '@user/providers/users-search.service';
-import { PaginateOptions } from '@util/types';
-import { PaginateQuery } from '@decorator/pagination.decorator';
-import { SEARCH_USER_PER_PAGE } from '@util/constants';
-import { SearchUserFilter } from '@util/enums';
+
 
 @ApiTags('User')
 @ApiBearerAuth()
 @Controller('user')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(
-    private usersService: UsersService,
-    private readonly usersSearchService: UsersSearchService,
-  ) {}
+  constructor(private usersService: UsersService) {}
   @Get('profile')
   @ApiQuery({
     type: String,

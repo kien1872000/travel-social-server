@@ -17,7 +17,7 @@ import { ChangePasswordInput } from '@dto/user/changePassword.dto';
 import { RENAMABLE_TIME } from '@util/constants';
 import { MapsHelper } from '@helper/maps.helper';
 import { StringHandlersHelper } from '@helper/string-handler.helper';
-import { MediaFilesService } from 'src/module/media-files/media-files.service';
+import { MediaFilesService } from '@mediaFile/media-files.service';
 import { FollowingsService } from '@following/providers/followings.service';
 @Injectable()
 export class UsersService {
@@ -27,7 +27,7 @@ export class UsersService {
     private readonly stringHandlers: StringHandlersHelper,
     private readonly mediaFilesService: MediaFilesService,
     private readonly followingsService: FollowingsService,
-  ) { }
+  ) {}
   public async findUserById(id: string): Promise<UserDocument> {
     try {
       return await this.userModel.findById(id);
@@ -55,21 +55,27 @@ export class UsersService {
       throw new InternalServerErrorException(error);
     }
   }
-  public async findUserByWalletAddress(email: string, walletAddress: string): Promise<UserDocument> {
+  public async findUserByWalletAddress(
+    email: string,
+    walletAddress: string,
+  ): Promise<UserDocument> {
     try {
       return await this.userModel.findOne({
         email: email,
-        walletAddress
+        walletAddress,
       });
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-  public async findUserByMailAndUpdateAddress(email: string, walletAddress: string): Promise<UserDocument> {
+  public async findUserByMailAndUpdateAddress(
+    email: string,
+    walletAddress: string,
+  ): Promise<UserDocument> {
     try {
       return await this.userModel.findOneAndUpdate(
         { email: email },
-        { walletAddress }
+        { walletAddress },
       );
     } catch (error) {
       throw new InternalServerErrorException(error);

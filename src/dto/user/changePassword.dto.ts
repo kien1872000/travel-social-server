@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PASSWORD_REGEX } from '@util/constants';
 import { IsNotEmpty, IsString, Matches } from 'class-validator';
-import { PASSWORD_REGEX } from 'src/util/constants';
 
 export class ChangePasswordInput {
   @ApiProperty({

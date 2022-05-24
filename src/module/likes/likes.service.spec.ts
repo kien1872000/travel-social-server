@@ -23,6 +23,6 @@ describe('LikesService', () => {
     service = module.get<LikesService>(LikesService);
   });
 
-  it('should create a like of post', () => {});
+  it('should be defined', () => {});
   expect(service).toBeDefined();
 });

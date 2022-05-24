@@ -1,3 +1,4 @@
+import { LikeInput } from '@dto/like/like.dto';
 import { LikeDocument } from '@entity/like.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtPayLoad } from '@util/types';
@@ -27,6 +28,10 @@ describe('LikesController', () => {
         createdAt: mockLike.createdAt,
       };
     }),
+    getLikesOfPost: jest
+      .fn()
+      .mockImplementation((userId, postId, page, perPage) => []),
+    removeLike: jest.fn().mockImplementation((userId, postId) => {}),
   };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,12 +45,30 @@ describe('LikesController', () => {
     controller = module.get<LikesController>(LikesController);
   });
 
-  it('should create a like of post', () => {
+  it('calling method addLike', () => {
     expect(controller.addLike(mockJwtPayload, mockLikeInput)).toEqual({
       _id: expect.any(Types.ObjectId),
       ...mockLike,
     });
     expect(mockLikesService.addLikeToPost).toHaveBeenCalled();
   });
-  // it('should return likes of post')
+  it('calling method getLikesOfPost', () => {
+    controller.getLikesOfPost(mockJwtPayload, mockLikeInput.postId, {
+      page: 0,
+      perPage: 1,
+    });
+    expect(mockLikesService.getLikesOfPost).toHaveBeenCalledWith(
+      mockJwtPayload._id,
+      mockLikeInput.postId,
+      0,
+      1,
+    );
+  });
+  it('calling method removeLike', () => {
+    controller.removeLike(mockJwtPayload, mockLikeInput);
+    expect(mockLikesService.removeLike).toHaveBeenCalledWith(
+      mockJwtPayload._id,
+      mockLikeInput.postId,
+    );
+  });
 });
